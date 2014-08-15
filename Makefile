@@ -1,7 +1,15 @@
+MACHINE= $(shell uname -s)
+
+ifeq ($(MACHINE),Darwin)
+	CROSSCOMPILER = 
+else
+	CROSSCOMPILER = arm-angstrom-linux-gnueabi-
+endif
+
 CLUTTER_INC= `pkg-config clutter-1.0 --cflags`
 CLUTTER_LIB= `pkg-config clutter-1.0 --libs`
 
-CXX = g++
+CXX = $(CROSSCOMPILER)g++
 CFLAGS = -Wall -g
 LDFLAGS = `pkg-config clutter-1.0 --libs`
 IFLAGS = `pkg-config clutter-1.0 --cflags`
