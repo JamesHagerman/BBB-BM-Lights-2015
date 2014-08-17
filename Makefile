@@ -1,4 +1,12 @@
-CXX = g++
+MACHINE= $(shell uname -s)
+
+ifeq ($(MACHINE),Darwin)
+	CROSSCOMPILER = 
+else
+	CROSSCOMPILER = arm-angstrom-linux-gnueabi-
+endif
+
+CXX = $(CROSSCOMPILER)g++
 CFLAGS = -Wall -g
 LDFLAGS = `pkg-config clutter-1.0 --libs`
 IFLAGS = `pkg-config clutter-1.0 --cflags`
@@ -6,11 +14,11 @@ IFLAGS = `pkg-config clutter-1.0 --cflags`
 CLUTTER_INC= `pkg-config clutter-1.0 --cflags`
 CLUTTER_LIB= `pkg-config clutter-1.0 --libs`
 
-ifeq ($(shell uname -s),Darwin)
+ifeq ($(MACHINE),Darwin)
 	LDFLAGS += -lftd2xx
 	CFLAGS += -fomit-frame-pointer -m64
 endif
-ifeq ($(shell uname -s),Linux)
+ifeq ($(MACHINE),Linux)
 	LDFLAGS += -l/usr/lib/libftd2xx.so.1.2.7
 	CFLAGS += -O3 -fomit-frame-pointer
 endif
