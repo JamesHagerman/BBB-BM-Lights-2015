@@ -1,12 +1,29 @@
+// Sensatron work:
+// We need SPI pins on the BBB. SPI0 pins are in use via the LCD. SPI1 pins are not:
+// 28   spi1_cs0
+// 29   spi1_d0
+// 30   spi1_d1 (IN USE BY LCD!!)
+// 31   spi1_sclk
+//
+// This means we should be able to use the SPI1 lines to at least TEST SPI data output.
+//
+// Another option is to just dump all of the color data out via DMA to a Teensy...
+// And yet another option is to dump color data out to the FTDI bitbang driver like we did last year.
+//
+// Honestly, the FTDI mode is probably the best solution. So we should try that first.
+
+
 #define COGL_ENABLE_EXPERIMENTAL_2_0_API
 
-#include <clutter/clutter.h>
+#include <stdio.h>
 #include <stdlib.h>
-
 #include <iostream>
+#include <unistd.h>
 #include <math.h>
 #include <time.h>
-#include <unistd.h>
+
+#include <clutter/clutter.h>
+#include "p9813.h"
 
 ClutterActor *rect;
 gdouble rotation = 0;
