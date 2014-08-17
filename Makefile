@@ -19,7 +19,7 @@ ifeq ($(MACHINE),Darwin)
 	CFLAGS += -fomit-frame-pointer -m64
 endif
 ifeq ($(MACHINE),Linux)
-	LDFLAGS += -l/usr/lib/libftd2xx.so.1.2.7
+	LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7
 	CFLAGS += -O3 -fomit-frame-pointer
 endif
 
