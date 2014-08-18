@@ -37,15 +37,14 @@
 */
 
 // The TotalControl processing library doesn't define the FTDI pins so we do:
-short TC_FTDI_TX  = 0x01;  /* Avail on all FTDI adapters,  strand 0 default */
-short TC_FTDI_RX  = 0x02;  /* Avail on all FTDI adapters,  strand 1 default */
-short TC_FTDI_RTS = 0x04;  /* Avail on FTDI-branded cable, strand 2 default */
-short TC_FTDI_CTS = 0x08;  /* Avail on all FTDI adapters,  clock default    */
-short TC_FTDI_DTR = 0x10;  /* Avail on third-party cables, strand 2 default */
-short TC_FTDI_DSR = 0x20;  /* Avail on full breakout board */
-short TC_FTDI_DCD = 0x40;  /* Avail on full breakout board */
-short TC_FTDI_RI  = 0x80;  /* Avail on full breakout board */
-  
+// short TC_FTDI_TX  = 0x01;  /* Avail on all FTDI adapters,  strand 0 default */
+// short TC_FTDI_RX  = 0x02;  /* Avail on all FTDI adapters,  strand 1 default */
+// short TC_FTDI_RTS = 0x04;  /* Avail on FTDI-branded cable, strand 2 default */
+// short TC_FTDI_CTS = 0x08;  /* Avail on all FTDI adapters,  clock default    */
+// short TC_FTDI_DTR = 0x10;  /* Avail on third-party cables, strand 2 default */
+// short TC_FTDI_DSR = 0x20;  /* Avail on full breakout board */
+// short TC_FTDI_DCD = 0x40;  /* Avail on full breakout board */
+// short TC_FTDI_RI  = 0x80;  /* Avail on full breakout board */
 
 #define COGL_ENABLE_EXPERIMENTAL_2_0_API
 
@@ -125,6 +124,16 @@ ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, Clutter
 }
 
 int main(int argc, char *argv[]) {
+
+    // Configure FTDI pins:
+    TCstatusCode status;
+    status = TCsetStrandPin(0, TC_FTDI_TX); // default
+    status = TCsetStrandPin(1, TC_FTDI_RX); // default
+    status = TCsetStrandPin(2, TC_FTDI_DTR); // spliting dtr and rts
+    status = TCsetStrandPin(3, TC_FTDI_RTS);
+    status = TCsetStrandPin(4, TC_FTDI_RI);
+    status = TCsetStrandPin(5, TC_FTDI_DSR);
+    status = TCsetStrandPin(6, TC_FTDI_DCD);
 
     /* Allocate pixel array.  One TCpixel per pixel per strand. */
     totalPixels = nStrands * pixelsPerStrand;
