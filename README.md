@@ -16,3 +16,19 @@ You can use Homebrew to install clutter and cogl, but you'll need to use updated
 I banged my head against this thing seg faulting a lot... so I uninstalled cogl, clutter, pango, cairo, and XQuartz, and reinstall them all.
 
 I think it was an issue with me building pango before installing XQuartz... but I'm not sure.
+
+
+Installing the Clutter as a service on the BBB
+===============================================
+
+After building you can configure this clutter app to open on boot. Open the clutter_window.service file and set the path to the executable binary correctly for your machine. Once it's modified install that clutter_window.service file into:
+
+/lib/systemd/system/
+
+Once it's there, run these commands to get it installed:
+
+systemctl enable clutter_window.service
+systemctl start clutter_window.service
+systemctl status clutter_window.service
+
+That should enable the script when ever the BBB boots.
