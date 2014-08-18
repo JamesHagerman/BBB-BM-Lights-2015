@@ -66,12 +66,13 @@ const int height = 480;
 const int mid_x = width/2;
 const int mid_y = height/2;
 
+int i, totalPixels;
+// These actually get handed in to the TCopen function:
+int nStrands = 6; 
+int pixelsPerStrand = 50;
 double x = 0.0;
 double s1,s2,s3;
 unsigned char r,g,b;
-int i, totalPixels;
-int nStrands = 1;
-int pixelsPerStrand = 600;
 time_t        t,prev = 0;
 TCstats stats;
 TCpixel *pixelBuf;
