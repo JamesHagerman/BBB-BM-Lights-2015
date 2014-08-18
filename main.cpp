@@ -72,7 +72,7 @@ double s1,s2,s3;
 unsigned char r,g,b;
 int i, totalPixels;
 int nStrands = 1;
-int pixelsPerStrand = 50;
+int pixelsPerStrand = 600;
 time_t        t,prev = 0;
 TCstats stats;
 TCpixel *pixelBuf;
