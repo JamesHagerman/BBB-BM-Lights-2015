@@ -8,16 +8,12 @@ endif
 
 CXX = $(CROSSCOMPILER)g++
 CFLAGS = -Wall -g
-LDFLAGS = `pkg-config clutter-1.0 --libs`
+LDFLAGS = `pkg-config clutter-1.0 --libs` -lp9813
 IFLAGS = `pkg-config clutter-1.0 --cflags`
-
-CLUTTER_INC= `pkg-config clutter-1.0 --cflags`
-CLUTTER_LIB= `pkg-config clutter-1.0 --libs`
 
 ifeq ($(MACHINE),Darwin)
 	LDFLAGS += -lftd2xx
 	CFLAGS += -fomit-frame-pointer
-	# -m64
 endif
 ifeq ($(MACHINE),Linux)
 	LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7
