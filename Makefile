@@ -16,7 +16,8 @@ CLUTTER_LIB= `pkg-config clutter-1.0 --libs`
 
 ifeq ($(MACHINE),Darwin)
 	LDFLAGS += -lftd2xx
-	CFLAGS += -fomit-frame-pointer -m64
+	CFLAGS += -fomit-frame-pointer
+	# -m64
 endif
 ifeq ($(MACHINE),Linux)
 	LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7
