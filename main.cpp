@@ -67,7 +67,8 @@ const int height = 480;
 const int mid_x = width/2;
 const int mid_y = height/2;
 
-double x,s1,s2,s3;
+double x = 0.0;
+double s1,s2,s3;
 unsigned char r,g,b;
 int i, totalPixels;
 int nStrands = 1;
@@ -82,6 +83,35 @@ void on_timeline_new_frame(ClutterTimeline *timeline, gint frame_num, gpointer d
     rotation += 0.3;
 
     clutter_actor_set_rotation_angle(rect, CLUTTER_Z_AXIS, rotation * 5);
+
+
+    // Update the lights:
+    x += (double)pixelsPerStrand / 20000.0;
+    s1 = sin(x                 ) *  11.0;
+    s2 = sin(x *  0.857 - 0.214) * -13.0;
+    s3 = sin(x * -0.923 + 1.428) *  17.0;
+    for(i=0;i<totalPixels;i++)
+    {
+        r   = (int)((sin(s1) + 1.0) * 127.5);
+        g   = (int)((sin(s2) + 1.0) * 127.5);
+        b   = (int)((sin(s3) + 1.0) * 127.5);
+        pixelBuf[i] = TCrgb(r,g,b);
+        s1 += 0.273;
+        s2 -= 0.231;
+        s3 += 0.428;
+    }
+
+    if((i = TCrefresh(pixelBuf,NULL,&stats)) != TC_OK)
+       TCprintError(static_cast<TCstatusCode>(i));
+
+    /* Update statistics once per second. */
+    if((t = time(NULL)) != prev)
+    {
+        system("clear");
+        TCprintStats(&stats);
+        prev = t;
+    }
+
 }
 
 ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, ClutterColor color) {
@@ -122,36 +152,35 @@ int main(int argc, char *argv[]) {
        patterns using a combination of sine waves.  There's no meaning
        to any of this, just applying various constants at each stage
        in order to avoid repetition between the component colors. */
-    for(x=0.0;;x += (double)pixelsPerStrand / 20000.0)
-    {
-        s1 = sin(x                 ) *  11.0;
-        s2 = sin(x *  0.857 - 0.214) * -13.0;
-        s3 = sin(x * -0.923 + 1.428) *  17.0;
-        for(i=0;i<totalPixels;i++)
-        {
-            r   = (int)((sin(s1) + 1.0) * 127.5);
-            g   = (int)((sin(s2) + 1.0) * 127.5);
-            b   = (int)((sin(s3) + 1.0) * 127.5);
-            pixelBuf[i] = TCrgb(r,g,b);
-            s1 += 0.273;
-            s2 -= 0.231;
-            s3 += 0.428;
-        }
+    // for(x=0.0;;x += (double)pixelsPerStrand / 20000.0)
+    // {
+    //     s1 = sin(x                 ) *  11.0;
+    //     s2 = sin(x *  0.857 - 0.214) * -13.0;
+    //     s3 = sin(x * -0.923 + 1.428) *  17.0;
+    //     for(i=0;i<totalPixels;i++)
+    //     {
+    //         r   = (int)((sin(s1) + 1.0) * 127.5);
+    //         g   = (int)((sin(s2) + 1.0) * 127.5);
+    //         b   = (int)((sin(s3) + 1.0) * 127.5);
+    //         pixelBuf[i] = TCrgb(r,g,b);
+    //         s1 += 0.273;
+    //         s2 -= 0.231;
+    //         s3 += 0.428;
+    //     }
 
-        if((i = TCrefresh(pixelBuf,NULL,&stats)) != TC_OK)
-           TCprintError(static_cast<TCstatusCode>(i));
+    //     if((i = TCrefresh(pixelBuf,NULL,&stats)) != TC_OK)
+    //        TCprintError(static_cast<TCstatusCode>(i));
 
-        /* Update statistics once per second. */
-        if((t = time(NULL)) != prev)
-        {
-            system("clear");
-            TCprintStats(&stats);
-            prev = t;
-        }
-    }
+    //     /* Update statistics once per second. */
+    //     if((t = time(NULL)) != prev)
+    //     {
+    //         system("clear");
+    //         TCprintStats(&stats);
+    //         prev = t;
+    //     }
+    // }
 
-    TCclose();
-    free(pixelBuf);
+    
 
 
 
@@ -194,6 +223,9 @@ int main(int argc, char *argv[]) {
     clutter_actor_show(stage);
 
     clutter_main();
+
+    TCclose();
+    free(pixelBuf);
 
     return EXIT_SUCCESS;
 }
