@@ -58,6 +58,8 @@
 #include <clutter/clutter.h>
 #include "p9813.h"
 
+#include "cat.h"
+
 ClutterActor *rect;
 gdouble rotation = 0;
 
@@ -124,7 +126,14 @@ ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, Clutter
     return toRet;
 }
 
+Cat jack;
+
 int main(int argc, char *argv[]) {
+
+    jack = Cat(4);
+    jack.Meow();
+
+    return 1;
 
     // Configure FTDI pins:
     TCstatusCode status;
@@ -138,7 +147,7 @@ int main(int argc, char *argv[]) {
 
     /* Allocate pixel array.  One TCpixel per pixel per strand. */
     totalPixels = nStrands * pixelsPerStrand;
-    i           = totalPixels * sizeof(TCpixel);
+    i = totalPixels * sizeof(TCpixel);
     if(NULL == (pixelBuf = (TCpixel *)malloc(i)))
     {
         printf("Could not allocate space for %d pixels (%d bytes).\n", totalPixels,i);
@@ -151,6 +160,7 @@ int main(int argc, char *argv[]) {
     {
         TCprintError(static_cast<TCstatusCode>(i));
         if(i < TC_ERR_DIVISOR) return 1;
+        exit(1);
     }
 
     /* Initialize statistics structure before use. */

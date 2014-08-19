@@ -22,7 +22,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = main.o
+OBJS = main.o cat.o
 
 all: ${OUTPUT}
 
