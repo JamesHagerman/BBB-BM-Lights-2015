@@ -1,12 +1,3 @@
-// class Cat {
-//   public:
-//     int GetAge() const;
-//     void SetAge(int age);
-//     int Meow();
-//   private:
-//     int itsAge;
-//     char * string;
-// };
 #include <stdio.h>
 
 

@@ -59,6 +59,7 @@
 #include "p9813.h"
 
 #include "cat.h"
+#include "sensatron.h"
 
 ClutterActor *rect;
 gdouble rotation = 0;

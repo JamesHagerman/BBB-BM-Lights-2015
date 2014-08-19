@@ -12,8 +12,11 @@ LDFLAGS = `pkg-config clutter-1.0 --libs`
 IFLAGS = `pkg-config clutter-1.0 --cflags`
 
 ifeq ($(MACHINE),Darwin)
+	LDFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config clutter-1.0 --libs`
+	IFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config clutter-1.0 --cflags`
 	LDFLAGS += -lftd2xx -lp9813
 	CFLAGS += -fomit-frame-pointer
+
 endif
 ifeq ($(MACHINE),Linux)
 	LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7 -l/usr/local/lib/libp9813.a
@@ -22,7 +25,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = main.o cat.o
+OBJS = main.o cat.o sensatron.o
 
 all: ${OUTPUT}
 
