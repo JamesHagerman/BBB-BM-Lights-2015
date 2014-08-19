@@ -59,7 +59,7 @@
 #include "p9813.h"
 
 #include "cat.h"
-#include "sensatron.h"
+#include "TCLControl.h"
 
 ClutterActor *rect;
 gdouble rotation = 0;
@@ -69,16 +69,14 @@ const int height = 480;
 const int mid_x = width/2;
 const int mid_y = height/2;
 
-int i, totalPixels;
-// These actually get handed in to the TCopen function:
-int nStrands = 6; 
-int pixelsPerStrand = 100;
+int i;
 double x = 0.0;
 double s1,s2,s3;
 unsigned char r,g,b;
 time_t        t,prev = 0;
-TCstats stats;
-TCpixel *pixelBuf;
+
+TCLControl tcl;
+
 
 // using namespace std;
 
@@ -87,32 +85,26 @@ void on_timeline_new_frame(ClutterTimeline *timeline, gint frame_num, gpointer d
 
     clutter_actor_set_rotation_angle(rect, CLUTTER_Z_AXIS, rotation * 5);
 
-
+    // Calculate the new values for the pixelBuf:
     // Update the lights:
-    x += (double)pixelsPerStrand / 20000.0;
+    x += (double)tcl.pixelsPerStrand / 20000.0;
     s1 = sin(x                 ) *  11.0;
     s2 = sin(x *  0.857 - 0.214) * -13.0;
     s3 = sin(x * -0.923 + 1.428) *  17.0;
-    for(i=0;i<totalPixels;i++)
+    for(i=0;i<tcl.totalPixels;i++)
     {
         r   = (int)((sin(s1) + 1.0) * 127.5);
         g   = (int)((sin(s2) + 1.0) * 127.5);
         b   = (int)((sin(s3) + 1.0) * 127.5);
-        pixelBuf[i] = TCrgb(r,g,b);
+        tcl.pixelBuf[i] = TCrgb(r,g,b);
         s1 += 0.273;
         s2 -= 0.231;
         s3 += 0.428;
     }
 
-    if((i = TCrefresh(pixelBuf,NULL,&stats)) != TC_OK)
-       TCprintError(static_cast<TCstatusCode>(i));
-
-    /* Update statistics once per second. */
-    if((t = time(NULL)) != prev)
-    {
-        system("clear");
-        TCprintStats(&stats);
-        prev = t;
+    // Send the updated buffer to the strands
+    if (tcl.enabled) {
+        tcl.Update();
     }
 
 }
@@ -134,74 +126,8 @@ int main(int argc, char *argv[]) {
     jack = Cat(4);
     jack.Meow();
 
-    return 1;
-
-    // Configure FTDI pins:
-    TCstatusCode status;
-    status = TCsetStrandPin(0, TC_FTDI_TX); // default
-    status = TCsetStrandPin(1, TC_FTDI_RX); // default
-    status = TCsetStrandPin(2, TC_FTDI_DTR); // spliting dtr and rts
-    status = TCsetStrandPin(3, TC_FTDI_RTS);
-    status = TCsetStrandPin(4, TC_FTDI_RI);
-    status = TCsetStrandPin(5, TC_FTDI_DSR);
-    status = TCsetStrandPin(6, TC_FTDI_DCD);
-
-    /* Allocate pixel array.  One TCpixel per pixel per strand. */
-    totalPixels = nStrands * pixelsPerStrand;
-    i = totalPixels * sizeof(TCpixel);
-    if(NULL == (pixelBuf = (TCpixel *)malloc(i)))
-    {
-        printf("Could not allocate space for %d pixels (%d bytes).\n", totalPixels,i);
-        return 1;
-    }
-
-    /* Initialize library, open FTDI device.  Baud rate errors
-       are non-fatal; program displays a warning but continues. */
-    if((i = TCopen(nStrands,pixelsPerStrand)) != TC_OK)
-    {
-        TCprintError(static_cast<TCstatusCode>(i));
-        if(i < TC_ERR_DIVISOR) return 1;
-        exit(1);
-    }
-
-    /* Initialize statistics structure before use. */
-    TCinitStats(&stats);
-
-    /* The demo animation sets every pixel in every frame.  Your code
-       doesn't necessarily have to --  it could just change altered
-       pixels and call TCrefresh().  The example is some swirly color
-       patterns using a combination of sine waves.  There's no meaning
-       to any of this, just applying various constants at each stage
-       in order to avoid repetition between the component colors. */
-    // for(x=0.0;;x += (double)pixelsPerStrand / 20000.0)
-    // {
-    //     s1 = sin(x                 ) *  11.0;
-    //     s2 = sin(x *  0.857 - 0.214) * -13.0;
-    //     s3 = sin(x * -0.923 + 1.428) *  17.0;
-    //     for(i=0;i<totalPixels;i++)
-    //     {
-    //         r   = (int)((sin(s1) + 1.0) * 127.5);
-    //         g   = (int)((sin(s2) + 1.0) * 127.5);
-    //         b   = (int)((sin(s3) + 1.0) * 127.5);
-    //         pixelBuf[i] = TCrgb(r,g,b);
-    //         s1 += 0.273;
-    //         s2 -= 0.231;
-    //         s3 += 0.428;
-    //     }
-
-    //     if((i = TCrefresh(pixelBuf,NULL,&stats)) != TC_OK)
-    //        TCprintError(static_cast<TCstatusCode>(i));
-
-    //     /* Update statistics once per second. */
-    //     if((t = time(NULL)) != prev)
-    //     {
-    //         system("clear");
-    //         TCprintStats(&stats);
-    //         prev = t;
-    //     }
-    // }
-
-    
+    // Init the main TCLControl object:
+    //tcl = TCLControl();
 
 
 
@@ -244,9 +170,6 @@ int main(int argc, char *argv[]) {
     clutter_actor_show(stage);
 
     clutter_main();
-
-    TCclose();
-    free(pixelBuf);
 
     return EXIT_SUCCESS;
 }

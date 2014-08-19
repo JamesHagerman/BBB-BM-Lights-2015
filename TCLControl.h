@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include "p9813.h"
+
+class TCLControl {
+	public:
+		TCLControl();
+		~TCLControl();
+		void Update();
+
+		bool enabled;
+
+		int totalPixels;
+		// These actually get handed in to the TCopen function:
+		static const int nStrands = 6; 
+		static const int pixelsPerStrand = 100;
+
+		// Our pixel buffer itself:
+		// Keep in mind that this is malloc'd so it's REAL memory... Don't leak it.
+		TCpixel *pixelBuf;
+
+		// Stats and Statuses about the TC library:
+		TCstats stats;
+		TCstatusCode status;
+	private:
+		
+};

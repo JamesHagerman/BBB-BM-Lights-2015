@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-
 class Cat                   // begin declaration of the class
 {
   public:                    // begin public section
