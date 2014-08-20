@@ -160,9 +160,6 @@ int main(int argc, char *argv[]) {
     int ret;
     ret = clutter_init(&argc, &argv);
 
-    tcl.BuildRadialRemap();
-    tcl.PrintRemapArray();
-
     // // Check clutter input devices:
     // ClutterDeviceManager * deviceManager = clutter_device_manager_get_default();
     // ClutterInputDevice *device;

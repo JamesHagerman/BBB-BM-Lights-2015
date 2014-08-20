@@ -23,6 +23,7 @@ TCLControl::TCLControl() {
         exit(1);
     }
     BuildRadialRemap();
+    PrintRemapArray();
     
 
     /* Initialize library, open FTDI device.  Baud rate errors
@@ -97,7 +98,7 @@ void TCLControl::PrintRemapArray() {
 
         // index +=1;
     }
-    printf("Done printing remap array!\n");
+    printf("Done printing remap array!\n\n");
 }
 
 void TCLControl::Update() {
@@ -122,7 +123,7 @@ void TCLControl::Update() {
 	// 	TCpixel *pixelInBuffer,
 	// 	int     *remap,
 	// 	TCstats *stats)
-    if((status = TCrefresh(pixelBuf,NULL,&stats)) != TC_OK)
+    if((status = TCrefresh(pixelBuf,remapArray,&stats)) != TC_OK)
        TCprintError(static_cast<TCstatusCode>(status));
 
     // /* Update statistics once per second. */
