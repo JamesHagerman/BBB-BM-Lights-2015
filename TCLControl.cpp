@@ -22,6 +22,8 @@ TCLControl::TCLControl() {
         printf("Could not allocate space for %d pixels (%d bytes).\n", totalPixels, memSize);
         exit(1);
     }
+    BuildRadialRemap();
+    
 
     /* Initialize library, open FTDI device.  Baud rate errors
        are non-fatal; program displays a warning but continues. */
@@ -45,8 +47,57 @@ TCLControl::TCLControl() {
 }
 
 TCLControl::~TCLControl() {
+    delete [] remapArray;
 	TCclose();
     free(pixelBuf);
+}
+
+void TCLControl::BuildRadialRemap() {
+    remapArray = new int[totalPixels];
+
+    int index = 0;
+    for(int i=0; i<nStrands; i++) {
+      // println("Setting wand: " + i);
+      for(int j=0;j<pixelsPerStrand;j++) {
+        if(j%2==0) { // even led's (0,2,4,6...)
+          remapArray[j-(j/2) + (pixelsPerStrand * i)] = index;
+          // if (i == 1) {
+          //   println("index " + index + " is: " + radialMap[index]);
+          // }
+        } else { // odd led's (1,3,5,7...)
+          remapArray[(pixelsPerStrand * (i+1)) - (j-(j/2))] = index;
+          // if (i == 1) {
+          //   println("index " + index + " is: " + radialMap[index]);
+          // }
+        }
+        index += 1;
+      }
+    }
+}
+
+void TCLControl::PrintRemapArray() {
+    int index = 0;
+    int strandIndex = 0;
+    for(int i=0; i<totalPixels; i++) {
+
+        if (index == 0) {
+            printf("strand %i: ", strandIndex);
+        }
+
+        // printf("%i ", index);
+        printf("%i ", remapArray[i]);
+
+        if (index < 49) {
+            index += 1;
+        } else {
+            printf("\n");
+            strandIndex += 1;
+            index = 0;
+        }
+
+        // index +=1;
+    }
+    printf("Done printing remap array!\n");
 }
 
 void TCLControl::Update() {

@@ -5,6 +5,8 @@ class TCLControl {
 	public:
 		TCLControl();
 		~TCLControl();
+		void BuildRadialRemap();
+		void PrintRemapArray();
 		void Update();
 
 		bool enabled;
@@ -17,10 +19,12 @@ class TCLControl {
 		// Our pixel buffer itself:
 		// Keep in mind that this is malloc'd so it's REAL memory... Don't leak it.
 		TCpixel *pixelBuf;
+		int *remapArray;
 
 		// Stats and Statuses about the TC library:
 		TCstats stats;
 		TCstatusCode status;
 	private:
+
 		
 };

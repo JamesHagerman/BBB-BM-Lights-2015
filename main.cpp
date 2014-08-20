@@ -89,6 +89,7 @@ void on_timeline_new_frame(ClutterTimeline *timeline, gint frame_num, gpointer d
 
     clutter_actor_set_rotation_angle(rect, CLUTTER_Z_AXIS, rotation * 5);
 
+
     // Calculate the new values for the pixelBuf:
     // Update the lights:
     x += (double)tcl.pixelsPerStrand / 20000.0;
@@ -159,22 +160,24 @@ int main(int argc, char *argv[]) {
     int ret;
     ret = clutter_init(&argc, &argv);
 
+    tcl.BuildRadialRemap();
+    tcl.PrintRemapArray();
 
     // // Check clutter input devices:
-    ClutterDeviceManager * deviceManager = clutter_device_manager_get_default();
-    ClutterInputDevice *device;
-    device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_TOUCHPAD_DEVICE);
+    // ClutterDeviceManager * deviceManager = clutter_device_manager_get_default();
+    // ClutterInputDevice *device;
+    // device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_TOUCHPAD_DEVICE);
 
-    if (device == NULL) {
-        printf("Oops. No touchpad found!\n");
-        device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_TOUCHSCREEN_DEVICE);
-    }
-    if (device == NULL) {
-        printf("Oops. No touchscreen found!\n");
-        device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_POINTER_DEVICE);
-    }
-    g_printf("Device name: %s\n", clutter_input_device_get_device_name(device));
-    g_printf(" Enabled: %s\n", clutter_input_device_get_enabled(device) ? "true":"false");
+    // if (device == NULL) {
+    //     printf("Oops. No touchpad found!\n");
+    //     device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_TOUCHSCREEN_DEVICE);
+    // }
+    // if (device == NULL) {
+    //     printf("Oops. No touchscreen found!\n");
+    //     device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_POINTER_DEVICE);
+    // }
+    // g_printf("Device name: %s\n", clutter_input_device_get_device_name(device));
+    // g_printf(" Enabled: %s\n", clutter_input_device_get_enabled(device) ? "true":"false");
 
     // GSList * deviceList = clutter_device_manager_list_devices(deviceManager);
     // int deviceCount = g_slist_length(deviceList);
@@ -199,7 +202,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    exit(1);
+    // exit(1);
 
 
     // Build some colors:
@@ -240,6 +243,9 @@ int main(int argc, char *argv[]) {
     clutter_actor_add_child(stage, label);
 
     ClutterTimeline *timeline = clutter_timeline_new(60);
+
+
+    //tcl
     g_signal_connect(timeline, "new-frame", G_CALLBACK(on_timeline_new_frame), NULL);
     clutter_timeline_set_repeat_count(timeline, -1);
     clutter_timeline_start(timeline);
