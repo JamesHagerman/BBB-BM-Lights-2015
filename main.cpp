@@ -160,7 +160,7 @@ static gboolean _pointer_motion_cb (ClutterActor *actor,
                                        stage_x, stage_y,
                                        &actor_x, &actor_y);
 
-  g_debug("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
+  printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
            stage_x, stage_y,
            actor_x, actor_y);
 
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
 
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
-    // g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     clutter_actor_add_child(stage, rect);
 
     // Create a bunch of yellow boxes on the screen:
@@ -256,10 +256,7 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_position(label, mid_x, mid_y); 
     clutter_actor_add_child(stage, label);
 
-    ClutterTimeline *timeline = clutter_timeline_new(60);
-
-
-    //tcl
+    ClutterTimeline *timeline = clutter_timeline_new(120);
     g_signal_connect(timeline, "new-frame", G_CALLBACK(on_timeline_new_frame), NULL);
     clutter_timeline_set_repeat_count(timeline, -1);
     clutter_timeline_start(timeline);
