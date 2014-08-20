@@ -139,7 +139,7 @@ _pointer_motion_cb (ClutterActor *actor,
                                        stage_x, stage_y,
                                        &actor_x, &actor_y);
 
-  printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
+  g_debug("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
            stage_x, stage_y,
            actor_x, actor_y);
 
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_background_color(stage, &stage_color);
 
     // Set up a listener to close the app if the window is closed:
-    g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
+    // g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
     // g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     
 
