@@ -143,11 +143,9 @@ ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, Clutter
     return toRet;
 }
 
-static gboolean
-_pointer_motion_cb (ClutterActor *actor,
+static gboolean _pointer_motion_cb (ClutterActor *actor,
                    ClutterEvent *event,
-                   gpointer      user_data)
-{
+                   gpointer      user_data) {
   /* get the coordinates where the pointer crossed into the actor */
   gfloat stage_x, stage_y;
   clutter_event_get_coords (event, &stage_x, &stage_y);
@@ -233,7 +231,7 @@ int main(int argc, char *argv[]) {
 
     // Set up a listener to close the app if the window is closed:
     g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
-    g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    // g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     
 
     
@@ -245,7 +243,7 @@ int main(int argc, char *argv[]) {
 
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
-    g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    // g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     clutter_actor_add_child(stage, rect);
 
     // Create a bunch of yellow boxes on the screen:

@@ -3,8 +3,8 @@
 #include "TCLControl.h"
 
 TCLControl::TCLControl() {
-	printf("Initalizing Main TCLControl class\n");
-	// Configure FTDI pins:
+    printf("Initalizing Main TCLControl class\n");
+    // Configure FTDI pins:
     
     status = TCsetStrandPin(0, TC_FTDI_TX); // default
     status = TCsetStrandPin(1, TC_FTDI_RX); // default
@@ -13,9 +13,6 @@ TCLControl::TCLControl() {
     status = TCsetStrandPin(4, TC_FTDI_RI);
     status = TCsetStrandPin(5, TC_FTDI_DSR);
     status = TCsetStrandPin(6, TC_FTDI_DCD);
-
-    // Our REAL, On the car, Light rig:
-    
 
     /* Allocate pixel array.  One TCpixel per pixel per strand. */
     totalPixels = nStrands * pixelsPerStrand;
@@ -28,7 +25,6 @@ TCLControl::TCLControl() {
     BuildRadialRemap();
     PrintRemapArray();
     
-
     /* Initialize library, open FTDI device.  Baud rate errors
        are non-fatal; program displays a warning but continues. */
     if((status = TCopen(nStrands,pixelsPerStrand)) != TC_OK)
@@ -47,12 +43,11 @@ TCLControl::TCLControl() {
 
     /* Initialize statistics structure before use. */
     TCinitStats(&stats);
-
 }
 
 TCLControl::~TCLControl() {
     delete [] remapArray;
-	TCclose();
+    TCclose();
     free(pixelBuf);
 }
 
@@ -83,14 +78,13 @@ void TCLControl::PrintRemapArray() {
     int index = 0;
     int strandIndex = 0;
     for(int i=0; i<totalPixels; i++) {
-
+        // Print wand index:
         if (index == 0) {
-            printf("strand %i: ", strandIndex);
+            printf("Wand %i: ", strandIndex);
         }
 
-        // printf("%i ", index);
+        // Print Pixel index:
         printf("%i ", remapArray[i]);
-
         if (index < 49) {
             index += 1;
         } else {
@@ -98,42 +92,13 @@ void TCLControl::PrintRemapArray() {
             strandIndex += 1;
             index = 0;
         }
-
-        // index +=1;
     }
     printf("Done printing remap array!\n\n");
 }
 
 void TCLControl::Update() {
-	// Update the lights:
-    // x += (double)pixelsPerStrand / 20000.0;
-    // s1 = sin(x                 ) *  11.0;
-    // s2 = sin(x *  0.857 - 0.214) * -13.0;
-    // s3 = sin(x * -0.923 + 1.428) *  17.0;
-    // for(i=0;i<totalPixels;i++)
-    // {
-    //     r   = (int)((sin(s1) + 1.0) * 127.5);
-    //     g   = (int)((sin(s2) + 1.0) * 127.5);
-    //     b   = (int)((sin(s3) + 1.0) * 127.5);
-    //     pixelBuf[i] = TCrgb(r,g,b);
-    //     s1 += 0.273;
-    //     s2 -= 0.231;
-    //     s3 += 0.428;
-    // }
-
-    // Simply call TCrefresh with our updated buffer:
-	// TCstatusCode TCrefresh(
-	// 	TCpixel *pixelInBuffer,
-	// 	int     *remap,
-	// 	TCstats *stats)
-    if((status = TCrefresh(pixelBuf,remapArray,&stats)) != TC_OK)
-       TCprintError(static_cast<TCstatusCode>(status));
-
-    // /* Update statistics once per second. */
-    // if((t = time(NULL)) != prev)
-    // {
-    //     system("clear");
-    //     TCprintStats(&stats);
-    //     prev = t;
-    // }
+    // Update the lights:
+    if((status = TCrefresh(pixelBuf,remapArray,&stats)) != TC_OK) {
+        TCprintError(static_cast<TCstatusCode>(status));
+    }
 }
