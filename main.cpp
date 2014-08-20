@@ -56,6 +56,9 @@
 #include <time.h>
 
 #include <clutter/clutter.h>
+#include <glib.h>
+#include <glib/gprintf.h>
+
 #include "p9813.h"
 
 #include "cat.h"
@@ -146,11 +149,58 @@ _pointer_motion_cb (ClutterActor *actor,
   return CLUTTER_EVENT_STOP;
 }
 
+void PrintInputDevice(gpointer data, gpointer user_data) {
+
+}
+
 int main(int argc, char *argv[]) {
 
     // init Clutter:
     int ret;
     ret = clutter_init(&argc, &argv);
+
+
+    // // Check clutter input devices:
+    ClutterDeviceManager * deviceManager = clutter_device_manager_get_default();
+    ClutterInputDevice *device;
+    device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_TOUCHPAD_DEVICE);
+
+    if (device == NULL) {
+        printf("Oops. No touchpad found!\n");
+        device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_TOUCHSCREEN_DEVICE);
+    }
+    if (device == NULL) {
+        printf("Oops. No touchscreen found!\n");
+        device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_POINTER_DEVICE);
+    }
+    g_printf("Device name: %s\n", clutter_input_device_get_device_name(device));
+    g_printf(" Enabled: %s\n", clutter_input_device_get_enabled(device) ? "true":"false");
+
+    // GSList * deviceList = clutter_device_manager_list_devices(deviceManager);
+    // int deviceCount = g_slist_length(deviceList);
+    // printf("Input device count: %i\n", deviceCount);
+
+
+    // // printf("deviceList 0: ", deviceList[])
+    // for (i = 0; i < deviceCount; i+=1) {
+    //     _ClutterInputDevice = g_slist_nth_data(deviceList, 0);
+    // //     gboolean enabled = clutter_input_device_get_enabled(deviceList);
+    // //     printf("Input device: %i\n", enabled);
+
+    // }
+
+
+    // How far off was I???
+    // translate_native_event_to_clutter (native_event, &c_event);
+    // ClutterDeviceManager *manager;
+    // ClutterInputDevice *device;
+    // manager = clutter_device_manager_get_default ();
+    // device = clutter_device_manager_get_core_device (manager, CLUTTER_POINTER_DEVICE);
+
+
+
+    exit(1);
+
 
     // Build some colors:
     ClutterColor stage_color = { 0xFF, 0xFF, 0xFF, 0xFF };
@@ -163,8 +213,8 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_background_color(stage, &stage_color);
 
     // Set up a listener to close the app if the window is closed:
-    // g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
-    // g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
+    g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     
 
     
@@ -176,7 +226,7 @@ int main(int argc, char *argv[]) {
 
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
-    // g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     clutter_actor_add_child(stage, rect);
 
     // Create a bunch of yellow boxes on the screen:

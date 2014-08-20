@@ -32,7 +32,7 @@ TCLControl::TCLControl() {
             // exit(1);
             // We don't wanna exit. We wanna keep running the UI until a reset is called for
             printf("Oops! FTDI had issues! Check your connections.\n");
-            printf("That said, we're still gonna show that UI...\n");
+            printf("That said, we're still gonna show that UI...\n\n");
             enabled = false;
         }
     } else {
