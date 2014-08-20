@@ -303,7 +303,7 @@ int main(int argc, char *argv[]) {
 
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
-    // g_signal_connect (rect, "touch-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (rect, "touch-event", G_CALLBACK (_pointer_motion_cb), transitions);
     g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     clutter_actor_add_child(stage, rect);
 
