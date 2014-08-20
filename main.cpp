@@ -143,6 +143,66 @@ ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, Clutter
     return toRet;
 }
 
+static gboolean handleMouseClick (ClutterActor *actor,
+                   ClutterEvent *event,
+                   gpointer      user_data) {
+    guint keyval = clutter_event_get_key_symbol (event);
+
+    ClutterModifierType state = clutter_event_get_state (event);
+    gboolean shift_pressed = (state & CLUTTER_SHIFT_MASK ? TRUE : FALSE);
+    gboolean ctrl_pressed = (state & CLUTTER_CONTROL_MASK ? TRUE : FALSE);
+
+    if (CLUTTER_KEY_Up == keyval) {
+        if (shift_pressed & ctrl_pressed)
+            printf ("Up and shift and control pressed\n");
+        else if (shift_pressed)
+            printf ("Up and shift pressed\n");
+        else
+            printf ("Up pressed\n");
+
+        /* The event was handled, and the emission should stop */
+        return CLUTTER_EVENT_STOP;
+    } else if (CLUTTER_KEY_Left == keyval) {
+        if (shift_pressed & ctrl_pressed)
+            printf ("Left and shift and control pressed\n");
+        else if (shift_pressed)
+            printf ("Left and shift pressed\n");
+        else
+            printf ("Left pressed\n");
+
+        /* The event was handled, and the emission should stop */
+        return CLUTTER_EVENT_STOP;
+    } else if (CLUTTER_KEY_Down == keyval) {
+        if (shift_pressed & ctrl_pressed)
+            printf ("Down and shift and control pressed\n");
+        else if (shift_pressed)
+            printf ("Down and shift pressed\n");
+        else
+            printf ("Down pressed\n");
+
+        /* The event was handled, and the emission should stop */
+        return CLUTTER_EVENT_STOP;
+    } else if (CLUTTER_KEY_Right == keyval) {
+        if (shift_pressed & ctrl_pressed)
+            printf ("Right and shift and control pressed\n");
+        else if (shift_pressed)
+            printf ("Right and shift pressed\n");
+        else
+            printf ("Right pressed\n");
+
+        /* The event was handled, and the emission should stop */
+        return CLUTTER_EVENT_STOP;
+    } else if (65293 == keyval) {
+        printf("Looks like the enter key...\n");
+    } else {
+        printf("Something else pressed: %i\n", keyval);
+    }
+
+    /* The event was not handled, and the emission should continue */
+    return CLUTTER_EVENT_PROPAGATE;
+
+}
+
 static gboolean _pointer_motion_cb (ClutterActor *actor,
                    ClutterEvent *event,
                    gpointer      user_data) {
@@ -167,9 +227,9 @@ static gboolean _pointer_motion_cb (ClutterActor *actor,
   return CLUTTER_EVENT_STOP;
 }
 
-void PrintInputDevice(gpointer data, gpointer user_data) {
+// void PrintInputDevice(gpointer data, gpointer user_data) {
 
-}
+// }
 
 int main(int argc, char *argv[]) {
 
@@ -232,7 +292,7 @@ int main(int argc, char *argv[]) {
     // Set up a listener to close the app if the window is closed:
     g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
     // g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
-    
+    g_signal_connect(stage, "key-press-event", G_CALLBACK(handleMouseClick), NULL);
 
     
     /* Add a rectangle to the stage: */
@@ -243,7 +303,8 @@ int main(int argc, char *argv[]) {
 
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
-    g_signal_connect (rect, "touch-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    // g_signal_connect (rect, "touch-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     clutter_actor_add_child(stage, rect);
 
     // Create a bunch of yellow boxes on the screen:
