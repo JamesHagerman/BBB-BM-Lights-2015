@@ -194,6 +194,9 @@ static gboolean handleMouseClick (ClutterActor *actor,
         return CLUTTER_EVENT_STOP;
     } else if (65293 == keyval) {
         printf("Looks like the enter key...\n");
+    } else if (65307 == keyval) {
+        printf("esc pressed. Exiting...\n");
+        exit(1);
     } else {
         printf("Something else pressed: %i\n", keyval);
     }
