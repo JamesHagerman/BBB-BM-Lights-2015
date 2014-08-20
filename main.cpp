@@ -62,6 +62,7 @@
 #include "TCLControl.h"
 
 ClutterActor *rect;
+ClutterState *transitions;
 gdouble rotation = 0;
 
 const int width = 800;
@@ -119,28 +120,52 @@ ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, Clutter
     return toRet;
 }
 
-Cat jack;
+static gboolean
+_pointer_motion_cb (ClutterActor *actor,
+                   ClutterEvent *event,
+                   gpointer      user_data)
+{
+  /* get the coordinates where the pointer crossed into the actor */
+  gfloat stage_x, stage_y;
+  clutter_event_get_coords (event, &stage_x, &stage_y);
+
+  /*
+   * as the coordinates are relative to the stage, rather than
+   * the actor which emitted the signal, it can be useful to
+   * transform them to actor-relative coordinates
+   */
+  gfloat actor_x, actor_y;
+  clutter_actor_transform_stage_point (actor,
+                                       stage_x, stage_y,
+                                       &actor_x, &actor_y);
+
+  printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
+           stage_x, stage_y,
+           actor_x, actor_y);
+
+  return CLUTTER_EVENT_STOP;
+}
 
 int main(int argc, char *argv[]) {
 
-    jack = Cat(4);
-    jack.Meow();
-
-    // Init the main TCLControl object:
-    //tcl = TCLControl();
-
-
-
+    // init Clutter:
     int ret;
     ret = clutter_init(&argc, &argv);
 
+    // Build some colors:
     ClutterColor stage_color = { 0xFF, 0xFF, 0xFF, 0xFF };
     ClutterColor actor_color = { 0x00, 0xCC, 0x00, 0xFF };
     ClutterColor red_color = { 0xFF, 0xCC, 0x00, 0xFF };
 
+    // Set up the stage:
     ClutterActor *stage = clutter_stage_new();
     clutter_actor_set_size(stage, width, height);
     clutter_actor_set_background_color(stage, &stage_color);
+
+    // Set up a listener to close the app if the window is closed:
+    g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
+    g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    
 
     
     /* Add a rectangle to the stage: */
@@ -148,19 +173,21 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_background_color (rect, &actor_color);
     clutter_actor_set_size (rect, 100, 50);
     clutter_actor_set_position (rect, 20, 20);
-    clutter_actor_add_child (stage, rect);
-    clutter_actor_show (rect);
 
+    // Wire up some event listeners:
+    clutter_actor_set_reactive (rect, TRUE);
+    // g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    clutter_actor_add_child(stage, rect);
+
+    // Create a bunch of yellow boxes on the screen:
     for (int i = 0; i < 50; i+=1) {
         createBox(stage, 10+(i*10), 10+(i*10), 10,10, red_color);
     }
     
-
     // Add a label to the stage:
-    ClutterActor *label = clutter_text_new_with_text ("Sans 32px", "Hello, world");
+    ClutterActor *label = clutter_text_new_with_text ("Sans 32px", "Sensatron 2014");
     clutter_actor_set_position(label, mid_x, mid_y); 
     clutter_actor_add_child(stage, label);
-
 
     ClutterTimeline *timeline = clutter_timeline_new(60);
     g_signal_connect(timeline, "new-frame", G_CALLBACK(on_timeline_new_frame), NULL);
