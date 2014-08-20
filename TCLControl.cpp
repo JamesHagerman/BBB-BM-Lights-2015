@@ -14,6 +14,9 @@ TCLControl::TCLControl() {
     status = TCsetStrandPin(5, TC_FTDI_DSR);
     status = TCsetStrandPin(6, TC_FTDI_DCD);
 
+    // Our REAL, On the car, Light rig:
+    
+
     /* Allocate pixel array.  One TCpixel per pixel per strand. */
     totalPixels = nStrands * pixelsPerStrand;
     int memSize = totalPixels * sizeof(TCpixel);
@@ -57,16 +60,16 @@ void TCLControl::BuildRadialRemap() {
     remapArray = new int[totalPixels];
 
     int index = 0;
-    for(int i=0; i<nStrands; i++) {
+    for(int i=0; i<wands; i++) {
       // println("Setting wand: " + i);
-      for(int j=0;j<pixelsPerStrand;j++) {
+      for(int j=0;j<pixelsPerWand;j++) {
         if(j%2==0) { // even led's (0,2,4,6...)
-          remapArray[j-(j/2) + (pixelsPerStrand * i)] = index;
+          remapArray[j-(j/2) + (pixelsPerWand * i)] = index;
           // if (i == 1) {
           //   println("index " + index + " is: " + radialMap[index]);
           // }
         } else { // odd led's (1,3,5,7...)
-          remapArray[(pixelsPerStrand * (i+1)) - (j-(j/2))] = index;
+          remapArray[(pixelsPerWand * (i+1)) - (j-(j/2))] = index;
           // if (i == 1) {
           //   println("index " + index + " is: " + radialMap[index]);
           // }
