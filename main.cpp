@@ -247,10 +247,10 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_size (button1, buttonWidth, buttonHeight);
     clutter_actor_set_position (button1, 0, height-buttonHeight);
     clutter_actor_add_child(stage, button1);
-
-    clutter_actor_add_action (button1, clutter_tap_action_new ());
     clutter_actor_set_reactive (button1, TRUE);
-    g_signal_connect (button1, "tap", G_CALLBACK (eventHandlers.handleTapEvents), NULL);
+    g_signal_connect (button1, "touch-event", G_CALLBACK (eventHandlers.handleButton1), NULL);
+    g_signal_connect (button1, "button-press-event", G_CALLBACK (eventHandlers.handleButton1), NULL);
+    
 
 
 

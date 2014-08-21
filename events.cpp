@@ -13,11 +13,11 @@ Events::~Events() {
 
 }
 
-gboolean Events::handleTapEvents (ClutterActor *actor,
+gboolean Events::handleButton1 (ClutterActor *actor,
     ClutterEvent *event,
     gpointer      user_data) {
 
-    printf("Tap event!");
+    printf("Button 1 event!");
     return CLUTTER_EVENT_PROPAGATE;
 }
 
