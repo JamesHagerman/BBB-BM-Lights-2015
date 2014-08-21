@@ -6,17 +6,17 @@
 #include <glib/gprintf.h>
 
 Events::Events() {
-	printf("Building events class");
+	printf("Building events class\n");
 }
 
 Events::~Events() {
 
 }
 
-
 gboolean Events::handleKeyPresses (ClutterActor *actor,
-                   ClutterEvent *event,
-                   gpointer      user_data) {
+    ClutterEvent *event,
+    gpointer      user_data) {
+
     guint keyval = clutter_event_get_key_symbol (event);
 
     ClutterModifierType state = clutter_event_get_state (event);
@@ -94,31 +94,31 @@ gboolean Events::handleTouchEvents (ClutterActor *actor,
 }
 
 gboolean Events::handleMouseEvents (ClutterActor *actor,
-                   ClutterEvent *event,
-                   gpointer      user_data) {
+    ClutterEvent *event,
+    gpointer      user_data) {
 
 
     ClutterActor *rect_actor = CLUTTER_ACTOR (user_data);
 
-  /* get the coordinates where the pointer crossed into the actor */
-  gfloat stage_x, stage_y;
-  clutter_event_get_coords (event, &stage_x, &stage_y);
+    /* get the coordinates where the pointer crossed into the actor */
+    gfloat stage_x, stage_y;
+    clutter_event_get_coords (event, &stage_x, &stage_y);
 
-  /*
-   * as the coordinates are relative to the stage, rather than
-   * the actor which emitted the signal, it can be useful to
-   * transform them to actor-relative coordinates
-   */
-  gfloat actor_x, actor_y;
-  clutter_actor_transform_stage_point (actor,
+    /*
+    * as the coordinates are relative to the stage, rather than
+    * the actor which emitted the signal, it can be useful to
+    * transform them to actor-relative coordinates
+    */
+    gfloat actor_x, actor_y;
+    clutter_actor_transform_stage_point (actor,
                                        stage_x, stage_y,
                                        &actor_x, &actor_y);
 
-  printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
+    printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
            stage_x, stage_y,
            actor_x, actor_y);
 
-  clutter_actor_set_position (rect_actor, stage_x, stage_y);
+    clutter_actor_set_position (rect_actor, stage_x, stage_y);
 
-  return CLUTTER_EVENT_STOP;
+    return CLUTTER_EVENT_STOP;
 }

@@ -89,8 +89,8 @@ Events eventHandlers;
 
 // Button actors:
 const int buttonHeight = height/5;
-const int buttonWidth = width/4;
-ClutterActor *button1, *button2, *button3, *button4;
+const int buttonWidth = width/5;
+ClutterActor *button1, *button2, *button3, *button4, *button5;
 
 
 // using namespace std;
@@ -242,15 +242,44 @@ int main(int argc, char *argv[]) {
     // ClutterActor *button1, *button2, *button3, *button4;
 
     button1 = clutter_actor_new();
-    clutter_actor_set_background_color (button1, &actor_color);
+    ClutterColor button1Color = { 0, 255, 47, 0xFF };
+    clutter_actor_set_background_color (button1, &button1Color);
     clutter_actor_set_size (button1, buttonWidth, buttonHeight);
-    clutter_actor_set_position (button1, height-(clutter_actor_get_height(button1)), 0);
+    clutter_actor_set_position (button1, 0, height-buttonHeight);
+    clutter_actor_add_child(stage, button1);
 
+    button2 = clutter_actor_new();
+    ClutterColor button2Color = { 232, 217, 12, 0xFF };
+    clutter_actor_set_background_color (button2, &button2Color);
+    clutter_actor_set_size (button2, buttonWidth, buttonHeight);
+    clutter_actor_set_position (button2, buttonWidth, height-buttonHeight);
+    clutter_actor_add_child(stage, button2);
+
+    button3 = clutter_actor_new();
+    ClutterColor button3Color = { 255, 122, 0, 0xFF };
+    clutter_actor_set_background_color (button3, &button3Color);
+    clutter_actor_set_size (button3, buttonWidth, buttonHeight);
+    clutter_actor_set_position (button3, buttonWidth*2, height-buttonHeight);
+    clutter_actor_add_child(stage, button3);
+
+    button4 = clutter_actor_new();
+    ClutterColor button4Color = { 232, 12, 111, 0xFF };
+    clutter_actor_set_background_color (button4, &button4Color);
+    clutter_actor_set_size (button4, buttonWidth, buttonHeight);
+    clutter_actor_set_position (button4, buttonWidth*3, height-buttonHeight);
+    clutter_actor_add_child(stage, button4);
+
+    button5 = clutter_actor_new();
+    ClutterColor button5Color = { 51, 13, 255, 0xFF };
+    clutter_actor_set_background_color (button5, &button5Color);
+    clutter_actor_set_size (button5, buttonWidth, buttonHeight);
+    clutter_actor_set_position (button5, buttonWidth*4, height-buttonHeight);
+    clutter_actor_add_child(stage, button5);
 
     
     // Add a label to the stage:
-    ClutterActor *label = clutter_text_new_with_text ("Sans 32px", "Sensatron 2014");
-    clutter_actor_set_position(label, mid_x-(clutter_actor_get_width(label)/2), 0); 
+    ClutterActor *label = clutter_text_new_with_text ("Sans 24px", "Sensatron 2014");
+    clutter_actor_set_position(label, mid_x-(clutter_actor_get_width(label)/2), height-clutter_actor_get_height(label)-buttonHeight); 
     clutter_actor_add_child(stage, label);
 
     ClutterTimeline *timeline = clutter_timeline_new(120);
