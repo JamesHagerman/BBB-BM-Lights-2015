@@ -202,9 +202,10 @@ int main(int argc, char *argv[]) {
 
 
     // Build some colors:
-    ClutterColor stage_color = { 0xFF, 0xFF, 0xFF, 0xFF };
-    ClutterColor actor_color = { 0x00, 0xCC, 0x00, 0xFF };
-    ClutterColor red_color = { 0xFF, 0xCC, 0x00, 0xFF };
+    ClutterColor stage_color = { 0, 0, 0, 0xFF };
+    ClutterColor text_color = {255, 255, 255, 255};
+    ClutterColor actor_color = { 100, 100, 0, 255 };
+    ClutterColor red_color = { 0xFF, 0, 0, 255 };
 
     // Set up the stage:
     ClutterActor *stage = clutter_stage_new();
@@ -233,7 +234,7 @@ int main(int argc, char *argv[]) {
 
     // Create a bunch of yellow boxes on the screen:
     for (int i = 0; i < 50; i+=1) {
-        createBox(stage, 10+(i*10), 10+(i*10), 10,10, red_color);
+        createBox(stage, 10+(i*1), 10, 1,1, red_color);
     }
 
 
@@ -243,76 +244,10 @@ int main(int argc, char *argv[]) {
     Button button3 = Button(stage, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF });
     Button button4 = Button(stage, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF });
     Button button5 = Button(stage, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF });
-    // ClutterActor *button1, *button2, *button3, *button4;
-
-    // button1 = clutter_actor_new();
-    // 
-    // clutter_actor_set_background_color (button1, &button1Color);
-    // clutter_actor_set_size (button1, buttonWidth, buttonHeight);
-    // clutter_actor_set_position (button1, 0, height-buttonHeight);
-    // clutter_actor_set_pivot_point(button1, 0.5, 0.5);
-    // clutter_actor_add_child(stage, button1);
-    // clutter_actor_set_reactive (button1, TRUE);
-
-    // button2 = clutter_actor_new();
-    // ClutterColor button2Color = { 232, 217, 12, 0xFF };
-    // clutter_actor_set_background_color (button2, &button2Color);
-    // clutter_actor_set_size (button2, buttonWidth, buttonHeight);
-    // clutter_actor_set_position (button2, buttonWidth, height-buttonHeight);
-    // clutter_actor_add_child(stage, button2);
-
-    // button3 = clutter_actor_new();
-    // ClutterColor button3Color = ;
-    // clutter_actor_set_background_color (button3, &button3Color);
-    // clutter_actor_set_size (button3, buttonWidth, buttonHeight);
-    // clutter_actor_set_position (button3, buttonWidth*2, height-buttonHeight);
-    // clutter_actor_add_child(stage, button3);
-
-    // button4 = clutter_actor_new();
-    // ClutterColor button4Color = ;
-    // clutter_actor_set_background_color (button4, &button4Color);
-    // clutter_actor_set_size (button4, buttonWidth, buttonHeight);
-    // clutter_actor_set_position (button4, buttonWidth*3, height-buttonHeight);
-    // clutter_actor_add_child(stage, button4);
-
-    // button5 = clutter_actor_new();
-    // ClutterColor button5Color = ;
-    // clutter_actor_set_background_color (button5, &button5Color);
-    // clutter_actor_set_size (button5, buttonWidth, buttonHeight);
-    // clutter_actor_set_position (button5, buttonWidth*4, height-buttonHeight);
-    // clutter_actor_add_child(stage, button5);
-
-
-
-    /* animations */
-    // transitions = clutter_state_new ();
-    // clutter_state_set (transitions, NULL, "fade-out",
-    //                  box, "opacity", CLUTTER_LINEAR, 180,
-    //                  NULL);
-
-    /*
-    * NB you can't use an easing mode where alpha > 1.0 if you're
-    * animating to a value of 255, as the value you're animating
-    * to will possibly go > 255
-    */
-    // clutter_state_set (transitions, NULL, "fade-in",
-    //                  box, "opacity", CLUTTER_LINEAR, 255,
-    //                  NULL);
-
-    // clutter_state_set_duration (transitions, NULL, NULL, 50);
-
-    // clutter_state_warp_to_state (transitions, "fade-out");
-
-
-    // Wire up the event callbacks for the buttons:
-    // g_signal_connect(button1, "touch-event", G_CALLBACK (eventHandlers.handleButton1), button1);
-    // g_signal_connect(button1, "button-press-event", G_CALLBACK (eventHandlers.handleButton1), button1);
-    // g_signal_connect(button1, "button-release-event", G_CALLBACK (eventHandlers.handleButton1), button1);
-
-
     
     // Add a label to the stage:
     ClutterActor *label = clutter_text_new_with_text ("Sans 24px", "Sensatron 2014");
+    clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
     clutter_actor_set_position(label, mid_x-(clutter_actor_get_width(label)/2), height-clutter_actor_get_height(label)-buttonHeight); 
     clutter_actor_add_child(stage, label);
 
