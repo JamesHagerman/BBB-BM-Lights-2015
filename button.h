@@ -16,10 +16,18 @@ class Button {
 
 		ClutterActor *buttonActor;
 		ClutterActor *stage;
+
 		ClutterColor *buttonColor;
+		ClutterColor *buttonDownColor;
 
 		int buttonWidth, buttonHeight;
 		int width, height;
+
+		typedef struct  {
+	        ClutterActor *actor;
+	        ClutterColor upColor;
+	        ClutterColor downColor;
+	    } ButtonData;
 	private:
 
 		
