@@ -63,6 +63,7 @@
 
 #include "cat.h"
 #include "TCLControl.h"
+#include "events.h"
 
 ClutterActor *rect;
 ClutterState *transitions;
@@ -82,6 +83,14 @@ unsigned char r,g,b;
 time_t        t,prev = 0;
 
 TCLControl tcl;
+Events eventHandlers;
+
+
+
+// Button actors:
+const int buttonHeight = height/5;
+const int buttonWidth = width/4;
+ClutterActor *button1, *button2, *button3, *button4;
 
 
 // using namespace std;
@@ -142,115 +151,6 @@ ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, Clutter
     clutter_actor_show (toRet);
     return toRet;
 }
-
-static gboolean handleKeyPress (ClutterActor *actor,
-                   ClutterEvent *event,
-                   gpointer      user_data) {
-    guint keyval = clutter_event_get_key_symbol (event);
-
-    ClutterModifierType state = clutter_event_get_state (event);
-    gboolean shift_pressed = (state & CLUTTER_SHIFT_MASK ? TRUE : FALSE);
-    gboolean ctrl_pressed = (state & CLUTTER_CONTROL_MASK ? TRUE : FALSE);
-
-    if (CLUTTER_KEY_Up == keyval) {
-        if (shift_pressed & ctrl_pressed)
-            printf ("Up and shift and control pressed\n");
-        else if (shift_pressed)
-            printf ("Up and shift pressed\n");
-        else
-            printf ("Up pressed\n");
-
-        /* The event was handled, and the emission should stop */
-        return CLUTTER_EVENT_STOP;
-    } else if (CLUTTER_KEY_Left == keyval) {
-        if (shift_pressed & ctrl_pressed)
-            printf ("Left and shift and control pressed\n");
-        else if (shift_pressed)
-            printf ("Left and shift pressed\n");
-        else
-            printf ("Left pressed\n");
-
-        /* The event was handled, and the emission should stop */
-        return CLUTTER_EVENT_STOP;
-    } else if (CLUTTER_KEY_Down == keyval) {
-        if (shift_pressed & ctrl_pressed)
-            printf ("Down and shift and control pressed\n");
-        else if (shift_pressed)
-            printf ("Down and shift pressed\n");
-        else
-            printf ("Down pressed\n");
-
-        /* The event was handled, and the emission should stop */
-        return CLUTTER_EVENT_STOP;
-    } else if (CLUTTER_KEY_Right == keyval) {
-        if (shift_pressed & ctrl_pressed)
-            printf ("Right and shift and control pressed\n");
-        else if (shift_pressed)
-            printf ("Right and shift pressed\n");
-        else
-            printf ("Right pressed\n");
-
-        /* The event was handled, and the emission should stop */
-        return CLUTTER_EVENT_STOP;
-    } else if (65293 == keyval) {
-        printf("Looks like the enter key...\n");
-    } else if (65307 == keyval) {
-        printf("esc pressed. Exiting...\n");
-        exit(1);
-    } else {
-        printf("Something else pressed: %i\n", keyval);
-    }
-
-    /* The event was not handled, and the emission should continue */
-    return CLUTTER_EVENT_PROPAGATE;
-
-}
-
-
-static gboolean handleTouchEvent (ClutterActor *actor,
-    ClutterEvent *event,
-    gpointer user_data) {
-
-    ClutterEventType eventType = clutter_event_type(event);
-
-    if (eventType == CLUTTER_TOUCH_END) {
-        printf("Touch end!\n");
-    } else {
-        printf("Some other touch event %i\n", eventType);
-    }
-
-    return CLUTTER_EVENT_STOP;
-}
-
-static gboolean _pointer_motion_cb (ClutterActor *actor,
-                   ClutterEvent *event,
-                   gpointer      user_data) {
-  /* get the coordinates where the pointer crossed into the actor */
-  gfloat stage_x, stage_y;
-  clutter_event_get_coords (event, &stage_x, &stage_y);
-
-  /*
-   * as the coordinates are relative to the stage, rather than
-   * the actor which emitted the signal, it can be useful to
-   * transform them to actor-relative coordinates
-   */
-  gfloat actor_x, actor_y;
-  clutter_actor_transform_stage_point (actor,
-                                       stage_x, stage_y,
-                                       &actor_x, &actor_y);
-
-  printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
-           stage_x, stage_y,
-           actor_x, actor_y);
-
-  clutter_actor_set_position (rect, stage_x, stage_y);
-
-  return CLUTTER_EVENT_STOP;
-}
-
-// void PrintInputDevice(gpointer data, gpointer user_data) {
-
-// }
 
 int main(int argc, char *argv[]) {
 
@@ -313,7 +213,7 @@ int main(int argc, char *argv[]) {
     // Set up a listener to close the app if the window is closed:
     g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
     // g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
-    g_signal_connect(stage, "key-press-event", G_CALLBACK(handleKeyPress), NULL);
+    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
 
     
     /* Add a rectangle to the stage: */
@@ -324,9 +224,9 @@ int main(int argc, char *argv[]) {
 
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
-    g_signal_connect (rect, "touch-event", G_CALLBACK (handleTouchEvent), transitions);
+    g_signal_connect (rect, "touch-event", G_CALLBACK (eventHandlers.handleTouchEvents), transitions);
     // g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
-    g_signal_connect (rect, "button-press-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (rect, "button-press-event", G_CALLBACK (eventHandlers.handleMouseEvents), transitions);
     
     clutter_actor_add_child(stage, rect);
 
@@ -334,6 +234,19 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < 50; i+=1) {
         createBox(stage, 10+(i*10), 10+(i*10), 10,10, red_color);
     }
+
+
+    // Build Buttons:
+    // const int buttonHeight = height/5;
+    // const int buttonWidth = width/4;
+    // ClutterActor *button1, *button2, *button3, *button4;
+
+    button1 = clutter_actor_new();
+    clutter_actor_set_background_color (button1, &actor_color);
+    clutter_actor_set_size (button1, buttonWidth, buttonHeight);
+    clutter_actor_set_position (button1, height-(clutter_actor_get_height(button1)), 0);
+
+
     
     // Add a label to the stage:
     ClutterActor *label = clutter_text_new_with_text ("Sans 32px", "Sensatron 2014");
