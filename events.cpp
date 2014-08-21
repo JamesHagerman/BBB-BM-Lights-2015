@@ -17,7 +17,7 @@ gboolean Events::handleButton1 (ClutterActor *actor,
     ClutterEvent *event,
     gpointer      user_data) {
 
-    printf("Button 1 event!");
+    printf("Button 1 event!\n");
     return CLUTTER_EVENT_PROPAGATE;
 }
 
