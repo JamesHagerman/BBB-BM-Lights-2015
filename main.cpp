@@ -143,7 +143,7 @@ ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, Clutter
     return toRet;
 }
 
-static gboolean handleMouseClick (ClutterActor *actor,
+static gboolean handleKeyPress (ClutterActor *actor,
                    ClutterEvent *event,
                    gpointer      user_data) {
     guint keyval = clutter_event_get_key_symbol (event);
@@ -206,6 +206,20 @@ static gboolean handleMouseClick (ClutterActor *actor,
 
 }
 
+
+static gboolean handleTouchEvent (ClutterActor *actor,
+    ClutterEvent *event,
+    gpointer user_data) {
+
+    ClutterEventType eventType = clutter_event_type(event);
+
+    if (eventType == CLUTTER_TOUCH_END) {
+        printf("Touch end!");
+    }
+
+    return CLUTTER_EVENT_STOP;
+}
+
 static gboolean _pointer_motion_cb (ClutterActor *actor,
                    ClutterEvent *event,
                    gpointer      user_data) {
@@ -226,6 +240,8 @@ static gboolean _pointer_motion_cb (ClutterActor *actor,
   printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
            stage_x, stage_y,
            actor_x, actor_y);
+
+  clutter_actor_set_position (rect, stage_x, stage_y);
 
   return CLUTTER_EVENT_STOP;
 }
@@ -295,7 +311,7 @@ int main(int argc, char *argv[]) {
     // Set up a listener to close the app if the window is closed:
     g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
     // g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
-    g_signal_connect(stage, "key-press-event", G_CALLBACK(handleMouseClick), NULL);
+    g_signal_connect(stage, "key-press-event", G_CALLBACK(handleKeyPress), NULL);
 
     
     /* Add a rectangle to the stage: */
@@ -306,8 +322,10 @@ int main(int argc, char *argv[]) {
 
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
-    g_signal_connect (rect, "touch-event", G_CALLBACK (_pointer_motion_cb), transitions);
-    g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (rect, "touch-event", G_CALLBACK (handleTouchEvent), transitions);
+    // g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (rect, "button-press-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    
     clutter_actor_add_child(stage, rect);
 
     // Create a bunch of yellow boxes on the screen:
@@ -317,7 +335,7 @@ int main(int argc, char *argv[]) {
     
     // Add a label to the stage:
     ClutterActor *label = clutter_text_new_with_text ("Sans 32px", "Sensatron 2014");
-    clutter_actor_set_position(label, mid_x, mid_y); 
+    clutter_actor_set_position(label, mid_x-(clutter_actor_get_width(label)/2), 0); 
     clutter_actor_add_child(stage, label);
 
     ClutterTimeline *timeline = clutter_timeline_new(120);
