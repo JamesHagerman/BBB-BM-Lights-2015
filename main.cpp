@@ -248,6 +248,12 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_position (button1, 0, height-buttonHeight);
     clutter_actor_add_child(stage, button1);
 
+    clutter_actor_add_action (button1, clutter_tap_action_new ());
+    clutter_actor_set_reactive (button1, TRUE);
+    g_signal_connect (button1, "tap", G_CALLBACK (eventHandlers.handleTapEvents), NULL);
+
+
+
     button2 = clutter_actor_new();
     ClutterColor button2Color = { 232, 217, 12, 0xFF };
     clutter_actor_set_background_color (button2, &button2Color);

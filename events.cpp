@@ -13,6 +13,14 @@ Events::~Events() {
 
 }
 
+gboolean Events::handleTapEvents (ClutterActor *actor,
+    ClutterEvent *event,
+    gpointer      user_data) {
+
+    printf("Tap event!");
+    return CLUTTER_EVENT_PROPAGATE;
+}
+
 gboolean Events::handleKeyPresses (ClutterActor *actor,
     ClutterEvent *event,
     gpointer      user_data) {
