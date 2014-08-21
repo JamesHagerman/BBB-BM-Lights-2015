@@ -96,6 +96,10 @@ gboolean Events::handleTouchEvents (ClutterActor *actor,
 gboolean Events::handleMouseEvents (ClutterActor *actor,
                    ClutterEvent *event,
                    gpointer      user_data) {
+
+
+    ClutterActor *rect_actor = CLUTTER_ACTOR (user_data);
+
   /* get the coordinates where the pointer crossed into the actor */
   gfloat stage_x, stage_y;
   clutter_event_get_coords (event, &stage_x, &stage_y);
@@ -114,7 +118,7 @@ gboolean Events::handleMouseEvents (ClutterActor *actor,
            stage_x, stage_y,
            actor_x, actor_y);
 
-  clutter_actor_set_position (rect, stage_x, stage_y);
+  clutter_actor_set_position (rect_actor, stage_x, stage_y);
 
   return CLUTTER_EVENT_STOP;
 }
