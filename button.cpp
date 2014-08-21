@@ -6,7 +6,7 @@
 #include <glib/gprintf.h>
 
 Button::Button(ClutterActor *stage, int width, int height, int x, int y, ClutterColor upColor) {
-	printf("Building events class\n");
+    printf("Building events class\n");
 
     buttonActor = clutter_actor_new();
     clutter_actor_set_background_color (buttonActor, &upColor);
@@ -26,15 +26,7 @@ Button::Button(ClutterActor *stage, int width, int height, int x, int y, Clutter
     data->upColor = upColor;
     data->downColor = downColor;
 
-    // struct buttonData *p;
-    // p = g_new0 (buttonData, 1);
-    // p->actor = buttonActor;
-
-
-    // struct buttonData data;
-    // struct my_struct *data = malloc(sizeof(*data));
-    // data->actor = buttonActor;
-
+    // Wire up the callbacks:
     g_signal_connect(buttonActor, "touch-event", G_CALLBACK (handleEvents), data);
     g_signal_connect(buttonActor, "button-press-event", G_CALLBACK (handleEvents), data);
     g_signal_connect(buttonActor, "button-release-event", G_CALLBACK (Button::handleEvents), data);
@@ -94,50 +86,3 @@ gboolean Button::handleEvents (ClutterActor *actor,
     
     return CLUTTER_EVENT_PROPAGATE;
 }
-
-
-
-// gboolean Events::handleTouchEvents (ClutterActor *actor,
-//     ClutterEvent *event,
-//     gpointer user_data) {
-
-//     ClutterEventType eventType = clutter_event_type(event);
-
-//     if (eventType == CLUTTER_TOUCH_END) {
-//         printf("Touch end!\n");
-//     } else {
-//         printf("Some other touch event %i\n", eventType);
-//     }
-
-//     return CLUTTER_EVENT_STOP;
-// }
-
-// gboolean Events::handleMouseEvents (ClutterActor *actor,
-//     ClutterEvent *event,
-//     gpointer      user_data) {
-
-
-//     ClutterActor *rect_actor = CLUTTER_ACTOR (user_data);
-
-//     /* get the coordinates where the pointer crossed into the actor */
-//     gfloat stage_x, stage_y;
-//     clutter_event_get_coords (event, &stage_x, &stage_y);
-
-//     /*
-//     * as the coordinates are relative to the stage, rather than
-//     * the actor which emitted the signal, it can be useful to
-//     * transform them to actor-relative coordinates
-//     */
-//     gfloat actor_x, actor_y;
-//     clutter_actor_transform_stage_point (actor,
-//                                        stage_x, stage_y,
-//                                        &actor_x, &actor_y);
-
-//     printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
-//            stage_x, stage_y,
-//            actor_x, actor_y);
-
-//     clutter_actor_set_position (rect_actor, stage_x, stage_y);
-
-//     return CLUTTER_EVENT_STOP;
-// }

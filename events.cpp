@@ -6,54 +6,11 @@
 #include <glib/gprintf.h>
 
 Events::Events() {
-	printf("Building events class\n");
+    printf("Building events class\n");
 }
 
 Events::~Events() {
 
-}
-
-gboolean Events::handleButton1 (ClutterActor *actor,
-    ClutterEvent *event,
-    gpointer      user_data) {
-
-    // First, we need to figure out if this was a touch or a click event:
-    ClutterEventType eventType = clutter_event_type(event);
-
-    // Then we need to copy the actor itself:
-    ClutterActor *button1 = CLUTTER_ACTOR (user_data);
-
-    // We'll need a place to store the color of this button:
-    // ClutterColor button1Color;
-    // clutter_actor_get_background_color(button1, &button1Color);
-    // ClutterColor downColor = { 0, 0, 0, 128 };
-
-    printf("Button 1 event: ");
-    if (eventType == CLUTTER_TOUCH_BEGIN) {
-        printf("Touch Begin...\n");
-    } else if (eventType == CLUTTER_TOUCH_END) {
-        printf("Touch End...\n");
-    } else if (eventType == CLUTTER_BUTTON_PRESS) {
-        printf("Mouse Down...\n");
-
-        // clutter_actor_set_background_color (button1, &downColor);
-
-        clutter_actor_set_rotation_angle(button1, CLUTTER_Z_AXIS, -15.0);
-    } else if (eventType == CLUTTER_BUTTON_RELEASE) {
-        printf("Mouse Up...\n");
-        // clutter_actor_set_background_color (button1, &button1Color);
-
-        clutter_actor_set_rotation_angle(button1, CLUTTER_Z_AXIS, 0.0);
-    } else if (eventType == CLUTTER_LEAVE) {
-        printf("Leave event......\n");
-    } else {
-        printf("Some other event %i\n", eventType);
-    }
-
-    // And now we need to figure out how to display that we've captured the event...
-
-    
-    return CLUTTER_EVENT_PROPAGATE;
 }
 
 gboolean Events::handleKeyPresses (ClutterActor *actor,

@@ -1,9 +1,9 @@
 MACHINE= $(shell uname -s)
 
 ifeq ($(MACHINE),Darwin)
-	CROSSCOMPILER = 
+    CROSSCOMPILER = 
 else
-	CROSSCOMPILER = arm-angstrom-linux-gnueabi-
+    CROSSCOMPILER = arm-angstrom-linux-gnueabi-
 endif
 
 CXX = $(CROSSCOMPILER)g++
@@ -12,15 +12,15 @@ LDFLAGS = `pkg-config clutter-1.0 --libs`
 IFLAGS = `pkg-config clutter-1.0 --cflags`
 
 ifeq ($(MACHINE),Darwin)
-	LDFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config clutter-1.0 --libs`
-	IFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config clutter-1.0 --cflags`
-	LDFLAGS += -lftd2xx -lp9813
-	CFLAGS += -fomit-frame-pointer
+    LDFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config clutter-1.0 --libs`
+    IFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config clutter-1.0 --cflags`
+    LDFLAGS += -lftd2xx -lp9813
+    CFLAGS += -fomit-frame-pointer
 
 endif
 ifeq ($(MACHINE),Linux)
-	LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7 -l/usr/local/lib/libp9813.a
-	CFLAGS += -O3 -fomit-frame-pointer
+    LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7 -l/usr/local/lib/libp9813.a
+    CFLAGS += -O3 -fomit-frame-pointer
 endif
 
 
@@ -30,14 +30,14 @@ OBJS = main.o cat.o TCLControl.o events.o button.o
 all: ${OUTPUT}
 
 ${OUTPUT}: $(OBJS)
-	$(CXX) $(OBJS) $(LDFLAGS) -o ${OUTPUT}
+    $(CXX) $(OBJS) $(LDFLAGS) -o ${OUTPUT}
 
 %.o: %.cpp
-	$(CXX) -c $(CFLAGS) $(IFLAGS) -o $@ $<
+    $(CXX) -c $(CFLAGS) $(IFLAGS) -o $@ $<
 
 
 clean:
-	rm -rf *.o *.a ${OUTPUT}
+    rm -rf *.o *.a ${OUTPUT}
 
 # The below make scripts will load or unload the original FTDI drivers 
 # So that the PaintYourDragon/D2XX drivers can be used for LED output.
@@ -52,17 +52,17 @@ ifeq ($(shell uname -s),Darwin)
   DRIVER    = com.FTDI.driver.FTDIUSBSerialDriver
   KEXTFLAGS = -b
   unload:
-	sudo kextunload $(KEXTFLAGS) $(DRIVER)
+    sudo kextunload $(KEXTFLAGS) $(DRIVER)
   load:
-	sudo kextload $(KEXTFLAGS) $(DRIVER)
+    sudo kextload $(KEXTFLAGS) $(DRIVER)
 else
 ifeq ($(shell uname -s),Linux)
 # Linux driver stuff
   unload:
-	sudo modprobe -r ftdi_sio
-	sudo modprobe -r usbserial
+    sudo modprobe -r ftdi_sio
+    sudo modprobe -r usbserial
   load:
-	sudo modprobe ftdi_sio
-	sudo modprobe usbserial
+    sudo modprobe ftdi_sio
+    sudo modprobe usbserial
 endif
 endif

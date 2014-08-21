@@ -18,6 +18,9 @@
    cd /Users/jhagerman/dev/processing/other peopels stuff/p9813/processing
  original 13"
    cd /Volumes/Keket/Users/jamis/dev/Circuits_MPUs/FTDI\ Hacks/TCL\ Lights/p9813/processing
+ Beaglebone Black:
+   Do Nothing.
+
  for arduino: make load
  for bitbanging: make unload
  
@@ -86,12 +89,9 @@ time_t        t,prev = 0;
 TCLControl tcl;
 Events eventHandlers;
 
-
-
 // Button actors:
 const int buttonHeight = height/5;
 const int buttonWidth = width/5;
-ClutterActor *button1, *button2, *button3, *button4, *button5;
 
 
 // using namespace std;
@@ -159,48 +159,6 @@ int main(int argc, char *argv[]) {
     int ret;
     ret = clutter_init(&argc, &argv);
 
-    // // Check clutter input devices:
-    // ClutterDeviceManager * deviceManager = clutter_device_manager_get_default();
-    // ClutterInputDevice *device;
-    // device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_TOUCHPAD_DEVICE);
-
-    // if (device == NULL) {
-    //     printf("Oops. No touchpad found!\n");
-    //     device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_TOUCHSCREEN_DEVICE);
-    // }
-    // if (device == NULL) {
-    //     printf("Oops. No touchscreen found!\n");
-    //     device = clutter_device_manager_get_core_device (deviceManager, CLUTTER_POINTER_DEVICE);
-    // }
-    // g_printf("Device name: %s\n", clutter_input_device_get_device_name(device));
-    // g_printf(" Enabled: %s\n", clutter_input_device_get_enabled(device) ? "true":"false");
-
-    // GSList * deviceList = clutter_device_manager_list_devices(deviceManager);
-    // int deviceCount = g_slist_length(deviceList);
-    // printf("Input device count: %i\n", deviceCount);
-
-
-    // // printf("deviceList 0: ", deviceList[])
-    // for (i = 0; i < deviceCount; i+=1) {
-    //     _ClutterInputDevice = g_slist_nth_data(deviceList, 0);
-    // //     gboolean enabled = clutter_input_device_get_enabled(deviceList);
-    // //     printf("Input device: %i\n", enabled);
-
-    // }
-
-
-    // How far off was I???
-    // translate_native_event_to_clutter (native_event, &c_event);
-    // ClutterDeviceManager *manager;
-    // ClutterInputDevice *device;
-    // manager = clutter_device_manager_get_default ();
-    // device = clutter_device_manager_get_core_device (manager, CLUTTER_POINTER_DEVICE);
-
-
-
-    // exit(1);
-
-
     // Build some colors:
     ClutterColor stage_color = { 0, 0, 0, 0xFF };
     ClutterColor text_color = {255, 255, 255, 255};
@@ -214,9 +172,8 @@ int main(int argc, char *argv[]) {
 
     // Set up a listener to close the app if the window is closed:
     g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
-    // g_signal_connect (stage, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    // Set up the keyboard listener for the arrow, enter, and esc keys:
     g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
-
     
     /* Add a rectangle to the stage: */
     rect = clutter_actor_new();
