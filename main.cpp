@@ -214,7 +214,9 @@ static gboolean handleTouchEvent (ClutterActor *actor,
     ClutterEventType eventType = clutter_event_type(event);
 
     if (eventType == CLUTTER_TOUCH_END) {
-        printf("Touch end!");
+        printf("Touch end!\n");
+    } else {
+        printf("Some other touch event %i\n", eventType);
     }
 
     return CLUTTER_EVENT_STOP;
