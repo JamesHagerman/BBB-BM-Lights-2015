@@ -68,7 +68,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
         clutter_actor_set_background_color (button, &downColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
-    } else if (eventType == CLUTTER_TOUCH_END) {
+    } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL) {
         printf("Touch End...\n");
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
