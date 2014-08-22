@@ -33,7 +33,7 @@ int rowstride;
 // We need an error object to store errors:
 GError *error;
 
-int osd_scale = 7;
+int osd_scale = 15;
 
 // Size of onscreen display:
 // Define the sizes of the image that shows the lights:
@@ -51,23 +51,22 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 
 
     // Update the spinning rectangle:
-    rotation += 0.3;
+    rotation += 0.2;
     clutter_actor_set_rotation_angle(rotatingActor, CLUTTER_Z_AXIS, rotation * 5);
 
 
     // Update the actual lights with some new color (Gotta figure out how to build animations out...):
     cutoff += 1;
-    if (cutoff > 50) {
+    if (cutoff > 600) {
         cutoff = 0;
     }
 
-    for(int i=0; i<tcl->totalPixels; i++) {
+    for(int i=0; i < tcl->totalPixels; i++) {
         if ( i > cutoff) {
             tcl->pixelBuf[i] = TCrgb(0,255,0);
         } else {
-            tcl->pixelBuf[i] = TCrgb(255,255,255);
+            tcl->pixelBuf[i] = TCrgb(255,0,255);
         }
-        
     }
 
     // Send the updated buffer to the strands
@@ -183,9 +182,10 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     #define THUMBNAIL_SIZE 30
     clutter_actor_set_x_expand(lightDisplay, TRUE);
     clutter_actor_set_y_expand(lightDisplay, TRUE);
-    clutter_actor_set_position(lightDisplay, 0, height-buttonHeight-20); 
+    clutter_actor_set_position(lightDisplay, 0, 50); 
     clutter_actor_set_size(lightDisplay, WIDTH * osd_scale, HEIGHT * osd_scale);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
+    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
     clutter_actor_set_reactive(lightDisplay, TRUE); // Allow for UI events on this crazy thing!
 
     clutter_actor_set_content(lightDisplay, colors);
