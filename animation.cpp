@@ -25,6 +25,7 @@
 typedef struct  {
     ClutterActor *rotatingActor;
     TCLControl *tcl;
+    int *animationNumber;
 } AnimationData;
 
 gdouble rotation = 0;
@@ -442,9 +443,6 @@ void animation1(TCLControl *tcl) {
 
 
 
-int currentAnimation = 2;
-
-
 void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data) {
 
     // Rebuild the struct from the pointer we handed in:
@@ -453,6 +451,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 
     ClutterActor *rotatingActor = CLUTTER_ACTOR (data->rotatingActor);
     TCLControl *tcl = data->tcl;
+    int *animation_number = data->animationNumber;
 
 
     // Update the spinning rectangle:
@@ -474,7 +473,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     //     }
     // }
 
-    switch(currentAnimation){
+    switch(*animation_number){
         case 1  :
            animation1(tcl);
            break;
@@ -557,6 +556,8 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     // }
 }
 
+
+
 Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl){ //TCLControl tcl
     printf("Building animation tools...\n");
 
@@ -629,6 +630,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     data = g_slice_new (AnimationData); // reserve memory for it...
     data->rotatingActor = rect;
     data->tcl = tcl;
+    data->animationNumber = &currentAnimation;
 
     timeline = clutter_timeline_new(120);
     g_signal_connect(timeline, "new-frame", G_CALLBACK(handleNewFrame), data);
@@ -641,9 +643,19 @@ Animation::~Animation(){
     g_object_unref(pixbuf);
 }
 
+Animation::Animation() {
+}
 
 
 
+void Animation::switchAnimation(int animationNumber) {
+    printf("Changing animation\n");
+    currentAnimation = animationNumber;
+}
 
+int Animation::getCurrentAnimation() {
+    printf("Called! Current animation is: %i\n", currentAnimation);
+    return currentAnimation;
+}
 
 

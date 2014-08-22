@@ -5,10 +5,13 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 
-Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor) {
+#include "configurations.h"
+
+Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations) {
     printf("Building events class\n");
 
     uniqueId = id;
+    animation = mainAnimations;
 
     buttonActor = clutter_actor_new();
     clutter_actor_set_background_color (buttonActor, &upColor);
@@ -28,6 +31,7 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
     data->upColor = upColor;
     data->downColor = downColor;
     data->uniqueId = id;
+    data->animationObject = animation;
 
     // Wire up the callbacks:
     g_signal_connect(buttonActor, "touch-event", G_CALLBACK (handleEvents), data);
@@ -37,6 +41,37 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
 
 Button::~Button() {
 
+}
+
+void changeAnimation(int id, Animation *animation) {
+    // We are getting here....
+    // animation->switchAnimation(3);
+        
+    switch(id){
+        case 1  :
+           animation->switchAnimation(1);
+           break;
+        case 2  :
+           animation->switchAnimation(2);
+           break;
+        case 3  :
+           animation->switchAnimation(3);
+           break;
+        case 4  :
+           animation->switchAnimation(4);
+           break;
+        case 5  :
+           animation->switchAnimation(5);
+           break;
+        case 6  :
+           animation->switchAnimation(6);
+           break;
+      
+        default : 
+           animation->switchAnimation(6);
+    }
+
+    // animation->getCurrentAnimation();
 }
 
 gboolean Button::handleEvents (ClutterActor *actor,
@@ -55,10 +90,11 @@ gboolean Button::handleEvents (ClutterActor *actor,
     ClutterColor upColor = data->upColor;
     ClutterColor downColor = data->downColor;
     int id = data->uniqueId;
+    Animation *animation = data->animationObject;
     // clutter_actor_get_background_color(button1, &button1Color);
     // ClutterColor downColor = { 0, 0, 0, 128 };
 
-    printf("Button event: ");
+    // printf("Button event: ");
     if (eventType == CLUTTER_TOUCH_BEGIN) {
         printf("Touch Begin...\n");
         clutter_actor_set_background_color (button, &downColor);
@@ -70,11 +106,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
 
         // On bluebutton presses...
-        if (id == 4) {
-            // sleep(3);
-            // clutter_main_quit();
-            // system("sync; shutdown -h now");
-        }
+        changeAnimation(id, animation);
 
     } else if (eventType == CLUTTER_BUTTON_PRESS) {
         printf("Mouse Down...\n");
@@ -86,11 +118,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
         // On bluebutton presses...
-        if (id == 4) {
-            // sleep(3);
-            // clutter_main_quit();
-            // system("sync; shutdown -h now");
-        }
+        changeAnimation(id, animation);
 
     } else if (eventType == CLUTTER_LEAVE) {
         printf("Leave event......\n");

@@ -13,10 +13,17 @@
 #include "p9813.h"
 #include "TCLControl.h"
 
+#ifndef TCL_ANIMATION
+#define TCL_ANIMATION
+
 class Animation {
     public:
+    	Animation();
         Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl); //TCLControl tcl
         ~Animation();
+        void switchAnimation(int animation_num);
+
+        int getCurrentAnimation();
 
         // Timeline object itself:
         ClutterTimeline *timeline;
@@ -26,7 +33,11 @@ class Animation {
 
         ClutterActor *rect;
 
+        int currentAnimation;
+
 };
+
+#endif
 
 
 
