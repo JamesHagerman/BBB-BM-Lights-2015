@@ -65,6 +65,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
         return CLUTTER_EVENT_STOP;
     } else if (65293 == keyval) {
         printf("Looks like the enter key...\n");
+        system("sync; shutdown -h now");
     } else if (65307 == keyval) {
         printf("esc pressed. Exiting...\n");
         exit(1);
