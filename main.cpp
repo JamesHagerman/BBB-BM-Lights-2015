@@ -210,15 +210,69 @@ int main(int argc, char *argv[]) {
     clutter_actor_add_child(stage, label);
 
     // Add a colored texture to the app:
+    //
+    // First, we need to load in some data:
+
+//First attempt:
+    // guchar *data =
+    // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(data);
+
+// Another attempt:
+    #define WIDTH 50
+    #define HEIGHT 12
+    // GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
+    // unsigned char* pixels = gdk_pixbuf_get_pixels(pixbuf);
+
+    // int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+
+    // int x = 0;
+    // for(; x < WIDTH; x++) {
+    //     int y = 0;
+    //     for(; y < HEIGHT; y++) {
+    //         unsigned char* pixel = 
+    //             &pixels[y * rowstride + x * 4];
+    //         //monochrome black
+    //         pixel[0] = 255;//red
+    //         pixel[1] = 0x0;//green
+    //         pixel[2] = 0x0;//blue
+    //         //but striped by transparency
+    //         // pixel[3] = get_transparency(x, y);//alpha
+    //     }
+    // }
+
+    // Set up an error object to store errors:
+    GError *error = NULL;
+
+    const char *img_path = "./wut.png";
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
     ClutterContent *colors = clutter_image_new();
-    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (filename, NULL);
-    clutter_image_set_data(CLUTTER_IMAGE(colors),
+    ClutterActor *lightDisplay = clutter_actor_new();
+
+    if (pixbuf != NULL) {
+        clutter_image_set_data(CLUTTER_IMAGE(colors),
                             gdk_pixbuf_get_pixels (pixbuf),
                             COGL_PIXEL_FORMAT_RGB_888,
                             gdk_pixbuf_get_width (pixbuf),
                             gdk_pixbuf_get_height (pixbuf),
                             gdk_pixbuf_get_rowstride (pixbuf),
                             &error);
+    }
+
+
+    #define THUMBNAIL_SIZE 30
+    clutter_actor_set_x_expand(lightDisplay, TRUE);
+    clutter_actor_set_y_expand(lightDisplay, TRUE);
+    clutter_actor_set_position(lightDisplay, mid_x, mid_y); 
+    clutter_actor_set_size(lightDisplay, 50, 12);
+    // clutter_actor_set_position(lightDisplay, col * THUMBNAIL_SIZE, row * THUMBNAIL_SIZE);
+    // clutter_actor_set_reactive(lightDisplay, TRUE);
+
+    clutter_actor_set_content(lightDisplay, colors);
+    g_object_unref(colors);
+    g_object_unref(pixbuf);
+
+    clutter_actor_add_child(stage, lightDisplay);
+    
 
 
 
