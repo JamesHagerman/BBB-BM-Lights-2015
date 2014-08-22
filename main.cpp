@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 
 
     // Add a label to the stage:
-    label = clutter_text_new_with_text ("Sans 18px", "System Live...");
+    label = clutter_text_new_with_text ("Sans 18px", "System Live... to halt system, press enter button below screen...");
     clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
     clutter_actor_set_position(label, 35, 13); 
     clutter_actor_add_child(stage, label);
