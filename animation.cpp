@@ -251,17 +251,35 @@ void animation3(TCLControl *tcl) {
 
 
 void animation1(TCLControl *tcl) {
-    cutoff += 1;
-    if (cutoff > 600) {
-        cutoff = 0;
+    int temp = getRandomColor();
+
+    int index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // // This next line grabs the address of single pixel out of the pixels char buffer
+            // // and points a char at it so that it's value can be set:
+            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
+
+            pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+            index += 1;
+        }
     }
 
-    for(int i=0; i < tcl->totalPixels; i++) {
-        
-        if ( i > cutoff) {
-            tcl->pixelBuf[i] = TCrgb(0,255,0);
-        } else {
-            tcl->pixelBuf[i] = TCrgb(255,0,255);
+    index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+            if (y>=1) {
+                tcl->pixelBuf[index] = pixelBackupBuf[index-1];
+            } else {
+                tcl->pixelBuf[index] = temp;
+            }
+
+            index += 1;
         }
     }
 }
@@ -317,7 +335,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     //     }
     // }
 
-    animation5(tcl);
+    animation1(tcl);
 
     // Send the updated buffer to the strands
     if (tcl->enabled) {
