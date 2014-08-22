@@ -15,7 +15,7 @@
 
 class Animation {
     public:
-        Animation(ClutterActor *rotatingActor, TCLControl *tcl); //TCLControl tcl
+        Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl); //TCLControl tcl
         ~Animation();
 
         // Timeline object itself:

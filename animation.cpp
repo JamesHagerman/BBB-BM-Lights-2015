@@ -13,6 +13,7 @@
 
 #include "p9813.h"
 #include "TCLControl.h"
+#include "configurations.h"
 
 
 typedef struct  {
@@ -111,73 +112,73 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     }
 }
 
-Animation::Animation(ClutterActor *rotatingActor, TCLControl *tcl){ //TCLControl tcl
+Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl){ //TCLControl tcl
     printf("Building animation tools...\n");
 
     rect = rotatingActor;
 
 
-    // // Add a colored texture to the app:
-    // //
-    // // First, we need some Actor to actually display the light colors:
-    // ClutterContent *colors = clutter_image_new();
-    // ClutterActor *lightDisplay = clutter_actor_new();
+    // Add a colored texture to the app:
+    //
+    // First, we need some Actor to actually display the light colors:
+    ClutterContent *colors = clutter_image_new();
+    ClutterActor *lightDisplay = clutter_actor_new();
 
-    // // Second we need an error object to store errors:
-    // GError *error = NULL;
+    // Second we need an error object to store errors:
+    GError *error = NULL;
 
-    // // Load image data from some other data source...:
-    // // guchar *data =
-    // // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(data);
+    // Load image data from some other data source...:
+    // guchar *data =
+    // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(data);
 
-    // // Load image data from a file:
-    // // const char *img_path = "./wut.png";
-    // // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
+    // Load image data from a file:
+    // const char *img_path = "./wut.png";
+    // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
     
 
-    // // Load image data from nothing. Build it manually.
-    // GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
-    // unsigned char* pixels = gdk_pixbuf_get_pixels(pixbuf);
+    // Load image data from nothing. Build it manually.
+    GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
+    unsigned char* pixels = gdk_pixbuf_get_pixels(pixbuf);
 
-    // int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+    int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 
-    // for(int x = 0; x < WIDTH; x++) {
-    //     for(int y = 0; y < HEIGHT; y++) {
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
 
-    //         // This next line grabs the address of single pixel out of the pixels char buffer
-    //         // and points a char at it so that it's value can be set:
-    //         unsigned char* pixel =  &pixels[y * rowstride + x * 3];
+            // This next line grabs the address of single pixel out of the pixels char buffer
+            // and points a char at it so that it's value can be set:
+            unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-    //         pixel[0] = 255;//red
-    //         pixel[1] = 0x0;//green
-    //         pixel[2] = 0x0;//blue
-    //     }
-    // }
+            pixel[0] = 255;//red
+            pixel[1] = 0x0;//green
+            pixel[2] = 0x0;//blue
+        }
+    }
 
-    // if (pixbuf != NULL) {
-    //     clutter_image_set_data(CLUTTER_IMAGE(colors),
-    //                         gdk_pixbuf_get_pixels (pixbuf),
-    //                         COGL_PIXEL_FORMAT_RGB_888,
-    //                         gdk_pixbuf_get_width (pixbuf),
-    //                         gdk_pixbuf_get_height (pixbuf),
-    //                         gdk_pixbuf_get_rowstride (pixbuf),
-    //                         &error);
-    // }
+    if (pixbuf != NULL) {
+        clutter_image_set_data(CLUTTER_IMAGE(colors),
+                            gdk_pixbuf_get_pixels (pixbuf),
+                            COGL_PIXEL_FORMAT_RGB_888,
+                            gdk_pixbuf_get_width (pixbuf),
+                            gdk_pixbuf_get_height (pixbuf),
+                            gdk_pixbuf_get_rowstride (pixbuf),
+                            &error);
+    }
 
 
-    // #define THUMBNAIL_SIZE 30
-    // clutter_actor_set_x_expand(lightDisplay, TRUE);
-    // clutter_actor_set_y_expand(lightDisplay, TRUE);
-    // clutter_actor_set_position(lightDisplay, mid_x, mid_y); 
-    // clutter_actor_set_size(lightDisplay, WIDTH*4, HEIGHT*4);
-    // // clutter_actor_set_position(lightDisplay, col * THUMBNAIL_SIZE, row * THUMBNAIL_SIZE);
-    // // clutter_actor_set_reactive(lightDisplay, TRUE);
+    #define THUMBNAIL_SIZE 30
+    clutter_actor_set_x_expand(lightDisplay, TRUE);
+    clutter_actor_set_y_expand(lightDisplay, TRUE);
+    clutter_actor_set_position(lightDisplay, mid_x, mid_y); 
+    clutter_actor_set_size(lightDisplay, WIDTH*4, HEIGHT*4);
+    // clutter_actor_set_position(lightDisplay, col * THUMBNAIL_SIZE, row * THUMBNAIL_SIZE);
+    // clutter_actor_set_reactive(lightDisplay, TRUE);
 
-    // clutter_actor_set_content(lightDisplay, colors);
-    // // g_object_unref(colors);
-    // // g_object_unref(pixbuf);
+    clutter_actor_set_content(lightDisplay, colors);
+    // g_object_unref(colors);
+    // g_object_unref(pixbuf);
 
-    // clutter_actor_add_child(stage, lightDisplay);
+    clutter_actor_add_child(stage, lightDisplay);
 
 
 

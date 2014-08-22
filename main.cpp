@@ -70,19 +70,18 @@
 #include "button.h"
 #include "animation.h"
 
+#include "configurations.h"
+
 ClutterActor *rect;
 ClutterState *transitions;
 
 
-const int width = 800;
-const int height = 480;
-const int mid_x = width/2;
-const int mid_y = height/2;
 
-double x = 0.0;
-double s1,s2,s3;
-unsigned char r,g,b;
-time_t        t,prev = 0;
+
+// double x = 0.0;
+// double s1,s2,s3;
+// unsigned char r,g,b;
+// time_t        t,prev = 0;
 
 TCLControl tcl;
 Events eventHandlers;
@@ -165,7 +164,7 @@ int main(int argc, char *argv[]) {
 
 
     // Start animation loop:
-    Animation animation = Animation(rect, &tcl);
+    Animation animation = Animation(stage, rect, &tcl);
     
 
     // Actually show the stage and run the app:
