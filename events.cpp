@@ -57,6 +57,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
             printf ("Down and shift pressed\n");
         else
             printf ("Down pressed\n");
+            exit(1);
 
         /* The event was handled, and the emission should stop */
         return CLUTTER_EVENT_STOP;
