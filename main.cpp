@@ -61,6 +61,7 @@
 #include <clutter/clutter.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "p9813.h"
 
@@ -208,13 +209,27 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_position(label, mid_x-(clutter_actor_get_width(label)/2), height-clutter_actor_get_height(label)-buttonHeight); 
     clutter_actor_add_child(stage, label);
 
+    // Add a colored texture to the app:
+    ClutterContent *colors = clutter_image_new();
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (filename, NULL);
+    clutter_image_set_data(CLUTTER_IMAGE(colors),
+                            gdk_pixbuf_get_pixels (pixbuf),
+                            COGL_PIXEL_FORMAT_RGB_888,
+                            gdk_pixbuf_get_width (pixbuf),
+                            gdk_pixbuf_get_height (pixbuf),
+                            gdk_pixbuf_get_rowstride (pixbuf),
+                            &error);
+
+
+
+    // Start animation loop:
     ClutterTimeline *timeline = clutter_timeline_new(120);
     g_signal_connect(timeline, "new-frame", G_CALLBACK(on_timeline_new_frame), NULL);
     clutter_timeline_set_repeat_count(timeline, -1);
     clutter_timeline_start(timeline);
 
+    // Actually show the stage and run the app:
     clutter_actor_show(stage);
-
     clutter_main();
 
     return EXIT_SUCCESS;

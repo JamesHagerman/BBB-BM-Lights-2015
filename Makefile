@@ -12,8 +12,8 @@ LDFLAGS = `pkg-config clutter-1.0 --libs`
 IFLAGS = `pkg-config clutter-1.0 --cflags`
 
 ifeq ($(MACHINE),Darwin)
-	LDFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config clutter-1.0 --libs`
-	IFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config clutter-1.0 --cflags`
+	LDFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config gdk-pixbuf-2.0 clutter-1.0 --libs`
+	IFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config gdk-pixbuf-2.0 clutter-1.0 --cflags`
 	LDFLAGS += -lftd2xx -lp9813
 	CFLAGS += -fomit-frame-pointer
 
