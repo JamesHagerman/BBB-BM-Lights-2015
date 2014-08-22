@@ -25,7 +25,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = main.o TCLControl.o events.o button.o onscreen.o animation.o
+OBJS = main.o TCLControl.o events.o button.o animation.o
 
 all: ${OUTPUT}
 

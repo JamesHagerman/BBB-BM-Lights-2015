@@ -24,6 +24,7 @@
 
 typedef struct  {
     ClutterActor *rotatingActor;
+    ClutterActor *infoDisplay;
     TCLControl *tcl;
     int *animationNumber;
 } AnimationData;
@@ -235,6 +236,19 @@ int popHSVRainbow(int h_rate) {
 int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
 int memSize = totalPixels * sizeof(TCpixel);
 TCpixel *pixelBackupBuf = (TCpixel *)malloc(memSize);
+
+void animation10(TCLControl *tcl) {
+
+}
+void animation9(TCLControl *tcl) {
+
+}
+void animation8(TCLControl *tcl) {
+
+}
+void animation7(TCLControl *tcl) {
+
+}
 
 void animation6(TCLControl *tcl) {
 
@@ -502,6 +516,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     data = (AnimationData *)user_data;
 
     ClutterActor *rotatingActor = CLUTTER_ACTOR (data->rotatingActor);
+    // ClutterActor *infoDisplay = CLUTTER_ACTOR (data->infoDisplay);
     TCLControl *tcl = data->tcl;
     int *animation_number = data->animationNumber;
 
@@ -544,7 +559,19 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
         case 6  :
            animation6(tcl);
            break;
-      
+        case 7  :
+           animation7(tcl);
+           break;
+        case 8  :
+           animation8(tcl);
+           break;
+        case 9  :
+           animation9(tcl);
+           break;
+        case 10  :
+           animation10(tcl);
+           break;
+
         default : 
            animation6(tcl);
     }
@@ -610,7 +637,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 
 
 
-Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl){ //TCLControl tcl
+Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl, ClutterActor *infoDisplay){ //TCLControl tcl
     printf("Building animation tools...\n");
 
     rect = rotatingActor;
@@ -699,6 +726,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     AnimationData *data;
     data = g_slice_new (AnimationData); // reserve memory for it...
     data->rotatingActor = rect;
+    data->infoDisplay = infoDisplay;
     data->tcl = tcl;
     data->animationNumber = &currentAnimation;
 
@@ -716,9 +744,10 @@ Animation::~Animation(){
 Animation::Animation() {
 }
 
-void Animation::switchAnimation(int animationNumber) {
+void Animation::switchAnimation(int animationNumber, ClutterActor *infoDisplay) {
     printf("Changing to animation: %i\n", animationNumber);
     currentAnimation = animationNumber;
+    clutter_text_set_text(CLUTTER_TEXT(infoDisplay), g_strdup_printf("Current sensor input: %i",currentAnimation));
 }
 
 int Animation::getCurrentAnimation() {

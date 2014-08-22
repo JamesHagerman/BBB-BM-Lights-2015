@@ -7,7 +7,7 @@
 
 #include "configurations.h"
 
-Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations) {
+Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations, ClutterActor *infoDisplay) {
     printf("Building events class\n");
 
     uniqueId = id;
@@ -25,7 +25,7 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
     ButtonData *data;
     data = g_slice_new (ButtonData); // reserve memory for it...
     data->actor = buttonActor; // Place the button actor itself inside the struct
-
+    data->infoDisplay = infoDisplay;
     // Build a "down" color (hard coded for now...)
     ClutterColor downColor = { 255, 0, 47, 0xFF };
     data->upColor = upColor;
@@ -43,32 +43,42 @@ Button::~Button() {
 
 }
 
-void changeAnimation(int id, Animation *animation) {
-    // We are getting here....
-    // animation->switchAnimation(3);
-        
+void changeAnimation(int id, Animation *animation, ClutterActor *infoDisplay) {
     switch(id){
         case 0  :
-           animation->switchAnimation(1);
+           animation->switchAnimation(1, infoDisplay);
            break;
         case 1  :
-           animation->switchAnimation(2);
+           animation->switchAnimation(2, infoDisplay);
            break;
         case 2  :
-           animation->switchAnimation(3);
+           animation->switchAnimation(3, infoDisplay);
            break;
         case 3  :
-           animation->switchAnimation(4);
+           animation->switchAnimation(4, infoDisplay);
            break;
         case 4  :
-           animation->switchAnimation(5);
+           animation->switchAnimation(5, infoDisplay);
            break;
+
         case 5  :
-           animation->switchAnimation(6);
+           animation->switchAnimation(6, infoDisplay);
+           break;
+        case 6  :
+           animation->switchAnimation(7, infoDisplay);
+           break;
+        case 7  :
+           animation->switchAnimation(8, infoDisplay);
+           break;
+        case 8  :
+           animation->switchAnimation(9, infoDisplay);
+           break;
+        case 9  :
+           animation->switchAnimation(10, infoDisplay);
            break;
       
         default : 
-           animation->switchAnimation(6);
+           animation->switchAnimation(6, infoDisplay);
     }
 
     // animation->getCurrentAnimation();
@@ -87,6 +97,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
 
     // And yank the values we need out of the rebuilt struct:
     ClutterActor *button = CLUTTER_ACTOR (data->actor);
+    ClutterActor *infoDisplay = CLUTTER_ACTOR (data->infoDisplay);
     ClutterColor upColor = data->upColor;
     ClutterColor downColor = data->downColor;
     int id = data->uniqueId;
@@ -106,7 +117,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
 
         // On bluebutton presses...
-        changeAnimation(id, animation);
+        changeAnimation(id, animation, infoDisplay);
 
     } else if (eventType == CLUTTER_BUTTON_PRESS) {
         // printf("Mouse Down...\n");
@@ -118,7 +129,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
         // On bluebutton presses...
-        changeAnimation(id, animation);
+        changeAnimation(id, animation, infoDisplay);
 
     } else if (eventType == CLUTTER_LEAVE) {
         // printf("Leave event......\n");

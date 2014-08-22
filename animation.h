@@ -19,10 +19,10 @@
 class Animation {
     public:
     	Animation();
-        Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl); //TCLControl tcl
+        Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl, ClutterActor *infoDisplay); //TCLControl tcl
         ~Animation();
 
-        void switchAnimation(int animation_num);
+        void switchAnimation(int animation_num, ClutterActor *infoDisplay);
         int getCurrentAnimation();
 
         // Timeline object itself:
