@@ -128,6 +128,8 @@ int main(int argc, char *argv[]) {
     clutter_actor_add_child(stage, label);
 
     label2 = clutter_text_new_with_text ("Sans 14px", "To halt system, press enter button below screen and wait for the orange LED to stop blinking before removing power.");
+    clutter_text_set_line_wrap(CLUTTER_TEXT(label2), true);
+    clutter_actor_set_size(label2, width, 40);
     clutter_text_set_color(CLUTTER_TEXT(label2), &text_color);
     clutter_actor_set_position(label2, 0, height-buttonHeight-clutter_actor_get_height(label2)*2); 
     clutter_actor_add_child(stage, label2);
