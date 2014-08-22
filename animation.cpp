@@ -33,14 +33,15 @@ int rowstride;
 // We need an error object to store errors:
 GError *error;
 
+int osd_scale = 7;
+
 // Size of onscreen display:
 // Define the sizes of the image that shows the lights:
-#define WIDTH 49
-#define HEIGHT 12
+#define WIDTH 12
+#define HEIGHT 50
 
 void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data) {
 
-    // Update the spinning rectangle:
     // Rebuild the struct from the pointer we handed in:
     AnimationData *data;
     data = (AnimationData *)user_data;
@@ -49,15 +50,36 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     TCLControl *tcl = data->tcl;
 
 
+    // Update the spinning rectangle:
     rotation += 0.3;
-    // printf("Update... %f\n", rotation);
-
     clutter_actor_set_rotation_angle(rotatingActor, CLUTTER_Z_AXIS, rotation * 5);
+
+
+    // Update the actual lights with some new color (Gotta figure out how to build animations out...):
+    cutoff += 1;
+    if (cutoff > 50) {
+        cutoff = 0;
+    }
+
+    for(int i=0; i<tcl->totalPixels; i++) {
+        if ( i > cutoff) {
+            tcl->pixelBuf[i] = TCrgb(0,255,0);
+        } else {
+            tcl->pixelBuf[i] = TCrgb(255,255,255);
+        }
+        
+    }
+
+    // Send the updated buffer to the strands
+    if (tcl->enabled) {
+        tcl->Update();
+    }
 
 
     // Update the on screen color display:
     // Draw onscreen color map display:
     // Try changing the color right after setting it to red:
+    int index = 0;
     for(int x = 0; x < WIDTH; x++) {
         for(int y = 0; y < HEIGHT; y++) {
 
@@ -65,9 +87,12 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
             // and points a char at it so that it's value can be set:
             unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-            pixel[0] = 0x0;//red
-            pixel[1] = 255;//green
-            pixel[2] = 0x0;//blue
+            TCpixel thisPixel = tcl->pixelBuf[index];
+            // #define TCrgb(R,G,B) (((R) << 16) | ((G) << 8) | (B))
+            pixel[0] = ((thisPixel) >> 16) & 0xff;//red
+            pixel[1] = ((thisPixel) >> 8) & 0xff;//green
+            pixel[2] = (thisPixel) & 0xff;//blue
+            index += 1;
         }
     }
     if (pixbuf != NULL) {
@@ -83,7 +108,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     clutter_actor_set_content(lightDisplay, colors);
 
 
-
+    // Old light update:
     // Calculate the new values for the pixelBuf:
     // Update the lights:
     // x += (double)tcl.pixelsPerStrand / 20000.0;
@@ -100,32 +125,6 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     //     s2 -= 0.231;
     //     s3 += 0.428;
     // }
-
-    
-
-
-
-    // Update the actual lights:
-    cutoff += 1;
-
-    if (cutoff > 50) {
-        cutoff = 0;
-    }
-
-    for(int i=0; i<tcl->totalPixels; i++) {
-        if ( i > cutoff) {
-            tcl->pixelBuf[i] = TCrgb(0,255,0);
-        } else {
-            tcl->pixelBuf[i] = TCrgb(255,255,255);
-        }
-        
-    }
-
-
-    // Send the updated buffer to the strands
-    if (tcl->enabled) {
-        tcl->Update();
-    }
 }
 
 Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl){ //TCLControl tcl
@@ -184,8 +183,9 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     #define THUMBNAIL_SIZE 30
     clutter_actor_set_x_expand(lightDisplay, TRUE);
     clutter_actor_set_y_expand(lightDisplay, TRUE);
-    clutter_actor_set_position(lightDisplay, mid_x, mid_y); 
-    clutter_actor_set_size(lightDisplay, WIDTH*4, HEIGHT*4);
+    clutter_actor_set_position(lightDisplay, 0, height-buttonHeight-20); 
+    clutter_actor_set_size(lightDisplay, WIDTH * osd_scale, HEIGHT * osd_scale);
+    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_reactive(lightDisplay, TRUE); // Allow for UI events on this crazy thing!
 
     clutter_actor_set_content(lightDisplay, colors);

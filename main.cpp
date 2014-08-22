@@ -79,11 +79,6 @@ ClutterState *transitions;
 TCLControl tcl;
 Events eventHandlers;
 
-// Button actors:
-const int buttonHeight = height/5;
-const int buttonWidth = width/5;
-
-
 // using namespace std;
 
 // ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, ClutterColor color) {
@@ -107,8 +102,8 @@ int main(int argc, char *argv[]) {
     // Build some colors:
     ClutterColor stage_color = { 0, 0, 0, 0xFF };
     ClutterColor text_color = {255, 255, 255, 255};
-    ClutterColor actor_color = { 100, 100, 0, 255 };
-    ClutterColor red_color = { 0xFF, 0, 0, 255 };
+    ClutterColor actor_color = { 102, 0, 204, 255 };
+    // ClutterColor red_color = { 0xFF, 0, 0, 255 };
 
     // Set up the stage:
     ClutterActor *stage = clutter_stage_new();
@@ -123,8 +118,9 @@ int main(int argc, char *argv[]) {
     /* Add a rectangle to the stage: */
     rect = clutter_actor_new();
     clutter_actor_set_background_color (rect, &actor_color);
-    clutter_actor_set_size (rect, 100, 50);
-    clutter_actor_set_position (rect, 20, 20);
+    clutter_actor_set_size (rect, 20, 20);
+    clutter_actor_set_pivot_point(rect, 0.5, 0.5);
+    clutter_actor_set_position (rect, 10, 10);
 
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
@@ -149,9 +145,9 @@ int main(int argc, char *argv[]) {
     Button button5 = Button(stage, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF });
     
     // Add a label to the stage:
-    ClutterActor *label = clutter_text_new_with_text ("Sans 24px", "Sensatron 2014");
+    ClutterActor *label = clutter_text_new_with_text ("Sans 18px", "System Live...");
     clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
-    clutter_actor_set_position(label, mid_x-(clutter_actor_get_width(label)/2), height-clutter_actor_get_height(label)-buttonHeight); 
+    clutter_actor_set_position(label, 35, 13); 
     clutter_actor_add_child(stage, label);
 
 
