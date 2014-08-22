@@ -33,6 +33,8 @@ typedef struct  {
     ClutterActor *lightDisplay;
     TCLControl *tcl;
     int *animationNumber;
+    gfloat *input_x;
+    gfloat *input_y;
 } TouchData;
 
 gdouble rotation = 0;
@@ -237,6 +239,9 @@ int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
 int memSize = totalPixels * sizeof(TCpixel);
 TCpixel *pixelBackupBuf = (TCpixel *)malloc(memSize);
 
+gfloat input_x;
+gfloat input_y;
+
 void animation10(TCLControl *tcl) {
 
 }
@@ -253,7 +258,14 @@ void animation7(TCLControl *tcl) {
 void animation6(TCLControl *tcl) {
 
     int rainbowPass = popHSVRainbow(10);
-    int jitterAmount = 40;
+    int jitterAmount = 10;
+    if (input_x > 1) {
+        // jitterAmount 100
+        jitterAmount = static_cast<int>(input_x);
+    }
+    
+    // printf("Input_X: %f\n", input_x);
+    
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -479,6 +491,8 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
     // ClutterActor *lightDisplay = CLUTTER_ACTOR (data->lightDisplay);
     // TCLControl *tcl = data->tcl;
     // int *animation_number = data->animationNumber;
+    // gfloat *input_x = data->input_x;
+    // gfloat *input_y = data->input_y;
 
     ClutterEventType eventType = clutter_event_type(event);
     gfloat stage_x, stage_y;
@@ -495,11 +509,13 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
         //  but we should probably scale them now since we have all the stuff we need
         //  to do so in this block...
         //
-        // This will scale both to 0.0 <-> 1.0:
-        actor_x = actor_x/clutter_actor_get_width(actor);
-        actor_y = actor_y/clutter_actor_get_height(actor);
+        // This will scale both to 0.0 <-> 255.0:
+        actor_x = actor_x/clutter_actor_get_width(actor)*255;
+        actor_y = actor_y/clutter_actor_get_height(actor)*255;
 
         printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
+        input_x = actor_x;
+        input_y = actor_y;
 
     } else {
         // printf("Some other touch event %i\n", eventType);
@@ -526,20 +542,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     clutter_actor_set_rotation_angle(rotatingActor, CLUTTER_Z_AXIS, rotation * 5);
 
 
-    // Update the actual lights with some new color (Gotta figure out how to build animations out...):
-    // cutoff += 1;
-    // if (cutoff > 600) {
-    //     cutoff = 0;
-    // }
-
-    // for(int i=0; i < tcl->totalPixels; i++) {
-    //     if ( i > cutoff) {
-    //         tcl->pixelBuf[i] = TCrgb(0,255,0);
-    //     } else {
-    //         tcl->pixelBuf[i] = TCrgb(255,0,255);
-    //     }
-    // }
-
+    // Run which ever animation we're on:
     switch(*animation_number){
         case 1  :
            animation1(tcl);
@@ -578,11 +581,10 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 
     
 
-    // Send the updated buffer to the strands
+    // Send the updated color buffer to the strands
     if (tcl->enabled) {
         tcl->Update();
     }
-
 
     // Update the on screen color display:
     // Draw onscreen color map display:
@@ -711,6 +713,14 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     touch_data->lightDisplay = lightDisplay; // Place the button actor itself inside the struct
     touch_data->tcl = tcl;
     touch_data->animationNumber = &currentAnimation;
+
+    // This does not work because handing pointers IN to this g_signal_connect doesn't allow 
+    // values to be handed back OUT because the callback has dropped it's reference by the time
+    // the end function finally gets around to acting on it. Using global scope is easier.
+    // input_x = 0;
+    // input_y = 0;
+    // touch_data->input_x = input_x;
+    // touch_data->input_y = input_y;
 
     g_signal_connect(lightDisplay, "touch-event", G_CALLBACK (handleTouchEvents), touch_data);
     g_signal_connect(lightDisplay, "button-press-event", G_CALLBACK (handleTouchEvents), touch_data);

@@ -177,8 +177,6 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_position(infoDisplay, 0, height-(buttonHeight*2)-clutter_actor_get_height(infoDisplay)); 
     clutter_actor_add_child(stage, infoDisplay);
 
-
-
     // Start animation loop:
     Animation animation = Animation(stage, rect, &tcl, infoDisplay);
 
@@ -194,10 +192,6 @@ int main(int argc, char *argv[]) {
     Button button8 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*2, height-(buttonHeight*2), (ClutterColor){ 0, 228, 255, 0xFF }, &animation, infoDisplay);
     Button button9 = Button(stage, 8, buttonWidth, buttonHeight, buttonWidth*3, height-(buttonHeight*2), (ClutterColor){ 30, 232, 12, 0xFF }, &animation, infoDisplay);
     Button button10 = Button(stage, 9, buttonWidth, buttonHeight, buttonWidth*4, height-(buttonHeight*2), (ClutterColor){ 255, 215, 0, 0xFF }, &animation, infoDisplay);
-    
-
-
-    
     
 
     // Actually show the stage and run the app:
