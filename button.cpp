@@ -5,8 +5,10 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 
-Button::Button(ClutterActor *stage, int width, int height, int x, int y, ClutterColor upColor) {
+Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor) {
     printf("Building events class\n");
+
+    uniqueId = id;
 
     buttonActor = clutter_actor_new();
     clutter_actor_set_background_color (buttonActor, &upColor);
@@ -25,11 +27,12 @@ Button::Button(ClutterActor *stage, int width, int height, int x, int y, Clutter
     ClutterColor downColor = { 255, 0, 47, 0xFF };
     data->upColor = upColor;
     data->downColor = downColor;
+    data->uniqueId = id;
 
     // Wire up the callbacks:
     g_signal_connect(buttonActor, "touch-event", G_CALLBACK (handleEvents), data);
     g_signal_connect(buttonActor, "button-press-event", G_CALLBACK (handleEvents), data);
-    g_signal_connect(buttonActor, "button-release-event", G_CALLBACK (Button::handleEvents), data);
+    g_signal_connect(buttonActor, "button-release-event", G_CALLBACK (handleEvents), data);
 }
 
 Button::~Button() {
@@ -51,6 +54,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
     ClutterActor *button = CLUTTER_ACTOR (data->actor);
     ClutterColor upColor = data->upColor;
     ClutterColor downColor = data->downColor;
+    int id = data->uniqueId;
     // clutter_actor_get_background_color(button1, &button1Color);
     // ClutterColor downColor = { 0, 0, 0, 128 };
 
@@ -65,6 +69,13 @@ gboolean Button::handleEvents (ClutterActor *actor,
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
 
+        // On bluebutton presses...
+        if (id == 4) {
+            // sleep(3);
+            clutter_main_quit();
+            system("sync; shutdown -h now");
+        }
+
     } else if (eventType == CLUTTER_BUTTON_PRESS) {
         printf("Mouse Down...\n");
         clutter_actor_set_background_color (button, &downColor);
@@ -74,6 +85,12 @@ gboolean Button::handleEvents (ClutterActor *actor,
         printf("Mouse Up...\n");
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+        // On bluebutton presses...
+        if (id == 4) {
+            // sleep(3);
+            clutter_main_quit();
+            system("sync; shutdown -h now");
+        }
 
     } else if (eventType == CLUTTER_LEAVE) {
         printf("Leave event......\n");

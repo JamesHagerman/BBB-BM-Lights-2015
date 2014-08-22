@@ -7,7 +7,7 @@
 class Button {
     public:
         Button();
-        Button(ClutterActor *stage, int width, int height, int x, int y, ClutterColor button1Color);
+        Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor button1Color);
         ~Button();
         static gboolean handleEvents (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
         ClutterActor *buttonActor;
@@ -18,11 +18,13 @@ class Button {
 
         int buttonWidth, buttonHeight;
         int width, height;
+        int uniqueId;
 
         typedef struct  {
             ClutterActor *actor;
             ClutterColor upColor;
             ClutterColor downColor;
+            int uniqueId;
         } ButtonData;
     private:
 

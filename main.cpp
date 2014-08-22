@@ -127,12 +127,12 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_position(label, 35, 13); 
     clutter_actor_add_child(stage, label);
 
-    label2 = clutter_text_new_with_text ("Sans 14px", "To halt system, press enter button below screen and wait for the orange LED to stop blinking before removing power.");
-    clutter_text_set_line_wrap(CLUTTER_TEXT(label2), true);
-    clutter_actor_set_size(label2, width, 40);
-    clutter_text_set_color(CLUTTER_TEXT(label2), &text_color);
-    clutter_actor_set_position(label2, 0, height-buttonHeight-clutter_actor_get_height(label2)*2); 
-    clutter_actor_add_child(stage, label2);
+    // label2 = clutter_text_new_with_text ("Sans 14px", "To halt system, press enter button below screen and wait for the orange LED to stop blinking before removing power.");
+    // clutter_text_set_line_wrap(CLUTTER_TEXT(label2), true);
+    // clutter_actor_set_size(label2, width, 40);
+    // clutter_text_set_color(CLUTTER_TEXT(label2), &text_color);
+    // clutter_actor_set_position(label2, 0, height-buttonHeight-clutter_actor_get_height(label2)*2); 
+    // clutter_actor_add_child(stage, label2);
 
     // Set up the keyboard listener for the arrow, enter, and esc keys:
     EventData *data;
@@ -165,11 +165,11 @@ int main(int argc, char *argv[]) {
 
 
     // Build UI Buttons:
-    Button button1 = Button(stage, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF });
-    Button button2 = Button(stage, buttonWidth, buttonHeight, buttonWidth, height-buttonHeight, (ClutterColor){ 232, 217, 12, 0xFF });
-    Button button3 = Button(stage, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF });
-    Button button4 = Button(stage, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF });
-    Button button5 = Button(stage, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF });
+    Button button1 = Button(stage, 0, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF });
+    Button button2 = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth, height-buttonHeight, (ClutterColor){ 232, 217, 12, 0xFF });
+    Button button3 = Button(stage, 2, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF });
+    Button button4 = Button(stage, 3, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF });
+    Button button5 = Button(stage, 4, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF });
 
 
 
