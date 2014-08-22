@@ -75,6 +75,8 @@
 ClutterActor *rect;
 ClutterState *transitions;
 
+ClutterActor *label;
+
 
 TCLControl tcl;
 Events eventHandlers;
@@ -90,6 +92,11 @@ Events eventHandlers;
 //     clutter_actor_show (toRet);
 //     return toRet;
 // }
+
+void killEverything() {
+    clutter_text_set_text(CLUTTER_TEXT(label), "Shut down!");
+    clutter_main_quit();
+}
 
 int main(int argc, char *argv[]) {
 
@@ -111,7 +118,7 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_background_color(stage, &stage_color);
 
     // Set up a listener to close the app if the window is closed:
-    g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
+    g_signal_connect (stage, "destroy", G_CALLBACK (killEverything), NULL);
     // Set up the keyboard listener for the arrow, enter, and esc keys:
     g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
     
@@ -145,7 +152,7 @@ int main(int argc, char *argv[]) {
     Button button5 = Button(stage, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF });
     
     // Add a label to the stage:
-    ClutterActor *label = clutter_text_new_with_text ("Sans 18px", "System Live...");
+    label = clutter_text_new_with_text ("Sans 18px", "System Live...");
     clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
     clutter_actor_set_position(label, 35, 13); 
     clutter_actor_add_child(stage, label);
