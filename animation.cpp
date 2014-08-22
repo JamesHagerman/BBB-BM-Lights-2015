@@ -467,9 +467,15 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
     int *animation_number = data->animationNumber;
 
     ClutterEventType eventType = clutter_event_type(event);
+    gfloat x, y;
 
     if (eventType == CLUTTER_TOUCH_END) {
         printf("Touch end!\n");
+
+    } else if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
+        clutter_event_get_coords (event, &x, &y);
+        printf("Touch Move!!\nx: %f\ny: %f\n\n",x, y );
+
     } else {
         printf("Some other touch event %i\n", eventType);
     }
