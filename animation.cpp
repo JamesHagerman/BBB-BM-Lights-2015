@@ -24,6 +24,15 @@ typedef struct  {
 gdouble rotation = 0;
 int cutoff = 0;
 
+// Hold on to the Color Display:
+ClutterContent *colors;
+ClutterActor *lightDisplay;
+GdkPixbuf *pixbuf;
+unsigned char* pixels;
+int rowstride;
+// We need an error object to store errors:
+GError *error;
+
 // Size of onscreen display:
 // Define the sizes of the image that shows the lights:
 #define WIDTH 49
@@ -31,6 +40,7 @@ int cutoff = 0;
 
 void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data) {
 
+    // Update the spinning rectangle:
     // Rebuild the struct from the pointer we handed in:
     AnimationData *data;
     data = (AnimationData *)user_data;
@@ -43,6 +53,35 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     // printf("Update... %f\n", rotation);
 
     clutter_actor_set_rotation_angle(rotatingActor, CLUTTER_Z_AXIS, rotation * 5);
+
+
+    // Update the on screen color display:
+    // Draw onscreen color map display:
+    // Try changing the color right after setting it to red:
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // This next line grabs the address of single pixel out of the pixels char buffer
+            // and points a char at it so that it's value can be set:
+            unsigned char* pixel =  &pixels[y * rowstride + x * 3];
+
+            pixel[0] = 0x0;//red
+            pixel[1] = 255;//green
+            pixel[2] = 0x0;//blue
+        }
+    }
+    if (pixbuf != NULL) {
+        clutter_image_set_data(CLUTTER_IMAGE(colors),
+                            gdk_pixbuf_get_pixels (pixbuf),
+                            COGL_PIXEL_FORMAT_RGB_888,
+                            gdk_pixbuf_get_width (pixbuf),
+                            gdk_pixbuf_get_height (pixbuf),
+                            gdk_pixbuf_get_rowstride (pixbuf),
+                            &error);
+    }
+
+    clutter_actor_set_content(lightDisplay, colors);
+
 
 
     // Calculate the new values for the pixelBuf:
@@ -62,34 +101,11 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     //     s3 += 0.428;
     // }
 
-    // Draw onscreen color map display:
-    // Try changing the color right after setting it to red:
-    // for(int x = 0; x < WIDTH; x++) {
-    //     for(int y = 0; y < HEIGHT; y++) {
-
-    //         // This next line grabs the address of single pixel out of the pixels char buffer
-    //         // and points a char at it so that it's value can be set:
-    //         unsigned char* pixel =  &pixels[y * rowstride + x * 3];
-
-    //         pixel[0] = 0x0;//red
-    //         pixel[1] = 255;//green
-    //         pixel[2] = 0x0;//blue
-    //     }
-    // }
-    // if (pixbuf != NULL) {
-    //     clutter_image_set_data(CLUTTER_IMAGE(colors),
-    //                         gdk_pixbuf_get_pixels (pixbuf),
-    //                         COGL_PIXEL_FORMAT_RGB_888,
-    //                         gdk_pixbuf_get_width (pixbuf),
-    //                         gdk_pixbuf_get_height (pixbuf),
-    //                         gdk_pixbuf_get_rowstride (pixbuf),
-    //                         &error);
-    // }
-
-    // clutter_actor_set_content(lightDisplay, colors);
+    
 
 
 
+    // Update the actual lights:
     cutoff += 1;
 
     if (cutoff > 50) {
@@ -121,11 +137,10 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     // Add a colored texture to the app:
     //
     // First, we need some Actor to actually display the light colors:
-    ClutterContent *colors = clutter_image_new();
-    ClutterActor *lightDisplay = clutter_actor_new();
+    colors = clutter_image_new();
+    lightDisplay = clutter_actor_new();
 
-    // Second we need an error object to store errors:
-    GError *error = NULL;
+    error = NULL;
 
     // Load image data from some other data source...:
     // guchar *data =
@@ -137,10 +152,10 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     
 
     // Load image data from nothing. Build it manually.
-    GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
-    unsigned char* pixels = gdk_pixbuf_get_pixels(pixbuf);
+    pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
+    pixels = gdk_pixbuf_get_pixels(pixbuf);
 
-    int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+    rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 
     for(int x = 0; x < WIDTH; x++) {
         for(int y = 0; y < HEIGHT; y++) {
@@ -171,16 +186,11 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     clutter_actor_set_y_expand(lightDisplay, TRUE);
     clutter_actor_set_position(lightDisplay, mid_x, mid_y); 
     clutter_actor_set_size(lightDisplay, WIDTH*4, HEIGHT*4);
-    // clutter_actor_set_position(lightDisplay, col * THUMBNAIL_SIZE, row * THUMBNAIL_SIZE);
-    // clutter_actor_set_reactive(lightDisplay, TRUE);
+    clutter_actor_set_reactive(lightDisplay, TRUE); // Allow for UI events on this crazy thing!
 
     clutter_actor_set_content(lightDisplay, colors);
-    // g_object_unref(colors);
-    // g_object_unref(pixbuf);
 
     clutter_actor_add_child(stage, lightDisplay);
-
-
 
 
     // Get ready to hand this display chunk in to the animation event:
@@ -196,7 +206,8 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
 }
 Animation::~Animation(){
-
+    g_object_unref(colors);
+    g_object_unref(pixbuf);
 }
 
 

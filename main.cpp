@@ -76,21 +76,12 @@ ClutterActor *rect;
 ClutterState *transitions;
 
 
-
-
-// double x = 0.0;
-// double s1,s2,s3;
-// unsigned char r,g,b;
-// time_t        t,prev = 0;
-
 TCLControl tcl;
 Events eventHandlers;
 
 // Button actors:
 const int buttonHeight = height/5;
 const int buttonWidth = width/5;
-
-
 
 
 // using namespace std;
