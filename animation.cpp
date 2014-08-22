@@ -43,16 +43,9 @@ int osd_scale = 15;
 
 int AnimationID = 0;
 
-int getrand(int min,int max){
-     return (rand()%(max-min)+min);
-}  
-int randColor() {
-    return getrand(0,255);
-}
-uint getRandomColor(){
-    return TCrgb(randColor(), randColor(), randColor());
-}
 
+//=======================
+// Helpful color tools:
 
 // convert HSB to RGB:
 int rgb_colors[3]; // holder for rgb color from hsb conversion
@@ -149,6 +142,55 @@ int getRGB(int hue, int sat, int val) {
 
 }
 
+// Unpack and packing colors into and out of int
+int pack(int a, int b, int c) { return (a<<16) | (b<<8) | c; }
+int unpackA(int color) { return (color>>16)&0xff; }
+int unpackB(int color) { return (color>>8)&0xff; }
+int unpackC(int color) { return (color)&0xff; }
+
+
+// Random functions: 
+int getrand(int min,int max){
+     return (rand()%(max-min)+min);
+}  
+int randColor() {
+    return getrand(0,255);
+}
+int getRandomColor(){
+    return TCrgb(randColor(), randColor(), randColor());
+}
+int getBetterRandomColor(){
+    return getRGB(randColor(), 255, 255);
+}
+int getHSVRandomColor(){
+    return pack(randColor(), 255, 255);
+}
+int jitter(int toJitter, int jitterAmount) {
+    return getrand(toJitter-jitterAmount, toJitter+jitterAmount);
+}
+int colorJitter(int color, int jitterAmount) {
+    int toRet = color;
+
+    int r = (toRet >> 16) & 0xff;
+    int g = (toRet >> 8) & 0xff;
+    int b = toRet & 0xff;
+
+    // int new_r = jitter(r, jitterAmount);
+    // int new_g = jitter(r, jitterAmount);
+    // int new_b = jitter(r, jitterAmount);
+
+    r = jitter(r, jitterAmount);
+    g = jitter(r, jitterAmount);
+    b = jitter(r, jitterAmount);
+
+    toRet = (r<<16) | (g<<8) | b;
+
+    return toRet;
+}
+
+int HSVJitter(int hsvColor, int amt) {
+    return pack(jitter(unpackA(hsvColor), amt), unpackB(hsvColor), unpackC(hsvColor));
+}
 
 int h_angle = 0;
 int popRainbow(int h_rate) {
@@ -162,12 +204,63 @@ int popRainbow(int h_rate) {
     return toRet;
 }
 
+int popHSVRainbow(int h_rate) {
+    h_angle += h_rate;
+
+    int toRet = pack(h_angle, 255, 255);
+
+    if (h_angle >= 255) {
+        h_angle = 0;
+    }
+    return toRet;
+}
+
 
 
 
 int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
 int memSize = totalPixels * sizeof(TCpixel);
 TCpixel *pixelBackupBuf = (TCpixel *)malloc(memSize);
+
+void animation6(TCLControl *tcl) {
+
+    int rainbowPass = popHSVRainbow(10);
+    int jitterAmount = 40;
+
+    int index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // // This next line grabs the address of single pixel out of the pixels char buffer
+            // // and points a char at it so that it's value can be set:
+            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
+
+            pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+            index += 1;
+        }
+    }
+
+    index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+            int hsvColor = HSVJitter(rainbowPass, jitterAmount);
+            int jitColor = getRGB(unpackA(hsvColor), unpackB(hsvColor), unpackC(hsvColor));
+
+            if (y>=1) {
+                tcl->pixelBuf[index] = pixelBackupBuf[index-1];
+            } else {
+                tcl->pixelBuf[index] = jitColor;
+            }
+
+            index += 1;
+        }
+    }
+}
+
 
 void animation5(TCLControl *tcl) {
 
@@ -219,7 +312,7 @@ void animation4(TCLControl *tcl) {
             if (y == 0) {
                 tcl->pixelBuf[index] = temp;
             } else if (y == 49) {
-                tcl->pixelBuf[index] = getRandomColor();
+                tcl->pixelBuf[index] = getBetterRandomColor();
             } else if (x == 10) {
                 tcl->pixelBuf[index] = tcl->pixelBuf[index+x];
             } else {
@@ -249,9 +342,71 @@ void animation3(TCLControl *tcl) {
     }
 }
 
+// int seedHSVColor = getHSVRandomColor();
+
+TCpixel *HSVBuf = (TCpixel *)malloc(memSize);
+bool set = false;
+
+void animation2(TCLControl *tcl) {
+
+    if (!set) {
+        for(int i=0; i < tcl->totalPixels; i++) {
+            HSVBuf[i] = pack(255,255,255);
+        }
+        set = true;
+    }
+
+    // int nextSeed = getrand(0,tcl->totalPixels);
+    // int tempColor;
+
+    // for(int i=0; i < tcl->totalPixels; i++) {
+    //     tempColor = HSVJitter(seedHSVColor, 1);
+    //     tcl->pixelBuf[i] = getRGB(unpackA(tempColor), unpackB(tempColor), unpackC(tempColor));
+    // }
+
+    // seedHSVColor = tcl->pixelBuf[nextSeed];
+
+    // int temp = getBetterRandomColor();
+
+    int index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // // This next line grabs the address of single pixel out of the pixels char buffer
+            // // and points a char at it so that it's value can be set:
+            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
+
+            HSVBuf[index] = HSVJitter(HSVBuf[index], 10);
+
+            index += 1;
+        }
+    }
+
+    // index = 0;
+    // for(int x = 0; x < WIDTH; x++) {
+    //     for(int y = 0; y < HEIGHT; y++) {
+
+    //         // pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+    //         if (y>=1) {
+    //             tcl->pixelBuf[index] = pixelBackupBuf[index-1];
+    //         } else {
+    //             tcl->pixelBuf[index] = temp;
+    //         }
+
+    //         index += 1;
+    //     }
+    // }
+
+    for(int i=0; i < tcl->totalPixels; i++) {
+        tcl->pixelBuf[i] = getRGB(unpackA(HSVBuf[i]), unpackB(HSVBuf[i]), unpackC(HSVBuf[i]));
+    }
+
+}
+
 
 void animation1(TCLControl *tcl) {
-    int temp = getRandomColor();
+    int temp = getBetterRandomColor();
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -284,26 +439,10 @@ void animation1(TCLControl *tcl) {
     }
 }
 
-void animation2(TCLControl *tcl) {
-    
-
-    cutoff += 1;
-    if (cutoff > 10) {
-        for(int i=0; i < tcl->totalPixels; i++) {
-            // if ( i > cutoff) {
-            //     tcl->pixelBuf[i] = TCrgb(0,255,0);
-            // } else {
-                tcl->pixelBuf[i] = getRandomColor();
-            // }
-        }
-        cutoff = 0;
-    }
-}
 
 
 
-
-
+int currentAnimation = 2;
 
 
 void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data) {
@@ -335,7 +474,31 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     //     }
     // }
 
-    animation1(tcl);
+    switch(currentAnimation){
+        case 1  :
+           animation1(tcl);
+           break;
+        case 2  :
+           animation2(tcl);
+           break;
+        case 3  :
+           animation3(tcl);
+           break;
+        case 4  :
+           animation4(tcl);
+           break;
+        case 5  :
+           animation5(tcl);
+           break;
+        case 6  :
+           animation6(tcl);
+           break;
+      
+        default : 
+           animation6(tcl);
+    }
+
+    
 
     // Send the updated buffer to the strands
     if (tcl->enabled) {
