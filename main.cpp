@@ -211,42 +211,40 @@ int main(int argc, char *argv[]) {
 
     // Add a colored texture to the app:
     //
-    // First, we need to load in some data:
+    // First, we need some Actor to actually display the light colors:
+    ClutterContent *colors = clutter_image_new();
+    ClutterActor *lightDisplay = clutter_actor_new();
+
+    // Second we need an error object to store errors:
+    GError *error = NULL;
 
 //First attempt:
     // guchar *data =
     // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(data);
 
 // Another attempt:
-    #define WIDTH 50
+    #define WIDTH 49
     #define HEIGHT 12
-    // GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
-    // unsigned char* pixels = gdk_pixbuf_get_pixels(pixbuf);
+    GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
+    unsigned char* pixels = gdk_pixbuf_get_pixels(pixbuf);
 
-    // int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+    int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 
-    // int x = 0;
-    // for(; x < WIDTH; x++) {
-    //     int y = 0;
-    //     for(; y < HEIGHT; y++) {
-    //         unsigned char* pixel = 
-    //             &pixels[y * rowstride + x * 4];
-    //         //monochrome black
-    //         pixel[0] = 255;//red
-    //         pixel[1] = 0x0;//green
-    //         pixel[2] = 0x0;//blue
-    //         //but striped by transparency
-    //         // pixel[3] = get_transparency(x, y);//alpha
-    //     }
-    // }
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+            unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-    // Set up an error object to store errors:
-    GError *error = NULL;
+            pixel[0] = 255;//red
+            pixel[1] = 0x0;//green
+            pixel[2] = 0x0;//blue
+        }
+    }
 
-    const char *img_path = "./wut.png";
-    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
-    ClutterContent *colors = clutter_image_new();
-    ClutterActor *lightDisplay = clutter_actor_new();
+    
+
+    // const char *img_path = "./wut.png";
+    // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
+    
 
     if (pixbuf != NULL) {
         clutter_image_set_data(CLUTTER_IMAGE(colors),
@@ -263,7 +261,7 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_x_expand(lightDisplay, TRUE);
     clutter_actor_set_y_expand(lightDisplay, TRUE);
     clutter_actor_set_position(lightDisplay, mid_x, mid_y); 
-    clutter_actor_set_size(lightDisplay, 50, 12);
+    clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
     // clutter_actor_set_position(lightDisplay, col * THUMBNAIL_SIZE, row * THUMBNAIL_SIZE);
     // clutter_actor_set_reactive(lightDisplay, TRUE);
 
