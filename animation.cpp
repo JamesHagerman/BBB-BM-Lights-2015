@@ -46,7 +46,7 @@ int rowstride;
 // We need an error object to store errors:
 GError *error;
 
-int osd_scale = 15;
+int osd_scale = 16;
 
 int AnimationID = 0;
 
@@ -343,7 +343,7 @@ void animation4(TCLControl *tcl) {
 
 void animation3(TCLControl *tcl) {
     cutoff += 1;
-    if (cutoff > 10) {
+    if (cutoff > 5) {
         cutoff = 0;
 
         for(int i=0; i < tcl->totalPixels; i++) {
@@ -471,7 +471,7 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
     gfloat actor_x = 0, actor_y = 0;
 
     if (eventType == CLUTTER_TOUCH_END) {
-        printf("Touch end!\n");
+        // printf("Touch end!\n");
 
     } else if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
         clutter_event_get_coords (event, &stage_x, &stage_y);
@@ -488,7 +488,7 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
         printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
 
     } else {
-        printf("Some other touch event %i\n", eventType);
+        // printf("Some other touch event %i\n", eventType);
     }
 
     return CLUTTER_EVENT_STOP;
@@ -717,7 +717,7 @@ Animation::Animation() {
 }
 
 void Animation::switchAnimation(int animationNumber) {
-    printf("Changing animation\n");
+    printf("Changing to animation: %i\n", animationNumber);
     currentAnimation = animationNumber;
 }
 

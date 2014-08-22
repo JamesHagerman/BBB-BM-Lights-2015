@@ -48,22 +48,22 @@ void changeAnimation(int id, Animation *animation) {
     // animation->switchAnimation(3);
         
     switch(id){
-        case 1  :
+        case 0  :
            animation->switchAnimation(1);
            break;
-        case 2  :
+        case 1  :
            animation->switchAnimation(2);
            break;
-        case 3  :
+        case 2  :
            animation->switchAnimation(3);
            break;
-        case 4  :
+        case 3  :
            animation->switchAnimation(4);
            break;
-        case 5  :
+        case 4  :
            animation->switchAnimation(5);
            break;
-        case 6  :
+        case 5  :
            animation->switchAnimation(6);
            break;
       
@@ -96,12 +96,12 @@ gboolean Button::handleEvents (ClutterActor *actor,
 
     // printf("Button event: ");
     if (eventType == CLUTTER_TOUCH_BEGIN) {
-        printf("Touch Begin...\n");
+        // printf("Touch Begin...\n");
         clutter_actor_set_background_color (button, &downColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
     } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL) {
-        printf("Touch End...\n");
+        // printf("Touch End...\n");
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
 
@@ -109,21 +109,21 @@ gboolean Button::handleEvents (ClutterActor *actor,
         changeAnimation(id, animation);
 
     } else if (eventType == CLUTTER_BUTTON_PRESS) {
-        printf("Mouse Down...\n");
+        // printf("Mouse Down...\n");
         clutter_actor_set_background_color (button, &downColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
     } else if (eventType == CLUTTER_BUTTON_RELEASE) {
-        printf("Mouse Up...\n");
+        // printf("Mouse Up...\n");
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
         // On bluebutton presses...
         changeAnimation(id, animation);
 
     } else if (eventType == CLUTTER_LEAVE) {
-        printf("Leave event......\n");
+        // printf("Leave event......\n");
     } else {
-        printf("Some other event %i\n", eventType);
+        // printf("Some other event %i\n", eventType);
     }
 
     // And now we need to figure out how to display that we've captured the event...
