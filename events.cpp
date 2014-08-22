@@ -23,7 +23,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
     EventData *data;
     data = (EventData *)user_data;
 
-    // ClutterActor *label = CLUTTER_ACTOR (data->statusLabel);
+    ClutterActor *label = CLUTTER_ACTOR (data->statusLabel);
     guint keyval = clutter_event_get_key_symbol (event);
 
     ClutterModifierType state = clutter_event_get_state (event);
@@ -72,11 +72,13 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
         return CLUTTER_EVENT_STOP;
     } else if (65293 == keyval) {
         printf("Looks like the enter key...\n");
-
+        clutter_text_set_text(CLUTTER_TEXT(label), "Shutting down! PLEASE WAIT until orange LED stops blinking before killing power!");
+        sleep(3);
+        clutter_main_quit();
+        system("sync; shutdown -h now");
     } else if (65307 == keyval) {
         printf("esc pressed. Exiting...\n");
         exit(1);
-        
     } else {
         printf("Something else pressed: %i\n", keyval);
     }
