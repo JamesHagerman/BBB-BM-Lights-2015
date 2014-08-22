@@ -108,8 +108,10 @@ const int buttonWidth = width/5;
 int main(int argc, char *argv[]) {
 
     // init Clutter:
-    int ret;
-    ret = clutter_init(&argc, &argv);
+    if (clutter_init(&argc, &argv) != CLUTTER_INIT_SUCCESS) {
+        printf("Clutter failed to initalize. Exiting...\n");
+        exit(1);
+    }
 
     // Build some colors:
     ClutterColor stage_color = { 0, 0, 0, 0xFF };
