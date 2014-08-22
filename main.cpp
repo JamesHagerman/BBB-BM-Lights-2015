@@ -79,10 +79,17 @@ ClutterActor *label;
 ClutterActor *label2;
 
 TCLControl tcl;
+
+// ColorMan colorMan;
+
 Events eventHandlers;
 typedef struct  {
     ClutterActor *statusLabel;
 } EventData;
+
+
+
+
 
 // using namespace std;
 
@@ -122,7 +129,7 @@ int main(int argc, char *argv[]) {
 
 
     // Add a label to the stage:
-    label = clutter_text_new_with_text ("Sans 16px", "System Live! To halt system, press enter button below screen, wait for orange LED to stop blinking");
+    label = clutter_text_new_with_text ("Sans 16px", "System Live! To halt system, press enter button below screen, wait for orange LED to stop blinking before removing system power.");
     clutter_text_set_line_wrap(CLUTTER_TEXT(label), true);
     clutter_actor_set_size(label, width-35, 35);
     clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
