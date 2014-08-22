@@ -259,9 +259,12 @@ void animation6(TCLControl *tcl) {
 
     int rainbowPass = popHSVRainbow(10);
     int jitterAmount = 10;
-    if (input_x > 1) {
+
+    if (input_x > 10.0) {
         // jitterAmount 100
         jitterAmount = static_cast<int>(input_x);
+    } else {
+        jitterAmount = 1;
     }
     
     // printf("Input_X: %f\n", input_x);
@@ -513,7 +516,7 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
         actor_x = actor_x/clutter_actor_get_width(actor)*255;
         actor_y = actor_y/clutter_actor_get_height(actor)*255;
 
-        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
+        // printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
         input_x = actor_x;
         input_y = actor_y;
 
