@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include "p9813.h"
 
+#ifndef TCL_CONTROL
+#define TCL_CONTROL
+
 class TCLControl {
 	public:
 		TCLControl();
@@ -32,3 +35,5 @@ class TCLControl {
 
 		
 };
+
+#endif

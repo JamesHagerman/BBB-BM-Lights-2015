@@ -25,7 +25,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = main.o cat.o TCLControl.o events.o button.o
+OBJS = main.o TCLControl.o events.o button.o onscreen.o animation.o
 
 all: ${OUTPUT}
 
@@ -49,20 +49,20 @@ clean:
 
 ifeq ($(shell uname -s),Darwin)
 # Mac driver stuff
-	DRIVER    = com.FTDI.driver.FTDIUSBSerialDriver
-	KEXTFLAGS = -b
-	unload:
-		sudo kextunload $(KEXTFLAGS) $(DRIVER)
-	load:
-		sudo kextload $(KEXTFLAGS) $(DRIVER)
+  DRIVER    = com.FTDI.driver.FTDIUSBSerialDriver
+  KEXTFLAGS = -b
+  unload:
+	sudo kextunload $(KEXTFLAGS) $(DRIVER)
+  load:
+	sudo kextload $(KEXTFLAGS) $(DRIVER)
 else
 ifeq ($(shell uname -s),Linux)
 # Linux driver stuff
-	unload:
-		sudo modprobe -r ftdi_sio
-		sudo modprobe -r usbserial
-	load:
-		sudo modprobe ftdi_sio
-		sudo modprobe usbserial
+  unload:
+	sudo modprobe -r ftdi_sio
+	sudo modprobe -r usbserial
+  load:
+	sudo modprobe ftdi_sio
+	sudo modprobe usbserial
 endif
 endif
