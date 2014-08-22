@@ -7,7 +7,6 @@ const int mid_y = height/2;
 const int buttonHeight = height/5;
 const int buttonWidth = width/5;
 
-
 // double x = 0.0;
 // double s1,s2,s3;
 // unsigned char r,g,b;

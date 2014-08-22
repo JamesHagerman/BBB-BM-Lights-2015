@@ -77,9 +77,11 @@ ClutterState *transitions;
 
 ClutterActor *label;
 
-
 TCLControl tcl;
 Events eventHandlers;
+typedef struct  {
+    ClutterActor *statusLabel;
+} EventData;
 
 // using namespace std;
 
@@ -93,10 +95,7 @@ Events eventHandlers;
 //     return toRet;
 // }
 
-void killEverything() {
-    clutter_text_set_text(CLUTTER_TEXT(label), "Shut down!");
-    clutter_main_quit();
-}
+
 
 int main(int argc, char *argv[]) {
 
@@ -118,23 +117,37 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_background_color(stage, &stage_color);
 
     // Set up a listener to close the app if the window is closed:
-    g_signal_connect (stage, "destroy", G_CALLBACK (killEverything), NULL);
+    g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
+
+
+    // Add a label to the stage:
+    label = clutter_text_new_with_text ("Sans 18px", "System Live...");
+    clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
+    clutter_actor_set_position(label, 35, 13); 
+    clutter_actor_add_child(stage, label);
+
+
     // Set up the keyboard listener for the arrow, enter, and esc keys:
-    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
+    EventData *data;
+    data = g_slice_new (EventData); // reserve memory for it...
+    data->statusLabel = label; // Place the button actor itself inside the struct
+    // Build a "down" color (hard coded for now...)
+    // ClutterColor downColor = { 255, 0, 47, 0xFF };
+    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), data);
     
-    /* Add a rectangle to the stage: */
+
+    /* Status rectangle */
     rect = clutter_actor_new();
     clutter_actor_set_background_color (rect, &actor_color);
     clutter_actor_set_size (rect, 20, 20);
     clutter_actor_set_pivot_point(rect, 0.5, 0.5);
     clutter_actor_set_position (rect, 10, 10);
-
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
     g_signal_connect (rect, "touch-event", G_CALLBACK (eventHandlers.handleTouchEvents), transitions);
     // g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     g_signal_connect (rect, "button-press-event", G_CALLBACK (eventHandlers.handleMouseEvents), rect);
-    
+
     // Add the spinning rectangle to the stage:
     clutter_actor_add_child(stage, rect);
 
@@ -144,18 +157,12 @@ int main(int argc, char *argv[]) {
     // }
 
 
-    // Build Buttons:
+    // Build UI Buttons:
     Button button1 = Button(stage, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF });
     Button button2 = Button(stage, buttonWidth, buttonHeight, buttonWidth, height-buttonHeight, (ClutterColor){ 232, 217, 12, 0xFF });
     Button button3 = Button(stage, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF });
     Button button4 = Button(stage, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF });
     Button button5 = Button(stage, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF });
-    
-    // Add a label to the stage:
-    label = clutter_text_new_with_text ("Sans 18px", "System Live...");
-    clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
-    clutter_actor_set_position(label, 35, 13); 
-    clutter_actor_add_child(stage, label);
 
 
 
