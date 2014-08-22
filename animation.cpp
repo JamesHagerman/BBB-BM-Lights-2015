@@ -28,6 +28,12 @@ typedef struct  {
     int *animationNumber;
 } AnimationData;
 
+typedef struct  {
+    ClutterActor *lightDisplay;
+    TCLControl *tcl;
+    int *animationNumber;
+} TouchData;
+
 gdouble rotation = 0;
 int cutoff = 0;
 
@@ -218,6 +224,13 @@ int popHSVRainbow(int h_rate) {
 
 
 
+//===================
+// Animation code!
+//
+// The theory is that all of these animations will need to take in some input from the touch screen.
+// We will need global variables that all of these functions can see.
+// We will need pointers to these global objects that can be handed in to the event listeners so that
+// the event data can be sent over to these functions.
 
 int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
 int memSize = totalPixels * sizeof(TCpixel);
@@ -440,7 +453,29 @@ void animation1(TCLControl *tcl) {
     }
 }
 
+// End Animation Code
+//===================
 
+gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer user_data) {
+
+    // Rebuild the struct from the pointer we handed in:
+    TouchData *data;
+    data = (TouchData *)user_data;
+
+    ClutterActor *lightDisplay = CLUTTER_ACTOR (data->lightDisplay);
+    TCLControl *tcl = data->tcl;
+    int *animation_number = data->animationNumber;
+
+    ClutterEventType eventType = clutter_event_type(event);
+
+    if (eventType == CLUTTER_TOUCH_END) {
+        printf("Touch end!\n");
+    } else {
+        printf("Some other touch event %i\n", eventType);
+    }
+
+    return CLUTTER_EVENT_STOP;
+}
 
 
 void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data) {
@@ -618,7 +653,25 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     clutter_actor_set_size(lightDisplay, WIDTH * osd_scale, HEIGHT * osd_scale);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
+    
+    // Wire up the event listener on this lightDisplay actor:
     clutter_actor_set_reactive(lightDisplay, TRUE); // Allow for UI events on this crazy thing!
+    // typedef struct  {
+    //     ClutterActor *lightDisplay;
+    //     TCLControl *tcl;
+    //     int *animationNumber;
+    // } TouchData;
+    // Build a pointer to a struct that we can pass through the g_signal_connect function:
+    TouchData *touch_data;
+    touch_data = g_slice_new (TouchData); // reserve memory for it...
+    touch_data->lightDisplay = lightDisplay; // Place the button actor itself inside the struct
+    touch_data->tcl = tcl;
+    touch_data->animationNumber = &currentAnimation;
+
+    g_signal_connect(lightDisplay, "touch-event", G_CALLBACK (handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "button-press-event", G_CALLBACK (handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "motion-event", G_CALLBACK (handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK (handleTouchEvents), touch_data);
 
     clutter_actor_set_content(lightDisplay, colors);
 
@@ -645,8 +698,6 @@ Animation::~Animation(){
 
 Animation::Animation() {
 }
-
-
 
 void Animation::switchAnimation(int animationNumber) {
     printf("Changing animation\n");
