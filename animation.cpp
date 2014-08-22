@@ -462,19 +462,30 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
     TouchData *data;
     data = (TouchData *)user_data;
 
-    ClutterActor *lightDisplay = CLUTTER_ACTOR (data->lightDisplay);
-    TCLControl *tcl = data->tcl;
-    int *animation_number = data->animationNumber;
+    // ClutterActor *lightDisplay = CLUTTER_ACTOR (data->lightDisplay);
+    // TCLControl *tcl = data->tcl;
+    // int *animation_number = data->animationNumber;
 
     ClutterEventType eventType = clutter_event_type(event);
-    gfloat x, y;
+    gfloat stage_x, stage_y;
+    gfloat actor_x = 0, actor_y = 0;
 
     if (eventType == CLUTTER_TOUCH_END) {
         printf("Touch end!\n");
 
     } else if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
-        clutter_event_get_coords (event, &x, &y);
-        printf("Touch Move!!\nx: %f\ny: %f\n\n",x, y );
+        clutter_event_get_coords (event, &stage_x, &stage_y);
+        clutter_actor_transform_stage_point (actor, stage_x, stage_y, &actor_x, &actor_y);
+
+        // Now we have some x,y coordinates we can throw back at those animations!
+        //  but we should probably scale them now since we have all the stuff we need
+        //  to do so in this block...
+        //
+        // This will scale both to 0.0 <-> 1.0:
+        actor_x = actor_x/clutter_actor_get_width(actor);
+        actor_y = actor_y/clutter_actor_get_height(actor);
+
+        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
 
     } else {
         printf("Some other touch event %i\n", eventType);
