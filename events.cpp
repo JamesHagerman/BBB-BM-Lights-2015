@@ -75,7 +75,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
         // ClutterActor *label;
         clutter_text_set_text(CLUTTER_TEXT(label), "Shutting down! PLEASE WAIT until orange LED stops blinking before killing power!");
         sleep(3);
-        // clutter_main_quit();
+        clutter_main_quit();
         system("sync; shutdown -h now");
     } else if (65307 == keyval) {
         printf("esc pressed. Exiting...\n");

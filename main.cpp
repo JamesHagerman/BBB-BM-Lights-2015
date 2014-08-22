@@ -76,6 +76,7 @@ ClutterActor *rect;
 ClutterState *transitions;
 
 ClutterActor *label;
+ClutterActor *label2;
 
 TCLControl tcl;
 Events eventHandlers;
@@ -121,11 +122,15 @@ int main(int argc, char *argv[]) {
 
 
     // Add a label to the stage:
-    label = clutter_text_new_with_text ("Sans 16px", "System Live! To halt system, press enter button below screen.");
+    label = clutter_text_new_with_text ("Sans 16px", "System Live!");
     clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
     clutter_actor_set_position(label, 35, 13); 
     clutter_actor_add_child(stage, label);
 
+    label2 = clutter_text_new_with_text ("Sans 14px", "To halt system, press enter button below screen and wait for the orange LED to stop blinking before removing power.");
+    clutter_text_set_color(CLUTTER_TEXT(label2), &text_color);
+    clutter_actor_set_position(label2, 0, height-buttonHeight-clutter_actor_get_height(label2)*2); 
+    clutter_actor_add_child(stage, label2);
 
     // Set up the keyboard listener for the arrow, enter, and esc keys:
     EventData *data;
