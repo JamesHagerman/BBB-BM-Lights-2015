@@ -72,8 +72,8 @@ gboolean Button::handleEvents (ClutterActor *actor,
         // On bluebutton presses...
         if (id == 4) {
             // sleep(3);
-            clutter_main_quit();
-            system("sync; shutdown -h now");
+            // clutter_main_quit();
+            // system("sync; shutdown -h now");
         }
 
     } else if (eventType == CLUTTER_BUTTON_PRESS) {
