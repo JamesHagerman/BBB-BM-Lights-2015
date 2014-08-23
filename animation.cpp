@@ -307,8 +307,6 @@ void animation10(TCLControl *tcl) {
             } else {
                 if (!clearing) {
                     tcl->pixelBuf[index] = getRGB(inverted_temp);
-                } else {
-                    tcl->pixelBuf[index] = 0;
                 }
             }
             index += 1;
