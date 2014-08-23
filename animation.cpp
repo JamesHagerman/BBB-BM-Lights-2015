@@ -49,7 +49,7 @@ int rowstride;
 // We need an error object to store errors:
 GError *error;
 
-int osd_scale = 16;
+gfloat osd_scale = 16;
 
 int AnimationID = 0;
 
@@ -88,6 +88,8 @@ const unsigned char dim_curve[] = {
     193, 196, 200, 203, 207, 211, 214, 218, 222, 226, 230, 234, 238, 242, 248, 255,
 };
 int getRGB(int hue, int sat, int val) { 
+    // These values should come in in the range of 0-255, not 0-360!
+    hue = hue*359/255;
   /* convert hue, saturation and brightness ( HSB/HSV ) to RGB
      The dim_curve is used only on brightness/value and on saturation (inverted).
      This looks the most natural.      
@@ -155,7 +157,7 @@ int getRGB(int hue, int sat, int val) {
   }  
 
   // unsigned char toRet = TCrgb(r, g, b);
-  return TCrgb(r, g, b);
+  return TCrgb(colors[0], colors[1], colors[2]);
 
 }
 
@@ -316,9 +318,6 @@ void animation7(TCLControl *tcl) {
 // }
 
 void animation6(TCLControl *tcl) {
-
-    
-    
     // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
     int jitterAmount = input_y*50/255;
     // printf( "Jitter: %i\n", jitterAmount);
@@ -362,7 +361,8 @@ void animation6(TCLControl *tcl) {
 
 void animation5(TCLControl *tcl) {
 
-    int temp = popRainbow(10);
+    printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
+    int temp = getRGB(input_y, input_x, 255);
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -372,23 +372,7 @@ void animation5(TCLControl *tcl) {
             // // and points a char at it so that it's value can be set:
             // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-            pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            index += 1;
-        }
-    }
-
-    index = 0;
-    for(int x = 0; x < WIDTH; x++) {
-        for(int y = 0; y < HEIGHT; y++) {
-
-            // pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            if (y>=1) {
-                tcl->pixelBuf[index] = pixelBackupBuf[index-1];
-            } else {
-                tcl->pixelBuf[index] = temp;
-            }
+            tcl->pixelBuf[index] = temp;
 
             index += 1;
         }
