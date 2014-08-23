@@ -241,6 +241,15 @@ int popHSVRainbow(int h_rate) {
     return toRet;
 }
 
+int invertHSV(int hsvColor) {
+    int temp = unpackA(hsvColor);
+    temp = temp+126;
+    if (temp> 255) {
+        temp -= 255;
+    }
+    return pack(temp, unpackB(hsvColor), unpackC(hsvColor));
+}
+
 int cycle = 0;
 int popCycle(int rate) {
     cycle +=rate;
@@ -267,8 +276,47 @@ int input_x = 1;
 int input_y = 1;
 int old_x, old_y;
 
+int W, H;
+int timeout = 0;
+bool clearing = false;
 void animation10(TCLControl *tcl) {
+    cutoff += 1;
+    if (cutoff > (input_y*50/255)) {
+        cutoff = 0;
+        W = getrand(0,WIDTH);
+        H = getrand(0,HEIGHT);
+    }
 
+    timeout += 1;
+    if (timeout > (input_x*100/255)) {
+        timeout = 0;
+        clearing = true;
+    }
+
+    int thresh = 4;
+
+    int temp = popHSVRainbow(1);
+    int inverted_temp = invertHSV(temp);
+
+    int index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            if (abs(W-x) < 2 && abs(H-y) < 2) {
+                tcl->pixelBuf[index] = getRGB(temp);
+            } else {
+                if (!clearing) {
+                    tcl->pixelBuf[index] = getRGB(inverted_temp);
+                } else {
+                    tcl->pixelBuf[index] = 0;
+                }
+            }
+            index += 1;
+        }
+    }
+    if (clearing) {
+        clearing = false;
+    }
 }
 void animation9(TCLControl *tcl) {
     // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
@@ -450,7 +498,7 @@ void animation5(TCLControl *tcl) {
     if (input_x != old_x || input_y != old_y) {
         tempHSV = pack(input_y, 255, 255);
     } else {
-        tempHSV = HSVJitter(tempHSV, input_x*50/255);
+        tempHSV = HSVJitter(tempHSV, input_x*5/255);
     }
     
 
