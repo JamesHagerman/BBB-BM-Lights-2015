@@ -427,7 +427,7 @@ void animation4(TCLControl *tcl) {
 
 void animation3(TCLControl *tcl) {
     cutoff += 1;
-    if (cutoff > 5) {
+    if (cutoff > (input_y*50/255)) {
         cutoff = 0;
 
         for(int i=0; i < tcl->totalPixels; i++) {
