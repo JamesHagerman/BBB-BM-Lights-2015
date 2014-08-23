@@ -79,7 +79,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
         system("sync; shutdown -h now");
     } else if (65307 == keyval) {
         printf("esc pressed. Exiting...\n");
-        exit(1);
+        // exit(1);
     } else {
         printf("Something else pressed: %i\n", keyval);
     }
