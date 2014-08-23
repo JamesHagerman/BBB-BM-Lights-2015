@@ -154,14 +154,17 @@ int getRGB(int hue, int sat, int val) {
 
 // Unpack and packing colors into and out of int
 int pack(int a, int b, int c) { return (a<<16) | (b<<8) | c; }
-int unpackA(int color) { return (color>>16)&0xff; }
-int unpackB(int color) { return (color>>8)&0xff; }
-int unpackC(int color) { return (color)&0xff; }
+int unpackA(int color) { return (color>>16) & 0xff; }
+int unpackB(int color) { return (color>>8)  & 0xff; }
+int unpackC(int color) { return (color)     & 0xff; }
 
 
 // Random functions: 
 int getrand(int min,int max){
-     return (rand()%(max-min)+min);
+    if (max==min) {
+        max += 1;
+    }
+    return (rand()%(max-min)+min);
 }  
 int randColor() {
     return getrand(0,255);
@@ -176,6 +179,7 @@ int getHSVRandomColor(){
     return pack(randColor(), 255, 255);
 }
 int jitter(int toJitter, int jitterAmount) {
+    // printf("Derp: %i   %i\n", toJitter-jitterAmount, toJitter+jitterAmount);
     return getrand(toJitter-jitterAmount, toJitter+jitterAmount);
 }
 int colorJitter(int color, int jitterAmount) {
@@ -239,8 +243,10 @@ int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
 int memSize = totalPixels * sizeof(TCpixel);
 TCpixel *pixelBackupBuf = (TCpixel *)malloc(memSize);
 
-gfloat input_x;
-gfloat input_y;
+gfloat finput_x;
+gfloat finput_y;
+int input_x = 1;
+int input_y = 1;
 
 void animation10(TCLControl *tcl) {
 
@@ -258,17 +264,9 @@ void animation7(TCLControl *tcl) {
 void animation6(TCLControl *tcl) {
 
     int rainbowPass = popHSVRainbow(10);
-    int jitterAmount = 10;
-
-    if (input_x > 10.0) {
-        // jitterAmount 100
-        jitterAmount = static_cast<int>(input_x);
-    } else {
-        jitterAmount = 1;
-    }
     
-    // printf("Input_X: %f\n", input_x);
-    
+    printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
+    int jitterAmount = input_x;
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -517,8 +515,20 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
         actor_y = actor_y/clutter_actor_get_height(actor)*255;
 
         // printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
-        input_x = actor_x;
-        input_y = actor_y;
+        // finput_x = actor_x;
+        // finput_y = actor_y;
+
+        // if (actor_x > 10.0) {
+            input_x = static_cast<int>(actor_x);
+        // } else {
+        //     input_x = 1;
+        // }
+        // if (actor_y > 10.0) {
+            input_y = static_cast<int>(actor_y);
+        // } else {
+        //     input_y = 1;
+        // }
+        // input_x = 10;
 
     } else {
         // printf("Some other touch event %i\n", eventType);
