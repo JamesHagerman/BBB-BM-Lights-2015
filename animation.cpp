@@ -315,11 +315,13 @@ void animation7(TCLControl *tcl) {
 
 void animation6(TCLControl *tcl) {
 
-    int rainbowPass = popHSVRainbow(10);
+    
     
     // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
     int jitterAmount = input_y*100/255;
     // printf( "Jitter: %i\n", jitterAmount);
+
+    int rainbowPass = popHSVRainbow(input_x);
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
