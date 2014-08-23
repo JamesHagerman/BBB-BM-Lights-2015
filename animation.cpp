@@ -305,7 +305,7 @@ void animation10(TCLControl *tcl) {
             if (abs(W-x) < 2 && abs(H-y) < 2) {
                 tcl->pixelBuf[index] = getRGB(temp);
             } else {
-                if (!clearing) {
+                if (clearing) {
                     tcl->pixelBuf[index] = getRGB(inverted_temp);
                 }
             }
