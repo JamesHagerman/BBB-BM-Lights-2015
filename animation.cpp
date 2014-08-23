@@ -265,15 +265,101 @@ gfloat finput_x;
 gfloat finput_y;
 int input_x = 1;
 int input_y = 1;
+int old_x, old_y;
 
 void animation10(TCLControl *tcl) {
 
 }
 void animation9(TCLControl *tcl) {
+    // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
+    // int jitterAmount = input_y*50/255;
+    // printf( "Jitter: %i\n", jitterAmount);
 
+    int rainbowPass = popHSVRainbow(input_y*50/255);
+
+    int index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+            pixelBackupBuf[index] = tcl->pixelBuf[index];
+            index += 1;
+        }
+    }
+
+    index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        // int wandOffset = input_x*11/255;
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+            int hsvColor = rainbowPass; //HSVJitter(rainbowPass, jitterAmount);
+            int jitColor = getRGB(unpackA(hsvColor), unpackB(hsvColor), unpackC(hsvColor));
+
+            if (y>=1) {
+                tcl->pixelBuf[index] = pixelBackupBuf[index-1];
+            } else {
+                if (input_x == old_x && input_y == old_y) {
+                    tcl->pixelBuf[index] = tcl->pixelBuf[index+49];
+                } else {
+                    if (x == input_x*12/255) {
+                        tcl->pixelBuf[index] = jitColor;
+                    }
+                }
+
+                
+            }
+
+            index += 1;
+        }
+    }
+    old_x = input_x;
+    old_y = input_y;
 }
 void animation8(TCLControl *tcl) {
+    // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
+    // int jitterAmount = input_y*50/255;
+    // printf( "Jitter: %i\n", jitterAmount);
 
+    int rainbowPass = popHSVRainbow(input_x*10/255);
+
+    int index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // // This next line grabs the address of single pixel out of the pixels char buffer
+            // // and points a char at it so that it's value can be set:
+            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
+
+            pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+            index += 1;
+        }
+    }
+
+    index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+            int hsvColor = rainbowPass; //HSVJitter(rainbowPass, jitterAmount);
+            int jitColor = getRGB(unpackA(hsvColor), unpackB(hsvColor), unpackC(hsvColor));
+
+            if (y>=1 && y < input_y*50/255) {
+                tcl->pixelBuf[index] = pixelBackupBuf[index-1];
+            } else if (y>=input_y*50/255) {
+                if (x==11) {
+                    tcl->pixelBuf[index] = pixelBackupBuf[index-49];
+                } else {
+                    tcl->pixelBuf[index] = pixelBackupBuf[index+1];
+                }
+            } else {
+                tcl->pixelBuf[index] = jitColor;
+            }
+
+            index += 1;
+        }
+    }
 }
 void animation7(TCLControl *tcl) {
 
@@ -358,7 +444,6 @@ void animation6(TCLControl *tcl) {
     }
 }
 
-int old_x, old_y;
 int tempHSV;
 void animation5(TCLControl *tcl) {
     // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
