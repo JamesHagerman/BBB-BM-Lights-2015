@@ -238,10 +238,8 @@ int popHSVRainbow(int h_rate) {
 
 int cycle = 0;
 int popCycle(int rate) {
-    int toRet = 0;
-
-    cycle +=1;
-    return toRet;
+    cycle +=rate;
+    return cycle;
 }
 
 
@@ -276,11 +274,12 @@ void animation7(TCLControl *tcl) {
 
     // Handle inputs:
     int rate = input_y*50/255;
-    int skew = input_x;
+    int skew = popCycle(input_x*50/255);
+    rate = rate-rate/2;
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
-        h_angle = 0;
+        // h_angle = 0;
         for(int y = 0; y < HEIGHT; y++) {
 
 
