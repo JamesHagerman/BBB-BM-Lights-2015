@@ -358,11 +358,16 @@ void animation6(TCLControl *tcl) {
     }
 }
 
-
+int old_x, old_y;
+int tempHSV;
 void animation5(TCLControl *tcl) {
-
-    printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
-    int temp = getRGB(input_y, input_x, 255);
+    // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
+    if (input_x != old_x || input_y != old_y) {
+        tempHSV = pack(input_y, 255, 255);
+    } else {
+        tempHSV = HSVJitter(tempHSV, input_x*50/255);
+    }
+    
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -372,11 +377,14 @@ void animation5(TCLControl *tcl) {
             // // and points a char at it so that it's value can be set:
             // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-            tcl->pixelBuf[index] = temp;
+            tcl->pixelBuf[index] = getRGB(tempHSV);
 
             index += 1;
         }
     }
+
+    old_x = input_x;
+    old_y = input_y;
 }
 
 void animation4(TCLControl *tcl) {
