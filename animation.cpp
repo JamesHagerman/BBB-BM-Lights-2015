@@ -344,12 +344,15 @@ void animation9(TCLControl *tcl) {
             if (y>=1) {
                 tcl->pixelBuf[index] = pixelBackupBuf[index-1];
             } else {
-                if (input_x == old_x && input_y == old_y) {
-                    tcl->pixelBuf[index] = tcl->pixelBuf[index+49];
-                } else {
-                    if (x == input_x*12/255) {
-                        tcl->pixelBuf[index] = jitColor;
-                    }
+                // if (input_x == old_x && input_y == old_y) {
+                //     tcl->pixelBuf[index] = tcl->pixelBuf[index+49];
+                // } else {
+                //     if (x == input_x*12/255) {
+                //         tcl->pixelBuf[index] = jitColor;
+                //     }
+                // }
+                if (x == input_x*12/255) {
+                    tcl->pixelBuf[index] = jitColor;
                 }
 
                 
