@@ -179,6 +179,9 @@ int getRandomColor(){
 int getBetterRandomColor(){
     return getRGB(randColor(), 255, 255);
 }
+int getBetterRandomColor(int sat){
+    return getRGB(randColor(), sat, 255);
+}
 int getHSVRandomColor(){
     return pack(randColor(), 255, 255);
 }
@@ -500,8 +503,16 @@ void animation2(TCLControl *tcl) {
 }
 
 
+int tempColor;
+int counter = 5;
 void animation1(TCLControl *tcl) {
-    int temp = getBetterRandomColor();
+
+    counter += 1;
+    if (counter > (input_y*50/255)) {
+        int sat = input_x;
+        tempColor = getBetterRandomColor(sat);
+        counter = 0;
+    }
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -526,7 +537,7 @@ void animation1(TCLControl *tcl) {
             if (y>=1) {
                 tcl->pixelBuf[index] = pixelBackupBuf[index-1];
             } else {
-                tcl->pixelBuf[index] = temp;
+                tcl->pixelBuf[index] = tempColor;
             }
 
             index += 1;
