@@ -205,6 +205,9 @@ int colorJitter(int color, int jitterAmount) {
 int HSVJitter(int hsvColor, int amt) {
     return pack(jitter(unpackA(hsvColor), amt), unpackB(hsvColor), unpackC(hsvColor));
 }
+int HSVShift(int hsvColor, int amt) {
+    return pack(unpackA(hsvColor)+amt, unpackB(hsvColor), unpackC(hsvColor));
+}
 
 int h_angle = 0;
 int popRainbow(int h_rate) {
@@ -226,6 +229,14 @@ int popHSVRainbow(int h_rate) {
     if (h_angle >= 255) {
         h_angle = 0;
     }
+    return toRet;
+}
+
+int cycle = 0;
+int popCycle(int rate) {
+    int toRet = 0;
+    
+    cycle +=1;
     return toRet;
 }
 
@@ -259,14 +270,46 @@ void animation8(TCLControl *tcl) {
 }
 void animation7(TCLControl *tcl) {
 
+    int index = 0;
+    for(int x = 0; x < WIDTH; x++) {
+        for(int y = 0; y < HEIGHT; y++) {
+
+            // // This next line grabs the address of single pixel out of the pixels char buffer
+            // // and points a char at it so that it's value can be set:
+            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
+
+            tcl->pixelBuf[index] = tcl->pixelBuf[index];
+
+            index += 1;
+        }
+    }
 }
+
+// Old light update:
+// Calculate the new values for the pixelBuf:
+// Update the lights:
+// x += (double)tcl.pixelsPerStrand / 20000.0;
+// s1 = sin(x                 ) *  11.0;
+// s2 = sin(x *  0.857 - 0.214) * -13.0;
+// s3 = sin(x * -0.923 + 1.428) *  17.0;
+// for(i=0;i<tcl.totalPixels;i++)
+// {
+//     r   = (int)((sin(s1) + 1.0) * 127.5);
+//     g   = (int)((sin(s2) + 1.0) * 127.5);
+//     b   = (int)((sin(s3) + 1.0) * 127.5);
+//     tcl.pixelBuf[i] = TCrgb(r,g,b);
+//     s1 += 0.273;
+//     s2 -= 0.231;
+//     s3 += 0.428;
+// }
 
 void animation6(TCLControl *tcl) {
 
     int rainbowPass = popHSVRainbow(10);
     
     printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
-    int jitterAmount = input_x;
+    int jitterAmount = input_y*100/255;
+    printf( "Jitter: %i\n", jitterAmount);
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -515,20 +558,8 @@ gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer u
         actor_y = actor_y/clutter_actor_get_height(actor)*255;
 
         // printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
-        // finput_x = actor_x;
-        // finput_y = actor_y;
-
-        // if (actor_x > 10.0) {
-            input_x = static_cast<int>(actor_x);
-        // } else {
-        //     input_x = 1;
-        // }
-        // if (actor_y > 10.0) {
-            input_y = static_cast<int>(actor_y);
-        // } else {
-        //     input_y = 1;
-        // }
-        // input_x = 10;
+        input_x = static_cast<int>(actor_x);
+        input_y = static_cast<int>(actor_y);
 
     } else {
         // printf("Some other touch event %i\n", eventType);
@@ -629,25 +660,6 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     }
 
     clutter_actor_set_content(lightDisplay, colors);
-
-
-    // Old light update:
-    // Calculate the new values for the pixelBuf:
-    // Update the lights:
-    // x += (double)tcl.pixelsPerStrand / 20000.0;
-    // s1 = sin(x                 ) *  11.0;
-    // s2 = sin(x *  0.857 - 0.214) * -13.0;
-    // s3 = sin(x * -0.923 + 1.428) *  17.0;
-    // for(i=0;i<tcl.totalPixels;i++)
-    // {
-    //     r   = (int)((sin(s1) + 1.0) * 127.5);
-    //     g   = (int)((sin(s2) + 1.0) * 127.5);
-    //     b   = (int)((sin(s3) + 1.0) * 127.5);
-    //     tcl.pixelBuf[i] = TCrgb(r,g,b);
-    //     s1 += 0.273;
-    //     s2 -= 0.231;
-    //     s3 += 0.428;
-    // }
 }
 
 
