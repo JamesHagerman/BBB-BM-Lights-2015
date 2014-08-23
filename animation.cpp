@@ -57,6 +57,13 @@ int AnimationID = 0;
 //=======================
 // Helpful color tools:
 
+// Unpack and packing colors into and out of int
+int pack(int a, int b, int c) { return (a<<16) | (b<<8) | c; }
+int unpackA(int color) { return (color>>16) & 0xff; }
+int unpackB(int color) { return (color>>8)  & 0xff; }
+int unpackC(int color) { return (color)     & 0xff; }
+
+
 // convert HSB to RGB:
 int rgb_colors[3]; // holder for rgb color from hsb conversion
 int hue;
@@ -152,12 +159,9 @@ int getRGB(int hue, int sat, int val) {
 
 }
 
-// Unpack and packing colors into and out of int
-int pack(int a, int b, int c) { return (a<<16) | (b<<8) | c; }
-int unpackA(int color) { return (color>>16) & 0xff; }
-int unpackB(int color) { return (color>>8)  & 0xff; }
-int unpackC(int color) { return (color)     & 0xff; }
-
+int getRGB(int hsvColor) {
+    return getRGB(unpackA(hsvColor), unpackB(hsvColor), unpackC(hsvColor));
+}
 
 // Random functions: 
 int getrand(int min,int max){
@@ -235,7 +239,7 @@ int popHSVRainbow(int h_rate) {
 int cycle = 0;
 int popCycle(int rate) {
     int toRet = 0;
-    
+
     cycle +=1;
     return toRet;
 }
@@ -270,15 +274,21 @@ void animation8(TCLControl *tcl) {
 }
 void animation7(TCLControl *tcl) {
 
+    // Handle inputs:
+    int rate = input_y*50/255;
+    int skew = input_x;
+
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
+        h_angle = 0;
         for(int y = 0; y < HEIGHT; y++) {
+
 
             // // This next line grabs the address of single pixel out of the pixels char buffer
             // // and points a char at it so that it's value can be set:
             // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-            tcl->pixelBuf[index] = tcl->pixelBuf[index];
+            tcl->pixelBuf[index] = getRGB(HSVShift(popHSVRainbow(rate), skew));
 
             index += 1;
         }
@@ -307,9 +317,9 @@ void animation6(TCLControl *tcl) {
 
     int rainbowPass = popHSVRainbow(10);
     
-    printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
+    // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
     int jitterAmount = input_y*100/255;
-    printf( "Jitter: %i\n", jitterAmount);
+    // printf( "Jitter: %i\n", jitterAmount);
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
