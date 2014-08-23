@@ -520,7 +520,7 @@ void animation5(TCLControl *tcl) {
 
 void animation4(TCLControl *tcl) {
  
-    int temp = popRainbow(10);
+    int temp = popRainbow(input_y*100/255);
 
     int index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -530,14 +530,10 @@ void animation4(TCLControl *tcl) {
             // // and points a char at it so that it's value can be set:
             // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-            if (y == 0) {
+            if (y == input_y*WIDTH/255) {
                 tcl->pixelBuf[index] = temp;
-            } else if (y == 49) {
-                tcl->pixelBuf[index] = getBetterRandomColor();
-            } else if (x == 10) {
-                tcl->pixelBuf[index] = tcl->pixelBuf[index+x];
             } else {
-                tcl->pixelBuf[index] = tcl->pixelBuf[index+x];
+                tcl->pixelBuf[index] = tcl->pixelBuf[index^(input_x*HEIGHT/255)] + temp;
             }
 
             // tcl->pixelBuf[index] = temp;
