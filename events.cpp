@@ -57,7 +57,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
             printf ("Down and shift pressed\n");
         else
             printf ("Down pressed\n");
-            exit(1);
+            // exit(1);
 
         /* The event was handled, and the emission should stop */
         return CLUTTER_EVENT_STOP;
@@ -79,7 +79,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
         system("sync; shutdown -h now");
     } else if (65307 == keyval) {
         printf("esc pressed. Exiting...\n");
-        // exit(1);
+        exit(1);
     } else {
         printf("Something else pressed: %i\n", keyval);
     }
