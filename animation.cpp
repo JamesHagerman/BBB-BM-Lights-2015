@@ -293,7 +293,7 @@ void animation10(TCLControl *tcl) {
         clearing = true;
     }
 
-    int thresh = 4;
+    // int thresh = 4;
 
     int temp = popHSVRainbow(1);
     int inverted_temp = invertHSV(temp);
@@ -519,7 +519,7 @@ void animation5(TCLControl *tcl) {
 }
 
 void animation4(TCLControl *tcl) {
-
+ 
     int temp = popRainbow(10);
 
     int index = 0;
@@ -557,7 +557,7 @@ void animation3(TCLControl *tcl) {
             // int temp = TCrgb(200,200,10);
             // int temp = (200<<16)|(200<<8)|10;
             // int temp = getRGB(0,255,255);
-            int temp = popRainbow(1);
+            int temp = popRainbow(input_x*10/255);
             tcl->pixelBuf[i] = temp;
         }
     }
