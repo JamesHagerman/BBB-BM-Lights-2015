@@ -458,7 +458,7 @@ void animation2(TCLControl *tcl) {
             // // and points a char at it so that it's value can be set:
             // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-            HSVBuf[index] = HSVJitter(HSVBuf[index], 10);
+            HSVBuf[index] = HSVJitter(HSVBuf[index], input_y*50/255);
 
             index += 1;
         }
