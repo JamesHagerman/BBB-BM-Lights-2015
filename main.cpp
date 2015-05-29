@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
     // Wire up some event listeners:
     clutter_actor_set_reactive (rect, TRUE);
     g_signal_connect (rect, "touch-event", G_CALLBACK (eventHandlers.handleTouchEvents), transitions);
-    // g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    //g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
     g_signal_connect (rect, "button-press-event", G_CALLBACK (eventHandlers.handleMouseEvents), rect);
 
     // Add the spinning rectangle to the stage:

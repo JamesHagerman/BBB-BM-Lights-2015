@@ -31,6 +31,7 @@ typedef struct  {
 
 typedef struct  {
     ClutterActor *lightDisplay;
+    ClutterShaderEffect *shaderEffect;
     TCLControl *tcl;
     int *animationNumber;
     gfloat *input_x;
@@ -43,6 +44,14 @@ int cutoff = 0;
 // Hold on to the Color Display:
 ClutterContent *colors;
 ClutterActor *lightDisplay;
+ClutterShaderEffect *shaderEffect;
+const gchar *fragShader = ""
+"#version 120"
+"void main(void) {"
+"    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);"
+"}";
+
+
 GdkPixbuf *pixbuf;
 unsigned char* pixels;
 int rowstride;
@@ -791,6 +800,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
         }
     }
     if (pixbuf != NULL) {
+        // THIS actually draws the image on the screen.
         clutter_image_set_data(CLUTTER_IMAGE(colors),
                             gdk_pixbuf_get_pixels (pixbuf),
                             COGL_PIXEL_FORMAT_RGB_888,
@@ -894,6 +904,14 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK (handleTouchEvents), touch_data);
 
     clutter_actor_set_content(lightDisplay, colors);
+
+    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
+    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
+    clutter_shader_effect_set_shader_source(shaderEffect, *fragShader);
+
+    // Add that effect to the on screen lightDisplay:
+    clutter_actor_add_effect(lightDisplay, shaderEffect);
+    // clutter_actor_remove_effect(lightDisplay, shaderEffect);
 
     clutter_actor_add_child(stage, lightDisplay);
 
