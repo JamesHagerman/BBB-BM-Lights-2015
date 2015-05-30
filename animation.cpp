@@ -31,7 +31,7 @@ typedef struct  {
 
 typedef struct  {
     ClutterActor *lightDisplay;
-    ClutterShaderEffect *shaderEffect;
+    ClutterEffect *shaderEffect;
     TCLControl *tcl;
     int *animationNumber;
     gfloat *input_x;
@@ -44,7 +44,7 @@ int cutoff = 0;
 // Hold on to the Color Display:
 ClutterContent *colors;
 ClutterActor *lightDisplay;
-ClutterShaderEffect *shaderEffect;
+ClutterEffect *shaderEffect;
 const gchar *fragShader = ""
 "#version 120"
 "void main(void) {"
@@ -907,7 +907,9 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
     // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
     shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
-    clutter_shader_effect_set_shader_source(shaderEffect, *fragShader);
+    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT (shaderEffect), fragShader);
+
+    //clutter_shader_effect_set_shader_source (CLUTTER_SHADER_EFFECT (shaderEffect), desaturare_glsl_shader);
 
     // Add that effect to the on screen lightDisplay:
     clutter_actor_add_effect(lightDisplay, shaderEffect);
