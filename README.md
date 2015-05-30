@@ -11,6 +11,13 @@ Building on OS X
 
 To build under OS X, you need to install clutter, cogl, and XQuartz.
 
+Actually, we shouldn't need XQuarts because clutter and cogl just suck trying to connect to the x11 display. So we are just
+going to use the --without-x11 flag for the install.
+
+```
+brew install clutter clutter-gst clutter-gtk pango cairo cogl --without-x11
+```
+
 You can use Homebrew to install clutter and cogl, but you'll need to use updated Formulas to make sure you pull down the latest versions.
 
 I banged my head against this thing seg faulting a lot... so I uninstalled cogl, clutter, pango, cairo, and XQuartz, and reinstall them all.
