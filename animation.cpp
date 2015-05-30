@@ -45,10 +45,9 @@ int cutoff = 0;
 ClutterContent *colors;
 ClutterActor *lightDisplay;
 ClutterEffect *shaderEffect;
-const gchar *fragShader = ""
-"#version 120"
-"void main(void) {"
-"    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);"
+const gchar *fragShader = "" //"#version 110\n\n"
+"void main(void) {\n"
+"   cogl_color_out = cogl_tex_coord_in[0];\n" //cogl_color_out = vec4(0.0, 1.0, 0.0, 1.0);
 "}";
 
 
@@ -909,10 +908,14 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT (shaderEffect), fragShader);
 
-    //clutter_shader_effect_set_shader_source (CLUTTER_SHADER_EFFECT (shaderEffect), desaturare_glsl_shader);
+    // Bind uniforms to the shader:
+//    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (effect), "tex", G_TYPE_INT, 1, 0);
+//    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (effect), "factor", G_TYPE_FLOAT, 1, 0.66);
 
     // Add that effect to the on screen lightDisplay:
-    clutter_actor_add_effect(lightDisplay, shaderEffect);
+//    clutter_actor_add_effect(lightDisplay, shaderEffect);
+    clutter_actor_add_effect_with_name(lightDisplay, "green", shaderEffect);
+
     // clutter_actor_remove_effect(lightDisplay, shaderEffect);
 
     clutter_actor_add_child(stage, lightDisplay);
