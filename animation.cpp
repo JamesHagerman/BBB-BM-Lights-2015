@@ -54,7 +54,7 @@ ClutterEffect *shaderEffect;
 const gchar *fragShader = "" //"#version 110\n\n"
 "uniform int iGlobalTime;\n"
 "void main(void) {\n"
-"   cogl_color_out = vec4(sin(cogl_tex_coord_in[0].x*100), 0.0, sin(cogl_tex_coord_in[0].y*50), 1.0);\n" //cogl_color_out = vec4(0.0, 1.0, 0.0, 1.0);
+"   cogl_color_out = cogl_tex_coord_in[0];\n" // "   cogl_color_out = vec4(sin(cogl_tex_coord_in[0].x*100), 0.0, sin(cogl_tex_coord_in[0].y*50), 1.0);\n"
 "}";
 
 
