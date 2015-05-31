@@ -806,16 +806,16 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     }
     if (pixbuf != NULL) {
         // THIS actually draws the image on the screen.
-        clutter_image_set_data(CLUTTER_IMAGE(colors),
-                            gdk_pixbuf_get_pixels (pixbuf),
-                            COGL_PIXEL_FORMAT_RGB_888,
-                            gdk_pixbuf_get_width (pixbuf),
-                            gdk_pixbuf_get_height (pixbuf),
-                            gdk_pixbuf_get_rowstride (pixbuf),
-                            &error);
+//        clutter_image_set_data(CLUTTER_IMAGE(colors),
+//                            gdk_pixbuf_get_pixels (pixbuf),
+//                            COGL_PIXEL_FORMAT_RGB_888,
+//                            gdk_pixbuf_get_width (pixbuf),
+//                            gdk_pixbuf_get_height (pixbuf),
+//                            gdk_pixbuf_get_rowstride (pixbuf),
+//                            &error);
     }
 
-    clutter_actor_set_content(lightDisplay, colors);
+//    clutter_actor_set_content(lightDisplay, colors);
 }
 
 
