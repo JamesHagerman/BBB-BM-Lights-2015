@@ -810,7 +810,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
                             &error);
     }
 
-//    clutter_actor_set_content(lightDisplay, colors);
+    clutter_actor_set_content(lightDisplay, colors);
 }
 
 
