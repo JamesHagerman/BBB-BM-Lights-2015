@@ -46,8 +46,9 @@ ClutterContent *colors;
 ClutterActor *lightDisplay;
 ClutterEffect *shaderEffect;
 const gchar *fragShader = "" //"#version 110\n\n"
+"uniform iGlobalTime"
 "void main(void) {\n"
-"   cogl_color_out = cogl_tex_coord_in[0];\n" //cogl_color_out = vec4(0.0, 1.0, 0.0, 1.0);
+"   cogl_color_out = vec4(sin(cogl_tex_coord_in[0].x*100), 0.0, sin(cogl_tex_coord_in[0].y*50), 1.0);\n" //cogl_color_out = vec4(0.0, 1.0, 0.0, 1.0);
 "}";
 
 
@@ -809,7 +810,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
                             &error);
     }
 
-    clutter_actor_set_content(lightDisplay, colors);
+//    clutter_actor_set_content(lightDisplay, colors);
 }
 
 
@@ -909,8 +910,8 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT (shaderEffect), fragShader);
 
     // Bind uniforms to the shader:
-//    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (effect), "tex", G_TYPE_INT, 1, 0);
-//    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (effect), "factor", G_TYPE_FLOAT, 1, 0.66);
+    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_INT, 1, 0);
+//    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "factor", G_TYPE_FLOAT, 1, 0.66);
 
     // Add that effect to the on screen lightDisplay:
 //    clutter_actor_add_effect(lightDisplay, shaderEffect);
