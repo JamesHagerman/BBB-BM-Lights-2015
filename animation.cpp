@@ -60,6 +60,7 @@ const gchar *fragShader = "" //"#version 110\n\n"
 "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(cogl_tex_coord_in[0].y*50.0), 1.0);\n"
 "}";
 
+guint8 *data;
 
 GdkPixbuf *pixbuf;
 unsigned char* pixels;
@@ -668,17 +669,22 @@ void animation1(TCLControl *tcl) {
     ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
     CoglHandle shaderBufferHandle = clutter_offscreen_effect_get_texture(offscreen_effect);
 
-    clutter_image_set_data(CLUTTER_IMAGE(colors),
-                        gdk_pixbuf_get_pixels (shaderBufferHandle),
+    int copySize = cogl_texture_get_data(shaderBufferHandle,
                         COGL_PIXEL_FORMAT_RGB_888,
-                        gdk_pixbuf_get_width (shaderBufferHandle),
-                        gdk_pixbuf_get_height (shaderBufferHandle),
-                        gdk_pixbuf_get_rowstride (shaderBufferHandle),
-                        &error);
+                        0,
+                        data);
 
-//    clutter_actor_set_content(lightDisplay, shaderBufferHandle);      // does not work.
+    printf("Derp: %i", copySize);
 
-    clutter_actor_set_content(lightDisplay, colors);
+//    clutter_image_set_data(CLUTTER_IMAGE(colors),
+//                        data,
+//                        COGL_PIXEL_FORMAT_RGB_888,
+//                        cogl_texture_get_width (shaderBufferHandle),
+//                        cogl_texture_get_height (shaderBufferHandle),
+//                        cogl_texture_get_width (shaderBufferHandle) * 3,
+//                        &error);
+
+//    clutter_actor_set_content(lightDisplay, colors);
 
     index = 0;
     for(int x = 0; x < WIDTH; x++) {
@@ -871,6 +877,10 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
     rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 
+    // Allocate the memory for the shader output buffer:
+    // Multiplied by 3 because we have three bytes per pixel (r, g, b)
+    data = (guint8 *)malloc(WIDTH * HEIGHT * 100); // Actually, 8, because FUCKING SIZE!?!?
+
     for(int x = 0; x < WIDTH; x++) {
         for(int y = 0; y < HEIGHT; y++) {
 
@@ -940,11 +950,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
 //    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "factor", G_TYPE_FLOAT, 1, 0.66);
 
-    // Add that effect to the on screen lightDisplay:
 //    clutter_actor_add_effect(lightDisplay, shaderEffect);
-//    clutter_actor_add_effect_with_name(lightDisplay, "green", shaderEffect);
-
-    // clutter_actor_remove_effect(lightDisplay, shaderEffect);
 
     clutter_actor_add_child(stage, lightDisplay);
 
