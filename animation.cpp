@@ -665,6 +665,21 @@ void animation1(TCLControl *tcl) {
         }
     }
 
+    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
+    CoglHandle shaderBufferHandle = clutter_offscreen_effect_get_texture(offscreen_effect);
+
+    clutter_image_set_data(CLUTTER_IMAGE(colors),
+                        gdk_pixbuf_get_pixels (shaderBufferHandle),
+                        COGL_PIXEL_FORMAT_RGB_888,
+                        gdk_pixbuf_get_width (shaderBufferHandle),
+                        gdk_pixbuf_get_height (shaderBufferHandle),
+                        gdk_pixbuf_get_rowstride (shaderBufferHandle),
+                        &error);
+
+//    clutter_actor_set_content(lightDisplay, shaderBufferHandle);      // does not work.
+
+    clutter_actor_set_content(lightDisplay, colors);
+
     index = 0;
     for(int x = 0; x < WIDTH; x++) {
         for(int y = 0; y < HEIGHT; y++) {
@@ -927,7 +942,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
     // Add that effect to the on screen lightDisplay:
 //    clutter_actor_add_effect(lightDisplay, shaderEffect);
-    clutter_actor_add_effect_with_name(lightDisplay, "green", shaderEffect);
+//    clutter_actor_add_effect_with_name(lightDisplay, "green", shaderEffect);
 
     // clutter_actor_remove_effect(lightDisplay, shaderEffect);
 
