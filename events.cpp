@@ -5,6 +5,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include "configurations.h"
+#include "animation.h"
 
 Events::Events() {
     printf("Building events class\n");
@@ -131,6 +132,31 @@ gboolean Events::handleMouseEvents (ClutterActor *actor,
            actor_x, actor_y);
 
     clutter_actor_set_position (rect_actor, stage_x, stage_y);
+
+    return CLUTTER_EVENT_STOP;
+}
+
+
+gboolean Events::handleAfterPaint (ClutterActor *actor,
+    ClutterEvent *event,
+    gpointer      user_data) {
+
+//    printf("after-paint\n");
+
+    // Rebuild the struct from the pointer we handed in:
+    EventDataAfterPaint *dataAfterPaint;
+    dataAfterPaint = (EventDataAfterPaint *)user_data;
+
+    Animation *animation = dataAfterPaint->animation;
+    animation->derp();
+
+//    ClutterEventType eventType = clutter_event_type(event);
+//
+//    if (eventType == CLUTTER_TOUCH_END) {
+//        printf("Touch end!\n");
+//    } else {
+//        printf("Some other touch event %i\n", eventType);
+//    }
 
     return CLUTTER_EVENT_STOP;
 }

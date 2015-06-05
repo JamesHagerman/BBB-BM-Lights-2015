@@ -666,15 +666,15 @@ void animation1(TCLControl *tcl) {
         }
     }
 
-    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
-    CoglHandle shaderBufferHandle = clutter_offscreen_effect_get_texture(offscreen_effect);
-
-    int copySize = cogl_texture_get_data(shaderBufferHandle,
-                        COGL_PIXEL_FORMAT_RGB_888,
-                        0,
-                        data);
-
-    printf("Derp: %i", copySize);
+//    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
+//    CoglHandle shaderBufferHandle = clutter_offscreen_effect_get_texture(offscreen_effect);
+//
+//    int copySize = cogl_texture_get_data(shaderBufferHandle,
+//                        COGL_PIXEL_FORMAT_RGB_888,
+//                        1,
+//                        data);
+//
+//    printf("copy-size: %i", copySize);
 
 //    clutter_image_set_data(CLUTTER_IMAGE(colors),
 //                        data,
@@ -683,7 +683,7 @@ void animation1(TCLControl *tcl) {
 //                        cogl_texture_get_height (shaderBufferHandle),
 //                        cogl_texture_get_width (shaderBufferHandle) * 3,
 //                        &error);
-
+//
 //    clutter_actor_set_content(lightDisplay, colors);
 
     index = 0;
@@ -879,7 +879,14 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
     // Allocate the memory for the shader output buffer:
     // Multiplied by 3 because we have three bytes per pixel (r, g, b)
-    data = (guint8 *)malloc(WIDTH * HEIGHT * 100); // Actually, 8, because FUCKING SIZE!?!?
+    int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
+    data = (guint8 *)malloc(shaderBufferSize);
+
+    if (data == NULL) {
+        printf("OOPS! malloc error!\n");
+    } else {
+        printf("We malloc'd %i bytes for your shaderBuffer. It points at: %p\n", shaderBufferSize, data);
+    }
 
     for(int x = 0; x < WIDTH; x++) {
         for(int y = 0; y < HEIGHT; y++) {
@@ -950,8 +957,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
 //    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "factor", G_TYPE_FLOAT, 1, 0.66);
 
-//    clutter_actor_add_effect(lightDisplay, shaderEffect);
-
+    clutter_actor_add_effect(lightDisplay, shaderEffect);
     clutter_actor_add_child(stage, lightDisplay);
 
 
@@ -988,4 +994,50 @@ int Animation::getCurrentAnimation() {
     return currentAnimation;
 }
 
+void Animation::derp() {
+    cogl_read_pixels(   0, // start x
+                        50, // stary y
+                        10*4,  // width (4 bytes per pixel)
+                        10*4, // height (4 bytes per pixel)
+                        COGL_READ_PIXELS_COLOR_BUFFER,
+                        COGL_PIXEL_FORMAT_RGBA_8888,
+                        data);
+
+    printf("Here's the data we pulled from the FB:\n");
+    for (int i = 0; i < (10*4)*1; i++) {
+        printf("%i ", data[i]);
+
+//        if (i%10 == 0) {  // OOPS That's not right. 4 bytes per pixel!
+        if (i%4 == 0) {
+            printf(", ");
+        }
+        if (i%40 == 0) {
+            printf("\n");
+        }
+    }
+    printf("\nDone!\n");
+
+// Trying to be all smart 'n shit:
+//    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
+//    CoglHandle shaderBufferHandle = clutter_offscreen_effect_get_texture(offscreen_effect);
+
+//    int copySize = 0;
+
+//    cogl_read_pixels(   0, // start x
+//                        0, // stary y
+//                        cogl_texture_get_width (shaderBufferHandle),  // width
+//                        cogl_texture_get_height (shaderBufferHandle), // height
+//                        COGL_READ_PIXELS_COLOR_BUFFER,
+//                        COGL_PIXEL_FORMAT_RGBA_8888,
+//                        data);
+
+
+
+//    copySize = cogl_texture_get_data(shaderBufferHandle,
+//                        COGL_PIXEL_FORMAT_RGB_888,
+//                        1,
+//                        data);
+
+//    printf("copy-size: %i\n", copySize);
+}
 

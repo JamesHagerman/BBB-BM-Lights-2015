@@ -81,12 +81,18 @@ ClutterActor *infoDisplay;
 
 TCLControl tcl;
 
+Animation animation;
+
 // ColorMan colorMan;
 
 Events eventHandlers;
 typedef struct  {
     ClutterActor *statusLabel;
 } EventData;
+
+typedef struct  {
+    Animation *animation;
+} EventDataAfterPaint;
 
 
 // using namespace std;
@@ -100,8 +106,6 @@ typedef struct  {
 //     clutter_actor_show (toRet);
 //     return toRet;
 // }
-
-
 
 int main(int argc, char *argv[]) {
 
@@ -148,7 +152,7 @@ int main(int argc, char *argv[]) {
     // Build a "down" color (hard coded for now...)
     // ClutterColor downColor = { 255, 0, 47, 0xFF };
     g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), data);
-    
+
 
     /* Status rectangle */
     rect = clutter_actor_new();
@@ -178,7 +182,23 @@ int main(int argc, char *argv[]) {
     clutter_actor_add_child(stage, infoDisplay);
 
     // Start animation loop:
-    Animation animation = Animation(stage, rect, &tcl, infoDisplay);
+    animation = Animation(stage, rect, &tcl, infoDisplay);
+
+    // The animation loop itself will have to know when the frame buffers are swapping. To do this
+    // we apparently nead to listen to the "after-paint" event on the main scene object.
+    //
+    // Once the "after-paint" event fires, we will need to set a state on the Animation to tell it that
+    // there's data to read from the shaderBuffer. The Animation object will grab the pixel data from
+    // the shadders buffer, then shove it into a buffer we can hold on to until the Animation loop is
+    // ready to draw the scene and to dump the colors to the lights.
+    //
+    // Set up the data storage to hand a pointer to the main Animation object into the event handler:
+    EventDataAfterPaint *dataAfterPaint;
+    dataAfterPaint = g_slice_new (EventDataAfterPaint); // reserve memory for it...
+    dataAfterPaint->animation = &animation; // Place the button actor itself inside the struct
+    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
+    g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
+
 
     // Build UI Buttons:
     Button button1 = Button(stage, 0, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF }, &animation, infoDisplay);
