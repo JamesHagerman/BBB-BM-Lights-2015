@@ -44,10 +44,12 @@ int cutoff = 0;
 // Hold on to the Color Display:
 ClutterContent *colors;
 ClutterActor *lightDisplay;
-ClutterEffect *shaderEffect;
 
-// A variable to hold the value of iGlobalTime:
-gfloat animationTime = 100.0;
+//============
+// GLSL Shader related:
+ClutterEffect *shaderEffect;
+guint8 *shaderBuffer;
+gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
 
 //const gchar *fragShader = ""
 //"void main(void) {\n"
@@ -60,7 +62,8 @@ const gchar *fragShader = "" //"#version 110\n\n"
 "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(cogl_tex_coord_in[0].y*50.0), 1.0);\n"
 "}";
 
-guint8 *data;
+// End shaders
+//============
 
 GdkPixbuf *pixbuf;
 unsigned char* pixels;
@@ -666,26 +669,6 @@ void animation1(TCLControl *tcl) {
         }
     }
 
-//    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
-//    CoglHandle shaderBufferHandle = clutter_offscreen_effect_get_texture(offscreen_effect);
-//
-//    int copySize = cogl_texture_get_data(shaderBufferHandle,
-//                        COGL_PIXEL_FORMAT_RGB_888,
-//                        1,
-//                        data);
-//
-//    printf("copy-size: %i", copySize);
-
-//    clutter_image_set_data(CLUTTER_IMAGE(colors),
-//                        data,
-//                        COGL_PIXEL_FORMAT_RGB_888,
-//                        cogl_texture_get_width (shaderBufferHandle),
-//                        cogl_texture_get_height (shaderBufferHandle),
-//                        cogl_texture_get_width (shaderBufferHandle) * 3,
-//                        &error);
-//
-//    clutter_actor_set_content(lightDisplay, colors);
-
     index = 0;
     for(int x = 0; x < WIDTH; x++) {
         for(int y = 0; y < HEIGHT; y++) {
@@ -880,12 +863,12 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     // Allocate the memory for the shader output buffer:
     // Multiplied by 3 because we have three bytes per pixel (r, g, b)
     int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
-    data = (guint8 *)malloc(shaderBufferSize);
+    shaderBuffer = (guint8 *)malloc(shaderBufferSize);
 
-    if (data == NULL) {
+    if (shaderBuffer == NULL) {
         printf("OOPS! malloc error!\n");
     } else {
-        printf("We malloc'd %i bytes for your shaderBuffer. It points at: %p\n", shaderBufferSize, data);
+        printf("We malloc'd %i bytes for your shaderBuffer. It points at: %p\n", shaderBufferSize, shaderBuffer);
     }
 
     for(int x = 0; x < WIDTH; x++) {
@@ -949,6 +932,8 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
     clutter_actor_set_content(lightDisplay, colors);
 
+    //=============
+    // Setup the GLSL Fragment shaders that we'll use to generate colors
     // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
     shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT (shaderEffect), fragShader);
@@ -959,6 +944,9 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
     clutter_actor_add_effect(lightDisplay, shaderEffect);
     clutter_actor_add_child(stage, lightDisplay);
+
+    // End shader stuff
+    //=============
 
 
     // Get ready to hand this display chunk in to the animation event:
@@ -976,8 +964,10 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
 }
 Animation::~Animation(){
-    g_object_unref(colors);
-    g_object_unref(pixbuf);
+    // These fail for some reason. Not sure why...
+//    g_object_unref(colors);
+//    g_object_unref(pixbuf);
+//    g_object_unref(shaderBuffer);
 }
 
 Animation::Animation() {
@@ -1001,11 +991,11 @@ void Animation::derp() {
                         10*4, // height (4 bytes per pixel)
                         COGL_READ_PIXELS_COLOR_BUFFER,
                         COGL_PIXEL_FORMAT_RGBA_8888,
-                        data);
+                        shaderBuffer);
 
     printf("Here's the data we pulled from the FB:\n");
     for (int i = 0; i < (10*4)*1; i++) {
-        printf("%i ", data[i]);
+        printf("%i ", shaderBuffer[i]);
 
 //        if (i%10 == 0) {  // OOPS That's not right. 4 bytes per pixel!
         if (i%4 == 0) {
@@ -1029,14 +1019,14 @@ void Animation::derp() {
 //                        cogl_texture_get_height (shaderBufferHandle), // height
 //                        COGL_READ_PIXELS_COLOR_BUFFER,
 //                        COGL_PIXEL_FORMAT_RGBA_8888,
-//                        data);
+//                        shaderBuffer);
 
 
 
 //    copySize = cogl_texture_get_data(shaderBufferHandle,
 //                        COGL_PIXEL_FORMAT_RGB_888,
 //                        1,
-//                        data);
+//                        shaderBuffer);
 
 //    printf("copy-size: %i\n", copySize);
 }
