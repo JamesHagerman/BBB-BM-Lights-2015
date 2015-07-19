@@ -4,7 +4,7 @@ ARCH = $(shell uname -m)
 ifeq ($(MACHINE)_$(ARCH),Darwin_x86_64)
 	CROSSCOMPILER = 
 endif
-ifeq ($(MACHINE)_$(ARCH),Linux_armv71)
+ifeq ($(MACHINE)_$(ARCH),Linux_armv7l)
 	CROSSCOMPILER = arm-angstrom-linux-gnueabi-
 endif
 ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)	
@@ -25,7 +25,7 @@ endif
 
 
 $(warning Building for $(MACHINE)_$(ARCH))
-ifeq ($(MACHINE)_$(ARCH),Linux_armv71)
+ifeq ($(MACHINE)_$(ARCH),Linux_armv7l)
 	LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7 -l/usr/local/lib/libp9813.a
 	CFLAGS += -O3 -fomit-frame-pointer
 endif
