@@ -1,9 +1,14 @@
 MACHINE= $(shell uname -s)
+ARCH = $(shell uname -m)
 
-ifeq ($(MACHINE),Darwin)
+ifeq ($(MACHINE)_$(ARCH),Darwin_x86_64)
 	CROSSCOMPILER = 
-else
+endif
+ifeq ($(MACHINE)_$(ARCH),Linux_armv71)
 	CROSSCOMPILER = arm-angstrom-linux-gnueabi-
+endif
+ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)	
+	CROSSCOMPILER = 
 endif
 
 CXX = $(CROSSCOMPILER)g++
@@ -11,17 +16,25 @@ CFLAGS = -Wall -g
 LDFLAGS = `pkg-config clutter-1.0 --libs`
 IFLAGS = `pkg-config clutter-1.0 --cflags`
 
-ifeq ($(MACHINE),Darwin)
+ifeq ($(MACHINE)_$(ARCH),Darwin_x86_64)
 	LDFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config gdk-pixbuf-2.0 clutter-1.0 --libs`
 	IFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config gdk-pixbuf-2.0 clutter-1.0 --cflags`
 	LDFLAGS += -lftd2xx -lp9813
 	CFLAGS += -fomit-frame-pointer
-
 endif
-ifeq ($(MACHINE),Linux)
+
+
+$(warning Building for $(MACHINE)_$(ARCH))
+ifeq ($(MACHINE)_$(ARCH),Linux_armv71)
 	LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7 -l/usr/local/lib/libp9813.a
 	CFLAGS += -O3 -fomit-frame-pointer
 endif
+
+ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)
+	LDFLAGS += -lp9813 -lftd2xx 
+	CFLAGS += -O3 -fomit-frame-pointer
+endif
+
 
 
 OUTPUT = clutter_window
