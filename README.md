@@ -25,6 +25,15 @@ I banged my head against this thing seg faulting a lot... so I uninstalled cogl,
 I think it was an issue with me building pango before installing XQuartz... but I'm not sure.
 
 
+Building on Ubuntu
+==================
+
+We need some packages installed under Ubuntu too. This does NOT build an ARM binary! No cross compiling here!
+
+```
+sudo apt-get install libclutter-1.0-dev libclutter-gst-2.0-dev libcogl-dev libpango1.0-dev libcairo2-dev
+```
+
 Installing the Clutter as a service on the BBB
 ===============================================
 
