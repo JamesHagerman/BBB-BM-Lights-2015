@@ -8,7 +8,7 @@
 #include "animation.h"
 
 Events::Events() {
-    printf("Building events class\n");
+    // printf("Building events class\n");
 }
 
 Events::~Events() {

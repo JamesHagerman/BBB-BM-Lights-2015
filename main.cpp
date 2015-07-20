@@ -70,8 +70,12 @@
 #include "button.h"
 #include "animation.h"
 
+#include "color.h"
+
 #include "configurations.h"
 
+
+Color colorManager;
 ClutterActor *rect;
 ClutterState *transitions;
 
@@ -109,6 +113,10 @@ typedef struct  {
 
 int main(int argc, char *argv[]) {
 
+    if (clutter_check_version(1,2,0)) {
+        printf("Right version of clutter is installed!\n\n");
+    }
+
     // init Clutter:
     if (clutter_init(&argc, &argv) != CLUTTER_INIT_SUCCESS) {
         printf("Clutter failed to initalize. Exiting...\n");
@@ -121,6 +129,9 @@ int main(int argc, char *argv[]) {
     ClutterColor actor_color = { 102, 0, 204, 255 };
     // ClutterColor red_color = { 0xFF, 0, 0, 255 };
 
+    Color colorManager = Color();
+    colorManager.Meow();
+
     // Set up the stage:
     ClutterActor *stage = clutter_stage_new();
     clutter_actor_set_size(stage, width, height);
@@ -131,12 +142,12 @@ int main(int argc, char *argv[]) {
 
 
     // Add a label to the stage:
-    label = clutter_text_new_with_text ("Sans 16px", "System Live! To halt system, press enter button below screen, wait for orange LED to stop blinking before removing system power.");
-    clutter_text_set_line_wrap(CLUTTER_TEXT(label), true);
-    clutter_actor_set_size(label, width-35, 35);
-    clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
-    clutter_actor_set_position(label, 35, 6); 
-    clutter_actor_add_child(stage, label);
+    // label = clutter_text_new_with_text ("Sans 16px", "System Live! To halt system, press enter button below screen, wait for orange LED to stop blinking before removing system power.");
+    // clutter_text_set_line_wrap(CLUTTER_TEXT(label), true);
+    // clutter_actor_set_size(label, width-35, 35);
+    // clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
+    // clutter_actor_set_position(label, 35, 6); 
+    // clutter_actor_add_child(stage, label);
 
     // label2 = clutter_text_new_with_text ("Sans 14px", "To halt system, press enter button below screen and wait for the orange LED to stop blinking before removing power.");
     // clutter_text_set_line_wrap(CLUTTER_TEXT(label2), true);

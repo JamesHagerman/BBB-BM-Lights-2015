@@ -12,7 +12,8 @@ ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)
 endif
 
 CXX = $(CROSSCOMPILER)g++
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -Wno-unused-result -Wno-unused-but-set-variable
+#-Wno-unused-variable
 LDFLAGS = `pkg-config clutter-1.0 --libs`
 IFLAGS = `pkg-config clutter-1.0 --cflags`
 
@@ -38,7 +39,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = main.o TCLControl.o events.o button.o animation.o
+OBJS = main.o TCLControl.o events.o button.o animation.o color.o
 
 all: ${OUTPUT}
 

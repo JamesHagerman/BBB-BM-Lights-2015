@@ -514,30 +514,30 @@ void animation6(TCLControl *tcl) {
 
 int tempHSV;
 void animation5(TCLControl *tcl) {
-    // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
-    if (input_x != old_x || input_y != old_y) {
-        tempHSV = pack(input_y, 255, 255);
-    } else {
-        tempHSV = HSVJitter(tempHSV, input_x*5/255);
-    }
+    // // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
+    // if (input_x != old_x || input_y != old_y) {
+    //     tempHSV = pack(input_y, 255, 255);
+    // } else {
+    //     tempHSV = HSVJitter(tempHSV, input_x*5/255);
+    // }
     
 
-    int index = 0;
-    for(int x = 0; x < WIDTH; x++) {
-        for(int y = 0; y < HEIGHT; y++) {
+    // int index = 0;
+    // for(int x = 0; x < WIDTH; x++) {
+    //     for(int y = 0; y < HEIGHT; y++) {
 
-            // // This next line grabs the address of single pixel out of the pixels char buffer
-            // // and points a char at it so that it's value can be set:
-            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
+    //         // // This next line grabs the address of single pixel out of the pixels char buffer
+    //         // // and points a char at it so that it's value can be set:
+    //         // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
 
-            tcl->pixelBuf[index] = getRGB(tempHSV);
+    //         tcl->pixelBuf[index] = getRGB(tempHSV);
 
-            index += 1;
-        }
-    }
+    //         index += 1;
+    //     }
+    // }
 
-    old_x = input_x;
-    old_y = input_y;
+    // old_x = input_x;
+    // old_y = input_y;
 }
 
 void animation4(TCLControl *tcl) {
@@ -814,16 +814,16 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     }
     if (pixbuf != NULL) {
         // THIS actually draws the image on the screen.
-//        clutter_image_set_data(CLUTTER_IMAGE(colors),
-//                            gdk_pixbuf_get_pixels (pixbuf),
-//                            COGL_PIXEL_FORMAT_RGB_888,
-//                            gdk_pixbuf_get_width (pixbuf),
-//                            gdk_pixbuf_get_height (pixbuf),
-//                            gdk_pixbuf_get_rowstride (pixbuf),
-//                            &error);
+       clutter_image_set_data(CLUTTER_IMAGE(colors),
+                           gdk_pixbuf_get_pixels (pixbuf),
+                           COGL_PIXEL_FORMAT_RGB_888,
+                           gdk_pixbuf_get_width (pixbuf),
+                           gdk_pixbuf_get_height (pixbuf),
+                           gdk_pixbuf_get_rowstride (pixbuf),
+                           &error);
     }
 
-//    clutter_actor_set_content(lightDisplay, colors);
+   clutter_actor_set_content(lightDisplay, colors);
 
     animationTime += 1.0;
     clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
@@ -942,7 +942,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
 //    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "factor", G_TYPE_FLOAT, 1, 0.66);
 
-    clutter_actor_add_effect(lightDisplay, shaderEffect);
+    // clutter_actor_add_effect(lightDisplay, shaderEffect);
     clutter_actor_add_child(stage, lightDisplay);
 
     // End shader stuff
@@ -1006,6 +1006,22 @@ void Animation::derp() {
         }
     }
     printf("\nDone!\n");
+
+    // int index = 0;
+    // for(int x = 0; x < WIDTH; x++) {
+    //     for(int y = 0; y < HEIGHT; y++) {
+
+    //         // pixelBackupBuf[index] = tcl->pixelBuf[index];
+
+    //         if (y>=1) {
+    //             tcl->pixelBuf[index] = pixelBackupBuf[index-1];
+    //         } else {
+    //             tcl->pixelBuf[index] = tempColor;
+    //         }
+
+    //         index += 1;
+    //     }
+    // }
 
 // Trying to be all smart 'n shit:
 //    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
