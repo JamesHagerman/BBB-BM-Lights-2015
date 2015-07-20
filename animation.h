@@ -22,7 +22,7 @@ class Animation {
         Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl, ClutterActor *infoDisplay); //TCLControl tcl
         ~Animation();
 
-        void switchAnimation(int animation_num, ClutterActor *infoDisplay);
+        void switchAnimation(int animationNumber, ClutterActor *infoDisplay);
         int getCurrentAnimation();
         void derp();
 

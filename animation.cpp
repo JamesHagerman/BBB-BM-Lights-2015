@@ -26,14 +26,14 @@ typedef struct  {
     ClutterActor *rotatingActor;
     ClutterActor *infoDisplay;
     TCLControl *tcl;
-    int *animationNumber;
+    int *animationNumber; // On 64 bit machines... we need to store huge addresses!
 } AnimationData;
 
 typedef struct  {
     ClutterActor *lightDisplay;
     ClutterEffect *shaderEffect;
     TCLControl *tcl;
-    int *animationNumber;
+    int *animationNumber; // On 64 bit machines... we need to store huge addresses!
     gfloat *input_x;
     gfloat *input_y;
 } TouchData;
@@ -741,7 +741,13 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     ClutterActor *rotatingActor = CLUTTER_ACTOR (data->rotatingActor);
     // ClutterActor *infoDisplay = CLUTTER_ACTOR (data->infoDisplay);
     TCLControl *tcl = data->tcl;
+
+    // We hand in the ADDRESS of the current Animation. The address should never change... but
+    // the value at that address SHOULD change! Keep in mind, on 64 bit machines, these 
+    // addresses can be huge...
     int *animation_number = data->animationNumber;
+
+    printf("Address of currentAnimation via animation_number: %i\n", animation_number);
 
 
     // Update the spinning rectangle:
@@ -750,6 +756,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 
 
     // Run which ever animation we're on:
+    printf("Currently on animation: %i\n", *animation_number);
     switch(*animation_number){
         case 1  :
            animation1(tcl);
@@ -823,10 +830,10 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
                            &error);
     }
 
-   clutter_actor_set_content(lightDisplay, colors);
+    clutter_actor_set_content(lightDisplay, colors);
 
     animationTime += 1.0;
-    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
+    // clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
 }
 
 
@@ -834,11 +841,10 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl, ClutterActor *infoDisplay){ //TCLControl tcl
     printf("Building animation tools...\n");
 
+    currentAnimation = 1;
+    printf("Address of currentAnimation that was set up FIRST: %i\n", &currentAnimation);
     rect = rotatingActor;
 
-
-    // Add a colored texture to the app:
-    //
     // First, we need some Actor to actually display the light colors:
     colors = clutter_image_new();
     lightDisplay = clutter_actor_new();
@@ -915,7 +921,10 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     touch_data = g_slice_new (TouchData); // reserve memory for it...
     touch_data->lightDisplay = lightDisplay; // Place the button actor itself inside the struct
     touch_data->tcl = tcl;
-    touch_data->animationNumber = &currentAnimation;
+
+    // This is the ADDRESS of the current Animation. This should never change. We just change the value
+    // AT that location in memory.
+    touch_data->animationNumber = &currentAnimation; 
 
     // This does not work because handing pointers IN to this g_signal_connect doesn't allow 
     // values to be handed back OUT because the callback has dropped it's reference by the time
@@ -935,11 +944,11 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     //=============
     // Setup the GLSL Fragment shaders that we'll use to generate colors
     // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
-    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
-    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT (shaderEffect), fragShader);
+    // shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
+    // clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT (shaderEffect), fragShader);
 
     // Bind uniforms to the shader:
-    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
+    // clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
 //    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "factor", G_TYPE_FLOAT, 1, 0.66);
 
     // clutter_actor_add_effect(lightDisplay, shaderEffect);
@@ -955,6 +964,8 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     data->rotatingActor = rect;
     data->infoDisplay = infoDisplay;
     data->tcl = tcl;
+    // This is the ADDRESS of the current Animation. This should never change. We just change the value
+    // AT that location in memory.
     data->animationNumber = &currentAnimation;
 
     timeline = clutter_timeline_new(120);
@@ -974,7 +985,7 @@ Animation::Animation() {
 }
 
 void Animation::switchAnimation(int animationNumber, ClutterActor *infoDisplay) {
-    // printf("Changing to animation: %i\n", animationNumber);
+    printf("Changing to animation: %i\n", animationNumber);
     currentAnimation = animationNumber;
     clutter_text_set_text(CLUTTER_TEXT(infoDisplay), g_strdup_printf("Current sensor input: %i",currentAnimation));
 }

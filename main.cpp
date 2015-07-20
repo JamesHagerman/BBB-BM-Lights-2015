@@ -87,8 +87,6 @@ TCLControl tcl;
 
 Animation animation;
 
-// ColorMan colorMan;
-
 Events eventHandlers;
 typedef struct  {
     ClutterActor *statusLabel;
@@ -204,11 +202,11 @@ int main(int argc, char *argv[]) {
     // ready to draw the scene and to dump the colors to the lights.
     //
     // Set up the data storage to hand a pointer to the main Animation object into the event handler:
-    EventDataAfterPaint *dataAfterPaint;
-    dataAfterPaint = g_slice_new (EventDataAfterPaint); // reserve memory for it...
-    dataAfterPaint->animation = &animation; // Place the button actor itself inside the struct
+    // EventDataAfterPaint *dataAfterPaint;
+    // dataAfterPaint = g_slice_new (EventDataAfterPaint); // reserve memory for it...
+    // dataAfterPaint->animation = &animation; // Place the button actor itself inside the struct
     // Setup the listener for the after-paint event so we know when we can read from the shader texture:
-    g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
+    // g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
 
 
     // Build UI Buttons:
