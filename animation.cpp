@@ -26,14 +26,14 @@ typedef struct  {
     ClutterActor *rotatingActor;
     ClutterActor *infoDisplay;
     TCLControl *tcl;
-    int *animationNumber; // On 64 bit machines... we need to store huge addresses!
+    int *animationNumber;
 } AnimationData;
 
 typedef struct  {
     ClutterActor *lightDisplay;
     ClutterEffect *shaderEffect;
     TCLControl *tcl;
-    int *animationNumber; // On 64 bit machines... we need to store huge addresses!
+    int *animationNumber;
     gfloat *input_x;
     gfloat *input_y;
 } TouchData;
@@ -47,10 +47,12 @@ ClutterActor *lightDisplay;
 
 //============
 // GLSL Shader related:
+// ToDo: Uncomment Shader stuff:
 ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
 gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
 
+//  NOT WORKING:
 //const gchar *fragShader = ""
 //"void main(void) {\n"
 //"   cogl_color_out = cogl_tex_coord_in[0];\n" //cogl_color_out = vec4(0.0, 1.0, 0.0, 1.0);
@@ -742,21 +744,14 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
     // ClutterActor *infoDisplay = CLUTTER_ACTOR (data->infoDisplay);
     TCLControl *tcl = data->tcl;
 
-    // We hand in the ADDRESS of the current Animation. The address should never change... but
-    // the value at that address SHOULD change! Keep in mind, on 64 bit machines, these 
-    // addresses can be huge...
+    // We hand in the ADDRESS of the current Animation:
     int *animation_number = data->animationNumber;
-
-    printf("Address of currentAnimation via animation_number: %i\n", animation_number);
-
 
     // Update the spinning rectangle:
     rotation += 0.2;
     clutter_actor_set_rotation_angle(rotatingActor, CLUTTER_Z_AXIS, rotation * 5);
 
-
     // Run which ever animation we're on:
-    printf("Currently on animation: %i\n", *animation_number);
     switch(*animation_number){
         case 1  :
            animation1(tcl);
@@ -832,8 +827,9 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 
     clutter_actor_set_content(lightDisplay, colors);
 
-    animationTime += 1.0;
-    // clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
+    // ToDo: Uncomment Shader stuff:
+     animationTime += 1.0;
+     clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
 }
 
 
@@ -841,8 +837,6 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl, ClutterActor *infoDisplay){ //TCLControl tcl
     printf("Building animation tools...\n");
 
-    currentAnimation = 1;
-    printf("Address of currentAnimation that was set up FIRST: %i\n", &currentAnimation);
     rect = rotatingActor;
 
     // First, we need some Actor to actually display the light colors:
@@ -866,16 +860,17 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
     rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 
+    // ToDo: Uncomment shader stuff
     // Allocate the memory for the shader output buffer:
     // Multiplied by 3 because we have three bytes per pixel (r, g, b)
-    int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
-    shaderBuffer = (guint8 *)malloc(shaderBufferSize);
+     int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
+     shaderBuffer = (guint8 *)malloc(shaderBufferSize);
 
-    if (shaderBuffer == NULL) {
-        printf("OOPS! malloc error!\n");
-    } else {
-        printf("We malloc'd %i bytes for your shaderBuffer. It points at: %p\n", shaderBufferSize, shaderBuffer);
-    }
+     if (shaderBuffer == NULL) {
+         printf("OOPS! malloc error!\n");
+     } else {
+         printf("We malloc'd %i bytes for your shaderBuffer. It points at: %p\n", shaderBufferSize, shaderBuffer);
+     }
 
     for(int x = 0; x < WIDTH; x++) {
         for(int y = 0; y < HEIGHT; y++) {
@@ -941,17 +936,18 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 
     clutter_actor_set_content(lightDisplay, colors);
 
+    // ToDo: Uncomment shader stuff:
     //=============
     // Setup the GLSL Fragment shaders that we'll use to generate colors
     // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
-    // shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
-    // clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT (shaderEffect), fragShader);
+     shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
+     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT (shaderEffect), fragShader);
 
     // Bind uniforms to the shader:
-    // clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
+     clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
 //    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "factor", G_TYPE_FLOAT, 1, 0.66);
 
-    // clutter_actor_add_effect(lightDisplay, shaderEffect);
+     clutter_actor_add_effect(lightDisplay, shaderEffect);
     clutter_actor_add_child(stage, lightDisplay);
 
     // End shader stuff
@@ -976,8 +972,8 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
 }
 Animation::~Animation(){
     // These fail for some reason. Not sure why...
-//    g_object_unref(colors);
-//    g_object_unref(pixbuf);
+   g_object_unref(colors);
+   g_object_unref(pixbuf);
 //    g_object_unref(shaderBuffer);
 }
 
@@ -995,6 +991,7 @@ int Animation::getCurrentAnimation() {
     return currentAnimation;
 }
 
+// ToDo: Uncomment shader stuff:
 void Animation::derp() {
     cogl_read_pixels(   0, // start x
                         50, // stary y

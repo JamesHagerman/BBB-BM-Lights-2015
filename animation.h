@@ -22,9 +22,11 @@ class Animation {
         Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl, ClutterActor *infoDisplay); //TCLControl tcl
         ~Animation();
 
-        void switchAnimation(int animationNumber, ClutterActor *infoDisplay);
+        void switchAnimation(int animation_num, ClutterActor *infoDisplay);
         int getCurrentAnimation();
-        void derp();
+
+        // ToDo: Uncomment shader stuff:
+         void derp();
 
         // Timeline object itself:
         ClutterTimeline *timeline;

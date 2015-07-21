@@ -44,7 +44,6 @@ Button::~Button() {
 }
 
 void changeAnimation(int id, Animation *animation, ClutterActor *infoDisplay) {
-    printf("Changing animation!\n");
     switch(id){
         case 0  :
            animation->switchAnimation(1, infoDisplay);

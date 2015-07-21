@@ -5,6 +5,14 @@
 #include <glib/gprintf.h>
 #include "animation.h"
 
+typedef struct  {
+    ClutterActor *statusLabel;
+} EventData;
+
+typedef struct  {
+    Animation *animation;
+} EventDataAfterPaint;
+
 class Events {
     public:
         Events();
@@ -12,14 +20,16 @@ class Events {
         static gboolean handleKeyPresses (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
         static gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
         static gboolean handleMouseEvents (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
-        static gboolean handleAfterPaint (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
-        typedef struct  {
-            ClutterActor *statusLabel;
-        } EventData;
+        // ToDo: Uncomment shader stuff:
+         static gboolean handleAfterPaint (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
 
-        typedef struct  {
-            Animation *animation;
-        } EventDataAfterPaint;
+        // ToDo: These probably shouldn't be here...
+//        typedef struct  {
+//            ClutterActor *statusLabel;
+//        } EventData;
+//         typedef struct  {
+//             Animation *animation;
+//         } EventDataAfterPaint;
     private:
 
         
