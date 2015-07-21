@@ -11,6 +11,11 @@ ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)
 	CROSSCOMPILER = 
 endif
 
+ifeq ($(MACHINE)_$(ARCH),CYGWIN_NT-6.3_x86_64)
+	CROSSCOMPILER =
+endif
+
+
 CXX = $(CROSSCOMPILER)g++
 CFLAGS = -Wall -g -Wno-unused-result -Wno-unused-but-set-variable
 #-Wno-unused-variable
@@ -36,6 +41,15 @@ ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)
 	CFLAGS += -O3 -fomit-frame-pointer
 endif
 
+
+ifeq ($(MACHINE)_$(ARCH),CYGWIN_NT-6.3_x86_64)
+	LDFLAGS = `pkg-config clutter-1.0 --libs`
+	IFLAGS = `pkg-config clutter-1.0 --cflags`
+#	LDFLAGS = -pthread -lclutter-1.0 -lcogl
+#	IFLAGS = -pthread -I/usr/include/clutter-1.0 -I/usr/include/pango-1.0 -I/usr/include/cogl -I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/atk-1.0 -I/usr/include/json-glib-1.0 -I/usr/include/gdk-pixbuf-2.0
+	LDFLAGS += -lftd2xx -lp9813
+	CFLAGS += -fomit-frame-pointer
+endif
 
 
 OUTPUT = clutter_window
