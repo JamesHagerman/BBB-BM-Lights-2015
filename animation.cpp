@@ -863,7 +863,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     // ToDo: Uncomment shader stuff
     // Allocate the memory for the shader output buffer:
     // Multiplied by 3 because we have three bytes per pixel (r, g, b)
-     int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
+     int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 4;
      shaderBuffer = (guint8 *)malloc(shaderBufferSize);
 
      if (shaderBuffer == NULL) {

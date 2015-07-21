@@ -195,25 +195,25 @@ int main(int argc, char *argv[]) {
     // ready to draw the scene and to dump the colors to the lights.
     //
     // Set up the data storage to hand a pointer to the main Animation object into the event handler:
-//     EventDataAfterPaint *dataAfterPaint;
-//     dataAfterPaint = g_slice_new (EventDataAfterPaint); // reserve memory for it...
-//     dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
-//    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
-//     g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
+     EventDataAfterPaint *dataAfterPaint;
+     dataAfterPaint = g_slice_new (EventDataAfterPaint); // reserve memory for it...
+     dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
+    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
+     g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
 
 
     // Build UI Buttons:
-//     Button button1 = Button(stage, 0, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF }, &animation, infoDisplay);
-//     Button button2 = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth, height-buttonHeight, (ClutterColor){ 232, 217, 12, 0xFF }, &animation, infoDisplay);
-//     Button button3 = Button(stage, 2, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF }, &animation, infoDisplay);
-//     Button button4 = Button(stage, 3, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF }, &animation, infoDisplay);
-//     Button button5 = Button(stage, 4, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF }, &animation, infoDisplay);
-//
-//     Button button6 = Button(stage, 5, buttonWidth, buttonHeight, 0, height-(buttonHeight*2), (ClutterColor){ 255, 0, 91, 0xFF }, &animation, infoDisplay);
-//     Button button7 = Button(stage, 6, buttonWidth, buttonHeight, buttonWidth, height-(buttonHeight*2), (ClutterColor){ 55, 8, 232, 0xFF }, &animation, infoDisplay);
-//     Button button8 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*2, height-(buttonHeight*2), (ClutterColor){ 0, 228, 255, 0xFF }, &animation, infoDisplay);
-//     Button button9 = Button(stage, 8, buttonWidth, buttonHeight, buttonWidth*3, height-(buttonHeight*2), (ClutterColor){ 30, 232, 12, 0xFF }, &animation, infoDisplay);
-//     Button button10 = Button(stage, 9, buttonWidth, buttonHeight, buttonWidth*4, height-(buttonHeight*2), (ClutterColor){ 255, 215, 0, 0xFF }, &animation, infoDisplay);
+     Button button1 = Button(stage, 0, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF }, &animation, infoDisplay);
+     Button button2 = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth, height-buttonHeight, (ClutterColor){ 232, 217, 12, 0xFF }, &animation, infoDisplay);
+     Button button3 = Button(stage, 2, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF }, &animation, infoDisplay);
+     Button button4 = Button(stage, 3, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF }, &animation, infoDisplay);
+     Button button5 = Button(stage, 4, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF }, &animation, infoDisplay);
+
+     Button button6 = Button(stage, 5, buttonWidth, buttonHeight, 0, height-(buttonHeight*2), (ClutterColor){ 255, 0, 91, 0xFF }, &animation, infoDisplay);
+     Button button7 = Button(stage, 6, buttonWidth, buttonHeight, buttonWidth, height-(buttonHeight*2), (ClutterColor){ 55, 8, 232, 0xFF }, &animation, infoDisplay);
+     Button button8 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*2, height-(buttonHeight*2), (ClutterColor){ 0, 228, 255, 0xFF }, &animation, infoDisplay);
+     Button button9 = Button(stage, 8, buttonWidth, buttonHeight, buttonWidth*3, height-(buttonHeight*2), (ClutterColor){ 30, 232, 12, 0xFF }, &animation, infoDisplay);
+     Button button10 = Button(stage, 9, buttonWidth, buttonHeight, buttonWidth*4, height-(buttonHeight*2), (ClutterColor){ 255, 215, 0, 0xFF }, &animation, infoDisplay);
     
 
     // Actually show the stage and run the app:
