@@ -1001,19 +1001,19 @@ void Animation::derp() {
                         COGL_PIXEL_FORMAT_RGBA_8888,
                         shaderBuffer);
 
-    printf("Here's the data we pulled from the FB:\n");
-    for (int i = 0; i < (10*4)*1; i++) {
-        printf("%i ", shaderBuffer[i]);
-
-//        if (i%10 == 0) {  // OOPS That's not right. 4 bytes per pixel!
-        if (i%4 == 0) {
-            printf(", ");
-        }
-        if (i%40 == 0) {
-            printf("\n");
-        }
-    }
-    printf("\nDone!\n");
+//    printf("Here's the data we pulled from the FB:\n");
+//    for (int i = 0; i < (10*4)*1; i++) {
+//        printf("%i ", shaderBuffer[i]);
+//
+////        if (i%10 == 0) {  // OOPS That's not right. 4 bytes per pixel!
+//        if (i%4 == 0) {
+//            printf(", ");
+//        }
+//        if (i%40 == 0) {
+//            printf("\n");
+//        }
+//    }
+//    printf("\nDone!\n");
 
     // int index = 0;
     // for(int x = 0; x < WIDTH; x++) {
