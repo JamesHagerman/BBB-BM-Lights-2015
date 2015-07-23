@@ -1002,8 +1002,8 @@ void Animation::derp() {
     // WIDTH * osd_scale, HEIGHT * osd_scale
     cogl_read_pixels(   0, // start x
                         50, // stary y
-                        WIDTH * osd_scale,  // width (4 bytes per pixel)
-                        HEIGHT * osd_scale, // height (4 bytes per pixel)
+                        WIDTH,  // width (4 bytes per pixel)
+                        HEIGHT, // height (4 bytes per pixel)
                         COGL_READ_PIXELS_COLOR_BUFFER,
                         COGL_PIXEL_FORMAT_RGBA_8888,
                         shaderBuffer);
@@ -1030,21 +1030,13 @@ void Animation::derp() {
     // Full screen size data is located in configurations.h
     // On screen display size is defined in main.cpp
 
-    // int index = 0;
-    // for(int x = 0; x < WIDTH; x++) {
-    //     for(int y = 0; y < HEIGHT; y++) {
-
-    //         // pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-    //         if (y>=1) {
-    //             tcl->pixelBuf[index] = pixelBackupBuf[index-1];
-    //         } else {
-    //             tcl->pixelBuf[index] = tempColor;
-    //         }
-
-    //         index += 1;
-    //     }
-    // }
+     int index = 0;
+     for(int x = 0; x < WIDTH; x++) {
+         for(int y = 0; y < HEIGHT; y++) {
+             tcl->pixelBuf[index] = shaderBuffer[index];
+             index += 1;
+         }
+     }
 
 // Trying to be all smart 'n shit:
 //    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
