@@ -25,7 +25,7 @@ class TCLControl {
 
 		// Our pixel buffer itself:
 		// Keep in mind that this is malloc'd so it's REAL memory... Don't leak it.
-		TCpixel *pixelBuf;
+		TCpixel *pixelBuf; // just a list of uint32_t's
 		int *remapArray;
 
 		// Stats and Statuses about the TC library:

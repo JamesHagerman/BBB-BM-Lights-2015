@@ -993,10 +993,17 @@ int Animation::getCurrentAnimation() {
 
 // ToDo: Uncomment shader stuff:
 void Animation::derp() {
+    // This grabs from the WHOLE screen!
+    // maybe we can use that to our advantage...?
+    //
+    // The shader is dumping to the screen at (x,y)=(0,50)
+    // This is the onscreen display...
+    // On screen display size is:
+    // WIDTH * osd_scale, HEIGHT * osd_scale
     cogl_read_pixels(   0, // start x
                         50, // stary y
-                        10*4,  // width (4 bytes per pixel)
-                        10*4, // height (4 bytes per pixel)
+                        WIDTH * osd_scale*4,  // width (4 bytes per pixel)
+                        HEIGHT * osd_scale*4, // height (4 bytes per pixel)
                         COGL_READ_PIXELS_COLOR_BUFFER,
                         COGL_PIXEL_FORMAT_RGBA_8888,
                         shaderBuffer);
@@ -1014,6 +1021,14 @@ void Animation::derp() {
 //        }
 //    }
 //    printf("\nDone!\n");
+
+
+    // When we pull data from the on screen display, we will need to
+    // know the full size of the on screen shader display so we know where
+    // to grab the pixel colors from.
+    //
+    // Full screen size data is located in configurations.h
+    // On screen display size is defined in main.cpp
 
     // int index = 0;
     // for(int x = 0; x < WIDTH; x++) {

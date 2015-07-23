@@ -12,6 +12,7 @@ Things to do
 - GET THE SHADER COLORS TO THE LIGHTS!!!!
 - FIGURE OUT MEMORY ISSUE!!!
 - Remove the stupid text and all calls trying to put crap on the screen
+- Remove the status square and text at the top of the screen
 - Build a Debug view of some kind.
 - MAIN.CPP LOOKS HALF DECENT!
 - SERIOUSLY clean up animation.cpp!
@@ -40,6 +41,9 @@ Bugs
     Maybe GDB can give some insight here. I thought I fixed this issue once before...
     It does NOT have anything to do with the events. I disabled all of those and it still happened.
     So it's SOMETHING to do with the Animation class itself.
+    
+    SOLVED: It was just running out of memory. There is just enough memory to draw to the screen once.
+    We were drawing two large status areas to the screen and that was overflowing as far as I can tell...
 
 Future Features
 ===============
