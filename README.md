@@ -6,6 +6,45 @@ Simple test of using Clutter to draw to a screen.
 Three assets: green spinning rectangle, "Hello, World." text, and a tiny yellowish square.
 
 
+Things to do
+============
+
+- GET THE SHADER COLORS TO THE LIGHTS!!!!
+- FIGURE OUT MEMORY ISSUE!!!
+- Remove the stupid text and all calls trying to put crap on the screen
+- Build a Debug view of some kind.
+- MAIN.CPP LOOKS HALF DECENT!
+- SERIOUSLY clean up animation.cpp!
+    - Pull all of the helper methods out into a helper class
+    - Pull all of the animations themselves out into animation classes.
+    - Build an Animation Manager class that will do most of what Animation is doing currently.
+    - Figure out how to swap out shaders/Get shaders stored in individual Animations (new animation objects)
+- Clean up the constructors and object instantiation so we do not have variable hidding happening all over the place
+- Rename the objects so they make sense.
+- Update the events handlers so they are all defined in the same area of main.cpp
+- Make the "features" into command line switches where appropriate.
+- abstract UI layout so that the UI can be swapped out more easily (VIEWS!)
+- Build a UI state machine
+- Abstract the UI elements themselves so they are easier to use
+- Look into the motion-event signal and see if it might stop the weird "dragging causes system pause" issue.
+- Perhaps write a shim to handle the difference between touches, movements, and mouse events.
+
+    
+
+Future Features
+===============
+
+- WIFI INTERFACING!! We should seriously get this to act as an AP somehow. Or just bring along a tiny WiFi AP and give
+  the BBB a static IP. All other wifi controllers could attach to that AP and offload a bunch of bullshit like the 
+  possible antenna issues and such. They'll be better with the power issues anyways.
+  
+- dump1090 integration! Not a big deal but might be kinda fun somehow...
+
+
+
+
+
+
 Building on OS X
 ================
 

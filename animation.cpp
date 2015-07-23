@@ -835,6 +835,7 @@ void handleNewFrame (ClutterActor *timeline, gint frame_num, gpointer user_data)
 
 
 Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl, ClutterActor *infoDisplay){ //TCLControl tcl
+    printf("PARAMATERIZED CONSTRUCTOR!!\n");
     printf("Building animation tools...\n");
 
     rect = rotatingActor;
@@ -978,6 +979,7 @@ Animation::~Animation(){
 }
 
 Animation::Animation() {
+    printf("DEFAULT CONSTRUCTOR!!\n");
 }
 
 void Animation::switchAnimation(int animationNumber, ClutterActor *infoDisplay) {
