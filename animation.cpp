@@ -1002,8 +1002,8 @@ void Animation::derp() {
     // WIDTH * osd_scale, HEIGHT * osd_scale
     cogl_read_pixels(   0, // start x
                         50, // stary y
-                        WIDTH,  // width (4 bytes per pixel)
-                        HEIGHT, // height (4 bytes per pixel)
+                        WIDTH*4,  // width (4 bytes per pixel)
+                        HEIGHT*4, // height (4 bytes per pixel)
                         COGL_READ_PIXELS_COLOR_BUFFER,
                         COGL_PIXEL_FORMAT_RGBA_8888,
                         shaderBuffer);
