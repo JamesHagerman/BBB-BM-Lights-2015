@@ -88,8 +88,6 @@ TCLControl tcl;
 Events eventHandlers;
 
 
-// using namespace std;
-
 // ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, ClutterColor color) {
 //     ClutterActor *toRet = clutter_actor_new();
 //     clutter_actor_set_background_color( toRet, &color);
@@ -146,12 +144,12 @@ int main(int argc, char *argv[]) {
     // clutter_actor_add_child(stage, label2);
 
     // Set up the keyboard listener for the arrow, enter, and esc keys:
-//    EventData *data;
-//    data = g_slice_new (EventData); // reserve memory for it...
-//    data->statusLabel = label; // Place the button actor itself inside the struct
-//    // Build a "down" color (hard coded for now...)
-//    // ClutterColor downColor = { 255, 0, 47, 0xFF };
-//    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), data);
+    EventData *data;
+    data = g_slice_new (EventData); // reserve memory for it...
+    data->statusLabel = label; // Place the button actor itself inside the struct
+    // Build a "down" color (hard coded for now...)
+    // ClutterColor downColor = { 255, 0, 47, 0xFF };
+    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), data);
 
 
     /* Status rectangle */
@@ -162,10 +160,10 @@ int main(int argc, char *argv[]) {
     clutter_actor_set_position (rect, 10, 10);
 
     // Wire up some event listeners:
-//    clutter_actor_set_reactive (rect, TRUE);
-//    g_signal_connect (rect, "touch-event", G_CALLBACK (eventHandlers.handleTouchEvents), transitions);
-//    //g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
-//    g_signal_connect (rect, "button-press-event", G_CALLBACK (eventHandlers.handleMouseEvents), rect);
+    clutter_actor_set_reactive (rect, TRUE);
+    g_signal_connect (rect, "touch-event", G_CALLBACK (eventHandlers.handleTouchEvents), transitions);
+    //g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
+    g_signal_connect (rect, "button-press-event", G_CALLBACK (eventHandlers.handleMouseEvents), rect);
 
     // Add the spinning rectangle to the stage:
     clutter_actor_add_child(stage, rect);
@@ -194,11 +192,11 @@ int main(int argc, char *argv[]) {
     // ready to draw the scene and to dump the colors to the lights.
     //
     // Set up the data storage to hand a pointer to the main Animation object into the event handler:
-//     EventDataAfterPaint *dataAfterPaint;
-//     dataAfterPaint = g_slice_new (EventDataAfterPaint); // reserve memory for it...
-//     dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
-//    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
-//     g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
+     EventDataAfterPaint *dataAfterPaint;
+     dataAfterPaint = g_slice_new (EventDataAfterPaint); // reserve memory for it...
+     dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
+    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
+     g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
 
 
     // Build UI Buttons:

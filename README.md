@@ -29,7 +29,17 @@ Things to do
 - Look into the motion-event signal and see if it might stop the weird "dragging causes system pause" issue.
 - Perhaps write a shim to handle the difference between touches, movements, and mouse events.
 
+
+Bugs
+====
+
+- Memory issue on BBB
+    After running for a few seconds:
+    (clutter_window:2082): Cogl-WARNING **: /home/elias/workspace/setup-scripts/build/tmp-angstrom_v2014_06-eglibc/work/armv7at2hf-vfp-neon-angstrom-linux-gnueabi/cogl-1.0/1.18.2-r0/cogl-1.18.2/cogl/driver/gl/cogl-framebuffer-gl.c:1135: GL error (1285): Out of memory
     
+    Maybe GDB can give some insight here. I thought I fixed this issue once before...
+    It does NOT have anything to do with the events. I disabled all of those and it still happened.
+    So it's SOMETHING to do with the Animation class itself.
 
 Future Features
 ===============

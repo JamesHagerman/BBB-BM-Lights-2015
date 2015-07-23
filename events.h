@@ -8,7 +8,6 @@
 typedef struct  {
     ClutterActor *statusLabel;
 } EventData;
-
 typedef struct  {
     Animation *animation;
 } EventDataAfterPaint;
@@ -23,13 +22,6 @@ class Events {
         // ToDo: Uncomment shader stuff:
          static gboolean handleAfterPaint (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
 
-        // ToDo: These probably shouldn't be here...
-//        typedef struct  {
-//            ClutterActor *statusLabel;
-//        } EventData;
-//         typedef struct  {
-//             Animation *animation;
-//         } EventDataAfterPaint;
     private:
 
         
