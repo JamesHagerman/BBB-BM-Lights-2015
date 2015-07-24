@@ -35,11 +35,9 @@ public:
     TCLControl *tcl;
 
     int i;
-
-    ClutterActor *rect;
-
     int currentAnimation;
 
+    ClutterActor *rect;
 };
 
 #endif

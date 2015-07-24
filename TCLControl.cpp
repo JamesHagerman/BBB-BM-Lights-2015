@@ -21,6 +21,8 @@ TCLControl::TCLControl() {
     {
         printf("Could not allocate space for %d pixels (%d bytes).\n", totalPixels, memSize);
         exit(1);
+    } else {
+        printf("LED Pixel buffer has been allocated!\n");
     }
     BuildRadialRemap();
     PrintRemapArray();

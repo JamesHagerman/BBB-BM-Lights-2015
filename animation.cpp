@@ -81,6 +81,12 @@ gfloat osd_scale = 16;
 
 int AnimationID = 0;
 
+// For some reason, the pixelbuffer array is not really behaving. I don't know why.
+// So we will wait until the animations have run... because THEY access it just fine!
+// This issue may be related to having TWO running loops. I may have to ditch one or the other...
+// Or do a bunch of complex multithread shit :(
+bool readyToWrite = false;
+
 
 //=======================
 // Helpful color tools:
@@ -854,12 +860,18 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
     animationTime += 1.0;
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                       animationTime);
+
+
+    // After the first run, maybe the stupid pixelBuf memory will be setup right:
+    readyToWrite = true;
 }
 
 
 Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl,
                      ClutterActor *infoDisplay) { //TCLControl tcl
     printf("Building animation tools...\n");
+
+
 
     rect = rotatingActor;
 
@@ -1109,7 +1121,13 @@ gboolean Animation::handleAfterPaint (ClutterActor *actor,
 
 
 //    tcl->pixelBuf[0] = getRandomColor();
-    printf("TCL = %i", tcl->pixelsPerStrand);
+    if (readyToWrite) {
+        printf("TCL = %u", tcl->pixelBuf[0]);
+    } else {
+        printf("Waiting for the buffer to be ready...");
+        printf("TCL = %i", tcl->pixelsPerStrand);
+    }
+
 
 
     return CLUTTER_EVENT_STOP;
