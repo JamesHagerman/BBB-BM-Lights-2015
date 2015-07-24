@@ -9,8 +9,11 @@ Three assets: green spinning rectangle, "Hello, World." text, and a tiny yellowi
 Things to do
 ============
 
-- GET THE SHADER COLORS TO THE LIGHTS!!!!
-- FIGURE OUT MEMORY ISSUE!!!
+- LOAD SHADERS FROM FILES!
+- Figure out shader-to-led map! Way more pixels on the screen than on the LEDS...
+- Clean up animation switching
+- Figure out how to swap shader programs!
+
 - Remove the stupid text and all calls trying to put crap on the screen
 - Remove the status square and text at the top of the screen
 - Build a Debug view of some kind.
