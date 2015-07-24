@@ -85,6 +85,7 @@ int AnimationID = 0;
 // So we will wait until the animations have run... because THEY access it just fine!
 // This issue may be related to having TWO running loops. I may have to ditch one or the other...
 // Or do a bunch of complex multithread shit :(
+int readyCount = 0;
 bool readyToWrite = false;
 
 
@@ -863,7 +864,12 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 
 
     // After the first run, maybe the stupid pixelBuf memory will be setup right:
-    readyToWrite = true;
+    if (readyCount > 100) {
+        readyToWrite = true;
+    } else {
+        readyCount++;
+    }
+
 }
 
 
