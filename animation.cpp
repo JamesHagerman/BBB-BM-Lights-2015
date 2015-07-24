@@ -708,8 +708,8 @@ void animation1(TCLControl *tcl) {
 }
 
 void shaderAnimation(TCLControl *tcl) {
-    int fbWidth = 2;//(10*4);
-    int fbHeight = 2;
+    int fbWidth = WIDTH;
+    int fbHeight = HEIGHT;
     cogl_read_pixels(   0, // start x
                         50, // stary y
                         fbWidth,  // width (4 bytes per pixel)
