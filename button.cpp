@@ -8,7 +8,7 @@
 #include "configurations.h"
 
 Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations, ClutterActor *infoDisplay) {
-    printf("Building events class\n");
+    // printf("Building a Button!\n");
 
     uniqueId = id;
     animation = mainAnimations;
