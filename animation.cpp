@@ -61,7 +61,7 @@ gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
 const gchar *fragShader = "" //"#version 110\n\n"
         "uniform float iGlobalTime;\n"
         "void main(void) {\n"
-        "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(cogl_tex_coord_in[0].x*50.0 + cogl_tex_coord_in[0].y/20.0), 1.0);\n"
+        "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(cogl_tex_coord_in[0].x*500.0 + cogl_tex_coord_in[0].y), 1.0);\n"
         "}";
 
 // End shaders
