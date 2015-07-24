@@ -81,14 +81,6 @@ gfloat osd_scale = 16;
 
 int AnimationID = 0;
 
-// For some reason, the pixelbuffer array is not really behaving. I don't know why.
-// So we will wait until the animations have run... because THEY access it just fine!
-// This issue may be related to having TWO running loops. I may have to ditch one or the other...
-// Or do a bunch of complex multithread shit :(
-int readyCount = 0;
-bool readyToWrite = false;
-
-
 //=======================
 // Helpful color tools:
 
@@ -822,6 +814,31 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
     }
 
 
+    int fbWidth = 2;//(10*4);
+    int fbHeight = 2;
+    int pixelLength = 4; // 4 bytes per pixel in the FB (r,g,b,a)
+    cogl_read_pixels(   0, // start x
+                        50, // stary y
+                        fbWidth,  // width (4 bytes per pixel)
+                        fbHeight, // height in pixels
+                        COGL_READ_PIXELS_COLOR_BUFFER,
+                        COGL_PIXEL_FORMAT_RGBA_8888,
+                        shaderBuffer);
+
+    printf("Here's the data we pulled from the FB:\n");
+    for (int i = 0; i < (fbWidth*fbHeight)*pixelLength; i++) {
+        if (i%pixelLength == 0 && i != 0) {
+            printf(", ");
+        }
+        if (i%(fbWidth*pixelLength) == 0 && i != 0) {
+            printf("\n");
+        }
+
+        printf("%i ", shaderBuffer[i]); // Print out the value of this byte in the pixel
+    }
+    printf("\nDone!\n");
+
+
 
     // Send the updated color buffer to the strands
     if (tcl->enabled) {
@@ -861,23 +878,12 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
     animationTime += 1.0;
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                       animationTime);
-
-
-    // After the first run, maybe the stupid pixelBuf memory will be setup right:
-    if (readyCount > 100) {
-        readyToWrite = true;
-    } else {
-        readyCount++;
-    }
-
 }
 
 
 Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl,
                      ClutterActor *infoDisplay) { //TCLControl tcl
     printf("Building animation tools...\n");
-
-
 
     rect = rotatingActor;
 
@@ -1050,13 +1056,13 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     // ready to draw the scene and to dump the colors to the lights.
     //
     // Set up the data storage to hand a pointer to the main Animation object into the event handler:
-    EventDataAfterPaint *dataAfterPaint;
-    dataAfterPaint = g_slice_new(EventDataAfterPaint); // reserve memory for it...
-//    dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
-    dataAfterPaint->tcl = tcl; // pointer TO the main tcl object.
-
-    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
-    g_signal_connect(stage, "after-paint", G_CALLBACK(handleAfterPaint), dataAfterPaint);
+//    EventDataAfterPaint *dataAfterPaint;
+//    dataAfterPaint = g_slice_new(EventDataAfterPaint); // reserve memory for it...
+////    dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
+//    dataAfterPaint->tcl = tcl; // pointer TO the main tcl object.
+//
+//    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
+//    g_signal_connect(stage, "after-paint", G_CALLBACK(handleAfterPaint), dataAfterPaint);
 }
 
 Animation::~Animation() {
@@ -1126,15 +1132,29 @@ gboolean Animation::handleAfterPaint (ClutterActor *actor,
     printf("\nDone!\n");
 
 
+    // When we pull data from the on screen display, we will need to
+    // know the full size of the on screen shader display so we know where
+    // to grab the pixel colors from.
+    //
+    // Full screen size data is located in configurations.h
+    // On screen display size is defined in main.cpp
+
+//    int ledIndex = 0; // This is the pixel offset in the actual color array. uint32_t
+//    int fbIndex = 0;  // This is the pixel BYTE offset in the
+//    for (int x = 0; x < WIDTH; x++) {
+//        for (int y = 0; y < HEIGHT; y++) {
+//            uint32_t nextColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
+//            fbIndex += 4;
+//
+////            tcl->pixelBuf[ledIndex] = nextColor;
+//            tcl->pixelBuf[ledIndex] = getRandomColor();
+//            ledIndex += 1;
+//        }
+//    }
+
 //    tcl->pixelBuf[0] = getRandomColor();
-    if (readyToWrite) {
-        printf("TCL = %u", tcl->pixelBuf[0]);
-    } else {
-        printf("Waiting for the buffer to be ready...");
-        printf("TCL = %i", tcl->pixelsPerStrand);
-    }
-
-
+    printf("TCL = %i\n", tcl->pixelsPerStrand);
+    printf("TCL = %u\n", tcl->pixelBuf[0]);
 
     return CLUTTER_EVENT_STOP;
 }
@@ -1173,24 +1193,24 @@ void Animation::grabShaderColors(TCLControl *tcl) {
 //    printf("\nDone!\n");
 
 
-    // When we pull data from the on screen display, we will need to
-    // know the full size of the on screen shader display so we know where
-    // to grab the pixel colors from.
-    //
-    // Full screen size data is located in configurations.h
-    // On screen display size is defined in main.cpp
-
-   // int ledIndex = 0; // This is the pixel offset in the actual color array. uint32_t
-   // int fbIndex = 0;  // This is the pixel BYTE offset in the  
-   // for (int x = 0; x < WIDTH; x++) {
-   //     for (int y = 0; y < HEIGHT; y++) {
-   //          uint32_t nextColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
-   //          fbIndex += 4;
-
-   //          tcl->pixelBuf[ledIndex] = nextColor;
-   //          ledIndex += 1;
-   //     }
-   // }
+//    // When we pull data from the on screen display, we will need to
+//    // know the full size of the on screen shader display so we know where
+//    // to grab the pixel colors from.
+//    //
+//    // Full screen size data is located in configurations.h
+//    // On screen display size is defined in main.cpp
+//
+//    int ledIndex = 0; // This is the pixel offset in the actual color array. uint32_t
+//    int fbIndex = 0;  // This is the pixel BYTE offset in the
+//    for (int x = 0; x < WIDTH; x++) {
+//        for (int y = 0; y < HEIGHT; y++) {
+//             uint32_t nextColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
+//             fbIndex += 4;
+//
+//             tcl->pixelBuf[ledIndex] = nextColor;
+//             ledIndex += 1;
+//        }
+//    }
 
 //    tcl->pixelBuf[0] = getRandomColor();
 
