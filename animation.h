@@ -16,10 +16,6 @@
 #ifndef TCL_ANIMATION
 #define TCL_ANIMATION
 
-typedef struct  {
-    TCLControl *tcl;
-} EventDataAfterPaint;
-
 class Animation {
 public:
     Animation();
