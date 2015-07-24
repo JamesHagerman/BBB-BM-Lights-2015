@@ -1047,8 +1047,9 @@ void Animation::derp() {
     // This is the onscreen display...
     // On screen display size is:
     // WIDTH * osd_scale, HEIGHT * osd_scale
-    int fbWidth = 1;//(10*4);
-    int fbHeight = 1;
+    int fbWidth = 2;//(10*4);
+    int fbHeight = 2;
+    int pixelLength = 4; // 4 bytes per pixel in the FB (r,g,b,a)
     cogl_read_pixels(   0, // start x
                         50, // stary y
                         fbWidth,  // width (4 bytes per pixel)
@@ -1058,16 +1059,15 @@ void Animation::derp() {
                         shaderBuffer);
 
     printf("Here's the data we pulled from the FB:\n");
-    for (int i = 0; i < (fbWidth*1); i++) {
-        printf("%i ", shaderBuffer[i]);
-
-//        if (i%10 == 0) {  // OOPS That's not right. 4 bytes per pixel!
-        if (i%4 == 0) {
+    for (int i = 0; i < (fbWidth*fbHeight)*pixelLength; i++) {
+        if (i%pixelLength == 0 && i != 0) {
             printf(", ");
         }
-        if (i%40 == 0) {
+        if (i%(fbWidth*pixelLength) == 0 && i != 0) {
             printf("\n");
         }
+
+        printf("%i ", shaderBuffer[i]); // Print out the value of this byte in the pixel
     }
     printf("\nDone!\n");
 
@@ -1079,14 +1079,19 @@ void Animation::derp() {
     // Full screen size data is located in configurations.h
     // On screen display size is defined in main.cpp
 
-//    int index = 0;
-//    for (int x = 0; x < WIDTH; x++) {
-//        for (int y = 0; y < HEIGHT; y++) {
-////             tcl->pixelBuf[index] = shaderBuffer[index];
-//            tcl->pixelBuf[index] = getRandomColor();
-//            index += 1;
-//        }
-//    }
+   // int ledIndex = 0; // This is the pixel offset in the actual color array. uint32_t
+   // int fbIndex = 0;  // This is the pixel BYTE offset in the  
+   // for (int x = 0; x < WIDTH; x++) {
+   //     for (int y = 0; y < HEIGHT; y++) {
+   //          uint32_t nextColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
+   //          fbIndex += 4;
+
+   //          tcl->pixelBuf[ledIndex] = nextColor;
+   //          ledIndex += 1;
+   //     }
+   // }
+
+    tcl->pixelBuf[0] = getRandomColor();
 
 // Trying to be all smart 'n shit:
 //    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
