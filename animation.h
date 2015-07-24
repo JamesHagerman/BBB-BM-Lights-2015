@@ -16,26 +16,33 @@
 #ifndef TCL_ANIMATION
 #define TCL_ANIMATION
 
+typedef struct  {
+    TCLControl *tcl;
+} EventDataAfterPaint;
+
 class Animation {
-    public:
-        Animation();
-        Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl, ClutterActor *infoDisplay); //TCLControl tcl
-        ~Animation();
+public:
+    Animation();
 
-        void switchAnimation(int animation_num, ClutterActor *infoDisplay);
-        int getCurrentAnimation();
+    Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl,
+              ClutterActor *infoDisplay); //TCLControl tcl
+    ~Animation();
 
-         void grabShaderColors(TCLControl *tcl);
+    void switchAnimation(int animation_num, ClutterActor *infoDisplay);
+    int getCurrentAnimation();
 
-        // Timeline object itself:
-        ClutterTimeline *timeline;
-        TCLControl *tcl;
+    static gboolean handleAfterPaint(ClutterActor *actor, ClutterEvent *event, gpointer user_data);
+    void grabShaderColors(TCLControl *tcl);
 
-        int i;
+    // Timeline object itself:
+    ClutterTimeline *timeline;
+    TCLControl *tcl;
 
-        ClutterActor *rect;
+    int i;
 
-        int currentAnimation;
+    ClutterActor *rect;
+
+    int currentAnimation;
 
 };
 

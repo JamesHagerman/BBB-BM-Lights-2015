@@ -181,24 +181,25 @@ int main(int argc, char *argv[]) {
     clutter_actor_add_child(stage, infoDisplay);
 
     // Start animation loop:
-    Animation animation = Animation(stage, rect, &tcl, infoDisplay);
+    Animation animation = Animation(stage, rect, &tcl, infoDisplay); // pointer TO the main tcl object.
 
-    // The animation loop itself will have to know when the frame buffers are swapping. To do this
-    // we apparently nead to listen to the "after-paint" event on the main scene object.
-    //
-    // Once the "after-paint" event fires, we will need to set a state on the Animation to tell it that
-    // there's data to read from the shaderBuffer. The Animation object will grab the pixel data from
-    // the shadders buffer, then shove it into a buffer we can hold on to until the Animation loop is
-    // ready to draw the scene and to dump the colors to the lights.
-    //
-    // Set up the data storage to hand a pointer to the main Animation object into the event handler:
-    EventDataAfterPaint *dataAfterPaint;
-    dataAfterPaint = g_slice_new(EventDataAfterPaint); // reserve memory for it...
-    dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
-    dataAfterPaint->tcl = &tcl; // TCLControl tcl is an Object here
-
-    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
-    g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
+    // MOVED THIS ALL TO animation.cpp
+//    // The animation loop itself will have to know when the frame buffers are swapping. To do this
+//    // we apparently nead to listen to the "after-paint" event on the main scene object.
+//    //
+//    // Once the "after-paint" event fires, we will need to set a state on the Animation to tell it that
+//    // there's data to read from the shaderBuffer. The Animation object will grab the pixel data from
+//    // the shadders buffer, then shove it into a buffer we can hold on to until the Animation loop is
+//    // ready to draw the scene and to dump the colors to the lights.
+//    //
+//    // Set up the data storage to hand a pointer to the main Animation object into the event handler:
+//    EventDataAfterPaint *dataAfterPaint;
+//    dataAfterPaint = g_slice_new(EventDataAfterPaint); // reserve memory for it...
+//    dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
+//    dataAfterPaint->tcl = &tcl; // pointer TO the main tcl object.
+//
+//    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
+//    g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
 
 
     // Build UI Buttons:

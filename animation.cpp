@@ -764,7 +764,7 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 
     ClutterActor *rotatingActor = CLUTTER_ACTOR(data->rotatingActor);
     // ClutterActor *infoDisplay = CLUTTER_ACTOR (data->infoDisplay);
-    TCLControl *tcl = data->tcl;
+    TCLControl *tcl = data->tcl; // tcl is STILL a pointer to the main TCLControl object
 
     // We hand in the ADDRESS of the current Animation:
     int *animation_number = data->animationNumber;
@@ -1002,7 +1002,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     data = g_slice_new(AnimationData); // reserve memory for it...
     data->rotatingActor = rect;
     data->infoDisplay = infoDisplay;
-    data->tcl = tcl;
+    data->tcl = tcl; // tcl is an pointer to the main TCLControl object.
     data->animationNumber = &currentAnimation;
 
     // The clutter timeline object takes a "duration" in milliseconds...
@@ -1015,6 +1015,26 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     // This actually starts the timeline animation!
     clutter_timeline_start(timeline);
 
+
+
+    // But we ALSO want to go in and start pulling data FROM the screen and dumping it into the lights:
+    //
+    // The animation loop itself will have to know when the frame buffers are swapping. To do this
+    // we apparently nead to listen to the "after-paint" event on the main scene object.
+    //
+    // Once the "after-paint" event fires, we will need to set a state on the Animation to tell it that
+    // there's data to read from the shaderBuffer. The Animation object will grab the pixel data from
+    // the shadders buffer, then shove it into a buffer we can hold on to until the Animation loop is
+    // ready to draw the scene and to dump the colors to the lights.
+    //
+    // Set up the data storage to hand a pointer to the main Animation object into the event handler:
+    EventDataAfterPaint *dataAfterPaint;
+    dataAfterPaint = g_slice_new(EventDataAfterPaint); // reserve memory for it...
+//    dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
+    dataAfterPaint->tcl = tcl; // pointer TO the main tcl object.
+
+    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
+    g_signal_connect(stage, "after-paint", G_CALLBACK(handleAfterPaint), dataAfterPaint);
 }
 
 Animation::~Animation() {
@@ -1038,8 +1058,20 @@ int Animation::getCurrentAnimation() {
     return currentAnimation;
 }
 
-// ToDo: Uncomment shader stuff:
-void Animation::grabShaderColors(TCLControl *tcl) {
+gboolean Animation::handleAfterPaint (ClutterActor *actor,
+                                   ClutterEvent *event,
+                                   gpointer      user_data) {
+
+    // Rebuild the struct from the pointer we handed in:
+    EventDataAfterPaint *dataAfterPaint;
+    dataAfterPaint = (EventDataAfterPaint *)user_data;
+
+//    Animation *animation = dataAfterPaint->animation;
+    TCLControl *tcl = dataAfterPaint->tcl;
+
+    //========================
+    // Start of shaderGrab rewrite:
+
     // This grabs from the WHOLE screen!
     // maybe we can use that to our advantage...?
     //
@@ -1072,6 +1104,47 @@ void Animation::grabShaderColors(TCLControl *tcl) {
     printf("\nDone!\n");
 
 
+//    tcl->pixelBuf[0] = getRandomColor();
+    printf("TCL = %i", tcl->pixelsPerStrand);
+
+
+    return CLUTTER_EVENT_STOP;
+}
+
+// ToDo: Uncomment shader stuff:
+void Animation::grabShaderColors(TCLControl *tcl) {
+//    // This grabs from the WHOLE screen!
+//    // maybe we can use that to our advantage...?
+//    //
+//    // The shader is dumping to the screen at (x,y)=(0,50)
+//    // This is the onscreen display...
+//    // On screen display size is:
+//    // WIDTH * osd_scale, HEIGHT * osd_scale
+//    int fbWidth = 2;//(10*4);
+//    int fbHeight = 2;
+//    int pixelLength = 4; // 4 bytes per pixel in the FB (r,g,b,a)
+//    cogl_read_pixels(   0, // start x
+//                        50, // stary y
+//                        fbWidth,  // width (4 bytes per pixel)
+//                        fbHeight, // height in pixels
+//                        COGL_READ_PIXELS_COLOR_BUFFER,
+//                        COGL_PIXEL_FORMAT_RGBA_8888,
+//                        shaderBuffer);
+//
+//    printf("Here's the data we pulled from the FB:\n");
+//    for (int i = 0; i < (fbWidth*fbHeight)*pixelLength; i++) {
+//        if (i%pixelLength == 0 && i != 0) {
+//            printf(", ");
+//        }
+//        if (i%(fbWidth*pixelLength) == 0 && i != 0) {
+//            printf("\n");
+//        }
+//
+//        printf("%i ", shaderBuffer[i]); // Print out the value of this byte in the pixel
+//    }
+//    printf("\nDone!\n");
+
+
     // When we pull data from the on screen display, we will need to
     // know the full size of the on screen shader display so we know where
     // to grab the pixel colors from.
@@ -1091,7 +1164,7 @@ void Animation::grabShaderColors(TCLControl *tcl) {
    //     }
    // }
 
-    tcl->pixelBuf[0] = getRandomColor();
+//    tcl->pixelBuf[0] = getRandomColor();
 
 
 

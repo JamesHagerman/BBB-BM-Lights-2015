@@ -135,19 +135,3 @@ gboolean Events::handleMouseEvents (ClutterActor *actor,
 
     return CLUTTER_EVENT_STOP;
 }
-
-
- gboolean Events::handleAfterPaint (ClutterActor *actor,
-     ClutterEvent *event,
-     gpointer      user_data) {
-
-     // Rebuild the struct from the pointer we handed in:
-     EventDataAfterPaint *dataAfterPaint;
-     dataAfterPaint = (EventDataAfterPaint *)user_data;
-
-     Animation *animation = dataAfterPaint->animation;
-     TCLControl *tcl = dataAfterPaint->tcl;
-     animation->grabShaderColors(tcl);
-
-     return CLUTTER_EVENT_STOP;
- }

@@ -8,10 +8,6 @@
 typedef struct  {
     ClutterActor *statusLabel;
 } EventData;
-typedef struct  {
-    Animation *animation;
-    TCLControl *tcl;
-} EventDataAfterPaint;
 
 class Events {
     public:
@@ -20,8 +16,6 @@ class Events {
         static gboolean handleKeyPresses (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
         static gboolean handleTouchEvents (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
         static gboolean handleMouseEvents (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
-        // ToDo: Uncomment shader stuff:
-         static gboolean handleAfterPaint (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
 
     private:
 
