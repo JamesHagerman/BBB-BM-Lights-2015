@@ -754,6 +754,8 @@ gboolean handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer us
 }
 
 
+// handleNewFrame is the function that is called ever 120 milliseconds via the timeline!
+// This is where ALL animation updates will happen.
 void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) {
 
     // Rebuild the struct from the pointer we handed in:
@@ -815,27 +817,26 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
         tcl->Update();
     }
 
-    // Update the on screen color display:
-    // Draw onscreen color map display:
-    // Try changing the color right after setting it to red:
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // This next line grabs the address of single pixel out of the pixels char buffer
-            // and points a char at it so that it's value can be set:
-            unsigned char *pixel = &pixels[y * rowstride + x * 3];
-
-            TCpixel thisPixel = tcl->pixelBuf[index];
-            // #define TCrgb(R,G,B) (((R) << 16) | ((G) << 8) | (B))
-            pixel[0] = ((thisPixel) >> 16) & 0xff;//red
-            pixel[1] = ((thisPixel) >> 8) & 0xff;//green
-            pixel[2] = (thisPixel) & 0xff;//blue
-            index += 1;
-        }
-    }
-    if (pixbuf != NULL) {
-        // THIS actually draws the image on the screen.
+//    // Update the on screen color display using the colors FROM THE PRE-LIGHT ARRAY ITSELF!
+//    // Draw onscreen color map display:
+//    int index = 0;
+//    for (int x = 0; x < WIDTH; x++) {
+//        for (int y = 0; y < HEIGHT; y++) {
+//
+//            // This next line grabs the address of single pixel out of the pixels char buffer
+//            // and points a char at it so that it's value can be set:
+//            unsigned char *pixel = &pixels[y * rowstride + x * 3];
+//
+//            TCpixel thisPixel = tcl->pixelBuf[index];
+//            // #define TCrgb(R,G,B) (((R) << 16) | ((G) << 8) | (B))
+//            pixel[0] = ((thisPixel) >> 16) & 0xff;//red
+//            pixel[1] = ((thisPixel) >> 8) & 0xff;//green
+//            pixel[2] = (thisPixel) & 0xff;//blue
+//            index += 1;
+//        }
+//    }
+//    if (pixbuf != NULL) {
+//        // THIS actually draws the image on the screen.
 //       clutter_image_set_data(CLUTTER_IMAGE(colors),
 //                           gdk_pixbuf_get_pixels (pixbuf),
 //                           COGL_PIXEL_FORMAT_RGB_888,
@@ -843,11 +844,9 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 //                           gdk_pixbuf_get_height (pixbuf),
 //                           gdk_pixbuf_get_rowstride (pixbuf),
 //                           &error);
-    }
-
+//    }
 //    clutter_actor_set_content(lightDisplay, colors);
 
-    // ToDo: Uncomment Shader stuff:
     animationTime += 1.0;
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                       animationTime);
@@ -1048,27 +1047,29 @@ void Animation::derp() {
     // This is the onscreen display...
     // On screen display size is:
     // WIDTH * osd_scale, HEIGHT * osd_scale
-//    cogl_read_pixels(   0, // start x
-//                        50, // stary y
-//                        WIDTH*4,  // width (4 bytes per pixel)
-//                        HEIGHT*4, // height (4 bytes per pixel)
-//                        COGL_READ_PIXELS_COLOR_BUFFER,
-//                        COGL_PIXEL_FORMAT_RGBA_8888,
-//                        shaderBuffer);
+    int fbWidth = 1;//(10*4);
+    int fbHeight = 1;
+    cogl_read_pixels(   0, // start x
+                        50, // stary y
+                        fbWidth,  // width (4 bytes per pixel)
+                        fbHeight, // height in pixels
+                        COGL_READ_PIXELS_COLOR_BUFFER,
+                        COGL_PIXEL_FORMAT_RGBA_8888,
+                        shaderBuffer);
 
-//    printf("Here's the data we pulled from the FB:\n");
-//    for (int i = 0; i < (10*4)*1; i++) {
-//        printf("%i ", shaderBuffer[i]);
-//
-////        if (i%10 == 0) {  // OOPS That's not right. 4 bytes per pixel!
-//        if (i%4 == 0) {
-//            printf(", ");
-//        }
-//        if (i%40 == 0) {
-//            printf("\n");
-//        }
-//    }
-//    printf("\nDone!\n");
+    printf("Here's the data we pulled from the FB:\n");
+    for (int i = 0; i < (fbWidth*1); i++) {
+        printf("%i ", shaderBuffer[i]);
+
+//        if (i%10 == 0) {  // OOPS That's not right. 4 bytes per pixel!
+        if (i%4 == 0) {
+            printf(", ");
+        }
+        if (i%40 == 0) {
+            printf("\n");
+        }
+    }
+    printf("\nDone!\n");
 
 
     // When we pull data from the on screen display, we will need to
@@ -1078,14 +1079,14 @@ void Animation::derp() {
     // Full screen size data is located in configurations.h
     // On screen display size is defined in main.cpp
 
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-//             tcl->pixelBuf[index] = shaderBuffer[index];
-            tcl->pixelBuf[index] = getRandomColor();
-            index += 1;
-        }
-    }
+//    int index = 0;
+//    for (int x = 0; x < WIDTH; x++) {
+//        for (int y = 0; y < HEIGHT; y++) {
+////             tcl->pixelBuf[index] = shaderBuffer[index];
+//            tcl->pixelBuf[index] = getRandomColor();
+//            index += 1;
+//        }
+//    }
 
 // Trying to be all smart 'n shit:
 //    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
