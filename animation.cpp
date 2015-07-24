@@ -838,7 +838,29 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
     }
     printf("\nDone!\n");
 
+    // When we pull data from the on screen display, we will need to
+    // know the full size of the on screen shader display so we know where
+    // to grab the pixel colors from.
+    //
+    // Full screen size data is located in configurations.h
+    // On screen display size is defined in main.cpp
 
+   int ledIndex = 0; // This is the pixel offset in the actual color array. uint32_t
+   int fbIndex = 0;  // This is the pixel BYTE offset in the
+   for (int x = 0; x < WIDTH; x++) {
+       for (int y = 0; y < HEIGHT; y++) {
+           uint32_t nextColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
+           fbIndex += 4;
+
+//            tcl->pixelBuf[ledIndex] = nextColor;
+           tcl->pixelBuf[ledIndex] = getRandomColor();
+           ledIndex += 1;
+       }
+   }
+
+
+    printf("TCL = %i\n", tcl->pixelsPerStrand);
+    printf("TCL = %u\n", tcl->pixelBuf[0]);
 
     // Send the updated color buffer to the strands
     if (tcl->enabled) {
