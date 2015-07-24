@@ -25,8 +25,7 @@ class Animation {
         void switchAnimation(int animation_num, ClutterActor *infoDisplay);
         int getCurrentAnimation();
 
-        // ToDo: Uncomment shader stuff:
-         void derp();
+         void grabShaderColors(TCLControl *tcl);
 
         // Timeline object itself:
         ClutterTimeline *timeline;

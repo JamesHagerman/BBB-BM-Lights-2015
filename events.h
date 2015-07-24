@@ -10,6 +10,7 @@ typedef struct  {
 } EventData;
 typedef struct  {
     Animation *animation;
+    TCLControl *tcl;
 } EventDataAfterPaint;
 
 class Events {

@@ -146,7 +146,8 @@ gboolean Events::handleMouseEvents (ClutterActor *actor,
      dataAfterPaint = (EventDataAfterPaint *)user_data;
 
      Animation *animation = dataAfterPaint->animation;
-     animation->derp();
+     TCLControl *tcl = dataAfterPaint->tcl;
+     animation->grabShaderColors(tcl);
 
      return CLUTTER_EVENT_STOP;
  }

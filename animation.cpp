@@ -949,7 +949,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     TouchData *touch_data;
     touch_data = g_slice_new(TouchData); // reserve memory for it...
     touch_data->lightDisplay = lightDisplay; // Place the button actor itself inside the struct
-    touch_data->tcl = tcl;
+    touch_data->tcl = tcl; // TCLControl *tcl is just a POINTER here (unlike in main.cpp)
     touch_data->animationNumber = &currentAnimation;
 
     // To get touch values back OUT of the callback, we will use variables in the global scope.
@@ -981,7 +981,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShader);
 
     // Bind uniforms to the shader so we can hand variables into them
-    // ToDo: Figure out what uniforms we'll need to implament to get Shader Toys to import cleanly!!
+    // ToDo: Figure out what uniforms we'll need to implement to get Shader Toys to import cleanly!!
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
 //    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "factor", G_TYPE_FLOAT, 1, 0.66);
 
@@ -1039,7 +1039,7 @@ int Animation::getCurrentAnimation() {
 }
 
 // ToDo: Uncomment shader stuff:
-void Animation::derp() {
+void Animation::grabShaderColors(TCLControl *tcl) {
     // This grabs from the WHOLE screen!
     // maybe we can use that to our advantage...?
     //
@@ -1093,6 +1093,14 @@ void Animation::derp() {
 
     tcl->pixelBuf[0] = getRandomColor();
 
+
+
+
+
+
+
+
+    // IGNORE ALL THIS:
 // Trying to be all smart 'n shit:
 //    ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (shaderEffect);
 //    CoglHandle shaderBufferHandle = clutter_offscreen_effect_get_texture(offscreen_effect);
