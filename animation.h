@@ -27,9 +27,6 @@ public:
     void switchAnimation(int animation_num, ClutterActor *infoDisplay);
     int getCurrentAnimation();
 
-    static gboolean handleAfterPaint(ClutterActor *actor, ClutterEvent *event, gpointer user_data);
-    void grabShaderColors(TCLControl *tcl);
-
     // Timeline object itself:
     ClutterTimeline *timeline;
     TCLControl *tcl;
