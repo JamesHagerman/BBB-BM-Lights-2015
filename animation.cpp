@@ -849,17 +849,17 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
    int fbIndex = 0;  // This is the pixel BYTE offset in the
    for (int x = 0; x < WIDTH; x++) {
        for (int y = 0; y < HEIGHT; y++) {
-           uint32_t nextColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
+           uint32_t thisColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
            fbIndex += 4;
 
-//            tcl->pixelBuf[ledIndex] = nextColor;
-           tcl->pixelBuf[ledIndex] = getRandomColor();
+           tcl->pixelBuf[ledIndex] = thisColor;
+//           tcl->pixelBuf[ledIndex] = getRandomColor();
            ledIndex += 1;
        }
    }
 
 
-    printf("TCL = %i\n", tcl->pixelsPerStrand);
+//    printf("TCL = %i\n", tcl->pixelsPerStrand);
     printf("TCL = %u\n", tcl->pixelBuf[0]);
 
     // Send the updated color buffer to the strands
