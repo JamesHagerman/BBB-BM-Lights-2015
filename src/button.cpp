@@ -8,7 +8,6 @@
 #include "configurations.h"
 
 Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations, ClutterActor *infoDisplay) {
-    // printf("Building a Button!\n");
 
     uniqueId = id;
     animation = mainAnimations;
@@ -120,9 +119,6 @@ gboolean Button::handleEvents (ClutterActor *actor,
         // printf("Touch End...\n");
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
-
-        // On bluebutton presses...
-        
 
     } else if (eventType == CLUTTER_BUTTON_PRESS) {
         // printf("Mouse Down...\n");

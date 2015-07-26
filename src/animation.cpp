@@ -38,52 +38,16 @@ typedef struct {
     gfloat *input_y;
 } TouchData;
 
-gdouble rotation = 0;
 int cutoff = 0;
 
 // Hold on to the Color Display:
 ClutterContent *colors;
 ClutterActor *lightDisplay;
 
-//============
-// GLSL Shader related:
-// ToDo: Uncomment Shader stuff:
+// GLSL Shader stuff:
 ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
 gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
-
-//  NOT WORKING:
-//const gchar *fragShader = ""
-//"void main(void) {\n"
-//"   cogl_color_out = cogl_tex_coord_in[0];\n" //cogl_color_out = vec4(0.0, 1.0, 0.0, 1.0);
-//"}";
-
-//const gchar *fragShader = "" //"#version 110\n\n"
-//        "uniform float iGlobalTime;\n"
-//        "uniform float width;\n"
-//        "uniform float height;\n"
-//        "void main(void) {\n"
-//        "   vec2 res = vec2(50, 12);\n"
-//        "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(iGlobalTime*cogl_tex_coord_in[0].x*500.0 + cogl_tex_coord_in[0].y), 1.0);\n"
-//        "}";
-
-const gchar *fragShader = "" //"#version 110\n\n"
-        "uniform float iGlobalTime;\n"
-        "uniform vec2 iResolution;\n"
-        "uniform vec2 iMouse;\n"
-        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
-        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
-        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
-        "}\n"
-        "void main(void) {\n"
-        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
-        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
-        "   mainImage(outFragColor, inFragCoord);\n"
-        "   cogl_color_out = outFragColor;\n"
-        "}";
-
-// End shaders
-//============
 
 GdkPixbuf *pixbuf;
 unsigned char *pixels;
@@ -824,17 +788,10 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
     // Rebuild the struct from the pointer we handed in:
     AnimationData *data;
     data = (AnimationData *) user_data;
-
-//    ClutterActor *rotatingActor = CLUTTER_ACTOR(data->rotatingActor);
-    // ClutterActor *infoDisplay = CLUTTER_ACTOR (data->infoDisplay);
     TCLControl *tcl = data->tcl; // tcl is STILL a pointer to the main TCLControl object
 
     // We hand in the ADDRESS of the current Animation:
     int *animation_number = data->animationNumber;
-
-    // Update the spinning rectangle:
-//    rotation += 0.2;
-//    clutter_actor_set_rotation_angle(rotatingActor, CLUTTER_Z_AXIS, rotation * 5);
 
     // Run which ever animation we're on:
     switch (*animation_number) {
@@ -908,6 +865,8 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 //    }
 //    clutter_actor_set_content(lightDisplay, colors);
 
+
+    // Update the shader uniforms:
     animationTime += 0.1;
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                       animationTime);
@@ -917,8 +876,6 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 Animation::Animation(ClutterActor *stage, TCLControl *tcl,
                      ClutterActor *infoDisplay) { //TCLControl tcl
     printf("Building animation tools...\n");
-
-//    rect = rotatingActor;
 
     // First, we need some Actor to actually display the light colors:
     colors = clutter_image_new();
@@ -934,7 +891,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
     // const char *img_path = "./wut.png";
     // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
 
-
     // Load image data from nothing. Build it manually.
     pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
     // Then grab all of the pixels from that blank pixel buffer:
@@ -942,7 +898,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
     // And figure out how many bytes wide that pixel buffer actually is.
     rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 
-    // ToDo: Uncomment shader stuff
     // Allocate the memory for the shader output buffer:
     // Figure out how big our buffer needs to be. *3 because three bytes per pixel (r, g, b)
 //    int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
@@ -1001,7 +956,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShader);
 
     // Bind uniforms to the shader so we can hand variables into them
-    // ToDo: Figure out what uniforms we'll need to implement to get Shader Toys to import cleanly!!
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 0.0);
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, WIDTH*osd_scale, HEIGHT*osd_scale);
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
@@ -1009,9 +963,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
     // Set the effect live on the on screen display actor...
     clutter_actor_add_effect(lightDisplay, shaderEffect);
 
-
-    // End shader stuff
-    //=============
 
 
     // Resize the on screen color display/Shader output display Actor:
@@ -1029,6 +980,9 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
 
     // Allow for UI events on this crazy thing!
     clutter_actor_set_reactive(lightDisplay, TRUE);
+
+
+
 
     // Wire up the event listener on this lightDisplay actor. This is the data object layout:
     // typedef struct  {
@@ -1085,10 +1039,9 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
 }
 
 Animation::~Animation() {
-    // These fail for some reason. Not sure why...
     g_object_unref(colors);
     g_object_unref(pixbuf);
-//    g_object_unref(shaderBuffer);
+    g_object_unref(shaderBuffer);
 }
 
 Animation::Animation() {
@@ -1097,7 +1050,6 @@ Animation::Animation() {
 void Animation::switchAnimation(int animationNumber, ClutterActor *infoDisplay) {
     printf("Changing to animation: %i\n", animationNumber);
     currentAnimation = animationNumber;
-//    clutter_text_set_text(CLUTTER_TEXT(infoDisplay), g_strdup_printf("Current sensor input: %i", currentAnimation));
 }
 
 int Animation::getCurrentAnimation() {

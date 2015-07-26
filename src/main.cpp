@@ -69,13 +69,8 @@
 #include "events.h"
 #include "button.h"
 #include "animation.h"
-
-// #include "color.h"
-
 #include "configurations.h"
 
-
-// Color colorManager;
 ClutterActor *rect;
 ClutterState *transitions;
 
@@ -86,17 +81,6 @@ ClutterActor *infoDisplay;
 TCLControl tcl;
 
 Events eventHandlers;
-
-
-// ClutterActor* createBox(ClutterActor *stage, int x, int y, int w, int h, ClutterColor color) {
-//     ClutterActor *toRet = clutter_actor_new();
-//     clutter_actor_set_background_color( toRet, &color);
-//     clutter_actor_set_size (toRet, w, h);
-//     clutter_actor_set_position (toRet, x, y);
-//     clutter_actor_add_child (stage, toRet);
-//     clutter_actor_show (toRet);
-//     return toRet;
-// }
 
 int main(int argc, char *argv[]) {
 
@@ -112,12 +96,6 @@ int main(int argc, char *argv[]) {
 
     // Build some colors:
     ClutterColor stage_color = { 0, 0, 0, 0xFF };
-//    ClutterColor text_color = {255, 255, 255, 255};
-//    ClutterColor actor_color = { 102, 0, 204, 255 };
-    // ClutterColor red_color = { 0xFF, 0, 0, 255 };
-
-    // Color colorManager = Color();
-    // colorManager.Meow();
 
     // Set up the stage:
     ClutterActor *stage = clutter_stage_new();
@@ -127,80 +105,14 @@ int main(int argc, char *argv[]) {
     // Set up a listener to close the app if the window is closed:
     g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
 
-
-    // Add a label to the stage:
-//    label = clutter_text_new_with_text ("Sans 16px", "System Live! To halt system, press enter button below screen, wait for orange LED to stop blinking before removing system power.");
-//    clutter_text_set_line_wrap(CLUTTER_TEXT(label), true);
-//    clutter_actor_set_size(label, width-35, 35);
-//    clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
-//    clutter_actor_set_position(label, 35, 6);
-//    clutter_actor_add_child(stage, label);
-
-    // label2 = clutter_text_new_with_text ("Sans 14px", "To halt system, press enter button below screen and wait for the orange LED to stop blinking before removing power.");
-    // clutter_text_set_line_wrap(CLUTTER_TEXT(label2), true);
-    // clutter_actor_set_size(label2, width, 40);
-    // clutter_text_set_color(CLUTTER_TEXT(label2), &text_color);
-    // clutter_actor_set_position(label2, 0, height-buttonHeight-clutter_actor_get_height(label2)*2); 
-    // clutter_actor_add_child(stage, label2);
-
     // Set up the keyboard listener for the arrow, enter, and esc keys:
     EventData *data;
     data = g_slice_new (EventData); // reserve memory for it...
     data->statusLabel = label; // Place the button actor itself inside the struct
-    // Build a "down" color (hard coded for now...)
-    // ClutterColor downColor = { 255, 0, 47, 0xFF };
     g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), data);
-
-
-//    /* Status rectangle */
-//    rect = clutter_actor_new();
-//    clutter_actor_set_background_color (rect, &actor_color);
-//    clutter_actor_set_size (rect, 20, 20);
-//    clutter_actor_set_pivot_point(rect, 0.5, 0.5);
-//    clutter_actor_set_position (rect, 10, 10);
-
-    // Wire up some event listeners:
-//    clutter_actor_set_reactive (rect, TRUE);
-//    g_signal_connect (rect, "touch-event", G_CALLBACK (eventHandlers.handleTouchEvents), transitions);
-    //g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
-//    g_signal_connect (rect, "button-press-event", G_CALLBACK (eventHandlers.handleMouseEvents), rect);
-
-    // Add the spinning rectangle to the stage:
-//    clutter_actor_add_child(stage, rect);
-
-    // Create a bunch of yellow boxes on the screen:
-    // for (int i = 0; i < 50; i+=1) {
-    //     createBox(stage, 10+(i*1), 10, 1,1, red_color);
-    // }
-
-//    infoDisplay = clutter_text_new_with_text ("Sans 14px", "Current sensor input: 6");
-//    clutter_text_set_line_wrap(CLUTTER_TEXT(infoDisplay), true);
-//    clutter_actor_set_size(infoDisplay, width, 40);
-//    clutter_text_set_color(CLUTTER_TEXT(infoDisplay), &text_color);
-//    clutter_actor_set_position(infoDisplay, 0, height-(buttonHeight*2)-clutter_actor_get_height(infoDisplay));
-//    clutter_actor_add_child(stage, infoDisplay);
 
     // Start animation loop:
     Animation animation = Animation(stage, &tcl, infoDisplay); // pointer TO the main tcl object.
-
-    // MOVED THIS ALL TO animation.cpp
-//    // The animation loop itself will have to know when the frame buffers are swapping. To do this
-//    // we apparently nead to listen to the "after-paint" event on the main scene object.
-//    //
-//    // Once the "after-paint" event fires, we will need to set a state on the Animation to tell it that
-//    // there's data to read from the shaderBuffer. The Animation object will grab the pixel data from
-//    // the shadders buffer, then shove it into a buffer we can hold on to until the Animation loop is
-//    // ready to draw the scene and to dump the colors to the lights.
-//    //
-//    // Set up the data storage to hand a pointer to the main Animation object into the event handler:
-//    EventDataAfterPaint *dataAfterPaint;
-//    dataAfterPaint = g_slice_new(EventDataAfterPaint); // reserve memory for it...
-//    dataAfterPaint->animation = &animation; // Place the current Animation into the struct that will be handed to the event handler
-//    dataAfterPaint->tcl = &tcl; // pointer TO the main tcl object.
-//
-//    // Setup the listener for the after-paint event so we know when we can read from the shader texture:
-//    g_signal_connect(stage, "after-paint", G_CALLBACK(eventHandlers.handleAfterPaint), dataAfterPaint);
-
 
     // Build UI Buttons:
     Button button1 = Button(stage, 0, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF }, &animation, infoDisplay);
@@ -214,7 +126,6 @@ int main(int argc, char *argv[]) {
     Button button8 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*2, height-(buttonHeight*2), (ClutterColor){ 0, 228, 255, 0xFF }, &animation, infoDisplay);
     Button button9 = Button(stage, 8, buttonWidth, buttonHeight, buttonWidth*3, height-(buttonHeight*2), (ClutterColor){ 30, 232, 12, 0xFF }, &animation, infoDisplay);
     Button button10 = Button(stage, 9, buttonWidth, buttonHeight, buttonWidth*4, height-(buttonHeight*2), (ClutterColor){ 255, 215, 0, 0xFF }, &animation, infoDisplay);
-
 
     // Actually show the stage and run the app:
     clutter_actor_show(stage);

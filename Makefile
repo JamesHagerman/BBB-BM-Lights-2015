@@ -53,7 +53,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = main.o TCLControl.o events.o button.o animation.o color.o
+OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o
 
 all: ${OUTPUT}
 
@@ -65,7 +65,7 @@ ${OUTPUT}: $(OBJS)
 
 
 clean:
-	rm -rf *.o *.a ${OUTPUT}
+	rm -rf src/*.o src/*.a ${OUTPUT}
 
 # The below make scripts will load or unload the original FTDI drivers 
 # So that the PaintYourDragon/D2XX drivers can be used for LED output.
