@@ -17,8 +17,7 @@ endif
 
 
 CXX = $(CROSSCOMPILER)g++
-CFLAGS = -Wall -g -Wno-unused-result -Wno-unused-but-set-variable
-#-Wno-unused-variable
+CFLAGS = -Wall -g
 LDFLAGS = `pkg-config clutter-1.0 --libs`
 IFLAGS = `pkg-config clutter-1.0 --cflags`
 
@@ -34,12 +33,12 @@ $(warning Building for $(MACHINE)_$(ARCH))
 ifeq ($(MACHINE)_$(ARCH),Linux_armv7l)
 	LDFLAGS += -lpthread -lrt -lm -lftd2xx -lp9813
 	#-l/usr/lib/libftd2xx.so.1.2.7 -l/usr/lib/libp9813.a
-	CFLAGS += -O3 -fomit-frame-pointer
+	CFLAGS += -O3 -fomit-frame-pointer -Wno-unused-result -Wno-unused-but-set-variable
 endif
 
 ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)
 	LDFLAGS += -lp9813 -lftd2xx 
-	CFLAGS += -O3 -fomit-frame-pointer
+	CFLAGS += -O3 -fomit-frame-pointer -Wno-unused-result -Wno-unused-but-set-variable
 endif
 
 
