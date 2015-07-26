@@ -112,8 +112,8 @@ int main(int argc, char *argv[]) {
 
     // Build some colors:
     ClutterColor stage_color = { 0, 0, 0, 0xFF };
-    ClutterColor text_color = {255, 255, 255, 255};
-    ClutterColor actor_color = { 102, 0, 204, 255 };
+//    ClutterColor text_color = {255, 255, 255, 255};
+//    ClutterColor actor_color = { 102, 0, 204, 255 };
     // ClutterColor red_color = { 0xFF, 0, 0, 255 };
 
     // Color colorManager = Color();
@@ -129,12 +129,12 @@ int main(int argc, char *argv[]) {
 
 
     // Add a label to the stage:
-    label = clutter_text_new_with_text ("Sans 16px", "System Live! To halt system, press enter button below screen, wait for orange LED to stop blinking before removing system power.");
-    clutter_text_set_line_wrap(CLUTTER_TEXT(label), true);
-    clutter_actor_set_size(label, width-35, 35);
-    clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
-    clutter_actor_set_position(label, 35, 6);
-    clutter_actor_add_child(stage, label);
+//    label = clutter_text_new_with_text ("Sans 16px", "System Live! To halt system, press enter button below screen, wait for orange LED to stop blinking before removing system power.");
+//    clutter_text_set_line_wrap(CLUTTER_TEXT(label), true);
+//    clutter_actor_set_size(label, width-35, 35);
+//    clutter_text_set_color(CLUTTER_TEXT(label), &text_color);
+//    clutter_actor_set_position(label, 35, 6);
+//    clutter_actor_add_child(stage, label);
 
     // label2 = clutter_text_new_with_text ("Sans 14px", "To halt system, press enter button below screen and wait for the orange LED to stop blinking before removing power.");
     // clutter_text_set_line_wrap(CLUTTER_TEXT(label2), true);
@@ -152,36 +152,36 @@ int main(int argc, char *argv[]) {
     g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), data);
 
 
-    /* Status rectangle */
-    rect = clutter_actor_new();
-    clutter_actor_set_background_color (rect, &actor_color);
-    clutter_actor_set_size (rect, 20, 20);
-    clutter_actor_set_pivot_point(rect, 0.5, 0.5);
-    clutter_actor_set_position (rect, 10, 10);
+//    /* Status rectangle */
+//    rect = clutter_actor_new();
+//    clutter_actor_set_background_color (rect, &actor_color);
+//    clutter_actor_set_size (rect, 20, 20);
+//    clutter_actor_set_pivot_point(rect, 0.5, 0.5);
+//    clutter_actor_set_position (rect, 10, 10);
 
     // Wire up some event listeners:
-    clutter_actor_set_reactive (rect, TRUE);
-    g_signal_connect (rect, "touch-event", G_CALLBACK (eventHandlers.handleTouchEvents), transitions);
+//    clutter_actor_set_reactive (rect, TRUE);
+//    g_signal_connect (rect, "touch-event", G_CALLBACK (eventHandlers.handleTouchEvents), transitions);
     //g_signal_connect (rect, "motion-event", G_CALLBACK (_pointer_motion_cb), transitions);
-    g_signal_connect (rect, "button-press-event", G_CALLBACK (eventHandlers.handleMouseEvents), rect);
+//    g_signal_connect (rect, "button-press-event", G_CALLBACK (eventHandlers.handleMouseEvents), rect);
 
     // Add the spinning rectangle to the stage:
-    clutter_actor_add_child(stage, rect);
+//    clutter_actor_add_child(stage, rect);
 
     // Create a bunch of yellow boxes on the screen:
     // for (int i = 0; i < 50; i+=1) {
     //     createBox(stage, 10+(i*1), 10, 1,1, red_color);
     // }
 
-    infoDisplay = clutter_text_new_with_text ("Sans 14px", "Current sensor input: 6");
-    clutter_text_set_line_wrap(CLUTTER_TEXT(infoDisplay), true);
-    clutter_actor_set_size(infoDisplay, width, 40);
-    clutter_text_set_color(CLUTTER_TEXT(infoDisplay), &text_color);
-    clutter_actor_set_position(infoDisplay, 0, height-(buttonHeight*2)-clutter_actor_get_height(infoDisplay));
-    clutter_actor_add_child(stage, infoDisplay);
+//    infoDisplay = clutter_text_new_with_text ("Sans 14px", "Current sensor input: 6");
+//    clutter_text_set_line_wrap(CLUTTER_TEXT(infoDisplay), true);
+//    clutter_actor_set_size(infoDisplay, width, 40);
+//    clutter_text_set_color(CLUTTER_TEXT(infoDisplay), &text_color);
+//    clutter_actor_set_position(infoDisplay, 0, height-(buttonHeight*2)-clutter_actor_get_height(infoDisplay));
+//    clutter_actor_add_child(stage, infoDisplay);
 
     // Start animation loop:
-    Animation animation = Animation(stage, rect, &tcl, infoDisplay); // pointer TO the main tcl object.
+    Animation animation = Animation(stage, &tcl, infoDisplay); // pointer TO the main tcl object.
 
     // MOVED THIS ALL TO animation.cpp
 //    // The animation loop itself will have to know when the frame buffers are swapping. To do this

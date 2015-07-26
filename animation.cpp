@@ -23,7 +23,7 @@
 #define TCrgb(R, G, B) (((R) << 16) | ((G) << 8) | (B))
 
 typedef struct {
-    ClutterActor *rotatingActor;
+//    ClutterActor *rotatingActor;
     ClutterActor *infoDisplay;
     TCLControl *tcl;
     int *animationNumber;
@@ -807,7 +807,7 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
     AnimationData *data;
     data = (AnimationData *) user_data;
 
-    ClutterActor *rotatingActor = CLUTTER_ACTOR(data->rotatingActor);
+//    ClutterActor *rotatingActor = CLUTTER_ACTOR(data->rotatingActor);
     // ClutterActor *infoDisplay = CLUTTER_ACTOR (data->infoDisplay);
     TCLControl *tcl = data->tcl; // tcl is STILL a pointer to the main TCLControl object
 
@@ -815,8 +815,8 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
     int *animation_number = data->animationNumber;
 
     // Update the spinning rectangle:
-    rotation += 0.2;
-    clutter_actor_set_rotation_angle(rotatingActor, CLUTTER_Z_AXIS, rotation * 5);
+//    rotation += 0.2;
+//    clutter_actor_set_rotation_angle(rotatingActor, CLUTTER_Z_AXIS, rotation * 5);
 
     // Run which ever animation we're on:
     switch (*animation_number) {
@@ -896,11 +896,11 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 }
 
 
-Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl,
+Animation::Animation(ClutterActor *stage, TCLControl *tcl,
                      ClutterActor *infoDisplay) { //TCLControl tcl
     printf("Building animation tools...\n");
 
-    rect = rotatingActor;
+//    rect = rotatingActor;
 
     // First, we need some Actor to actually display the light colors:
     colors = clutter_image_new();
@@ -936,7 +936,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
         printf("OOPS! malloc error!\n");
     } else {
         printf("We malloc'd %i bytes for your shaderBuffer. It points at: %p\n", shaderBufferSize, shaderBuffer);
-        printf(" The Rowstride on the shaderBuffer is %i", rowstride);
+        printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
     }
 
     // Loop through the (blank) image we just made...
@@ -1043,7 +1043,7 @@ Animation::Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLContro
     // Get ready to hand this display chunk in to the animation event:
     AnimationData *data;
     data = g_slice_new(AnimationData); // reserve memory for it...
-    data->rotatingActor = rect;
+//    data->rotatingActor = rect;
     data->infoDisplay = infoDisplay;
     data->tcl = tcl; // tcl is an pointer to the main TCLControl object.
     data->animationNumber = &currentAnimation;
@@ -1073,7 +1073,7 @@ Animation::Animation() {
 void Animation::switchAnimation(int animationNumber, ClutterActor *infoDisplay) {
     printf("Changing to animation: %i\n", animationNumber);
     currentAnimation = animationNumber;
-    clutter_text_set_text(CLUTTER_TEXT(infoDisplay), g_strdup_printf("Current sensor input: %i", currentAnimation));
+//    clutter_text_set_text(CLUTTER_TEXT(infoDisplay), g_strdup_printf("Current sensor input: %i", currentAnimation));
 }
 
 int Animation::getCurrentAnimation() {

@@ -20,7 +20,7 @@ class Animation {
 public:
     Animation();
 
-    Animation(ClutterActor *stage, ClutterActor *rotatingActor, TCLControl *tcl,
+    Animation(ClutterActor *stage, TCLControl *tcl,
               ClutterActor *infoDisplay); //TCLControl tcl
     ~Animation();
 
