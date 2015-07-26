@@ -43,41 +43,45 @@ Button::~Button() {
 }
 
 void changeAnimation(int id, Animation *animation, ClutterActor *infoDisplay) {
-    switch(id){
+    switch (id) {
         case 0  :
-           animation->switchAnimation(1, infoDisplay);
-           break;
+            printf("Button 0 pressed\n");
+//            animation->switchAnimation(1, infoDisplay);
+            animation->loadShader();
+            break;
         case 1  :
-           animation->switchAnimation(2, infoDisplay);
-           break;
+            printf("Button 1 pressed\n");
+//            animation->switchAnimation(2, infoDisplay);
+            animation->unloadShader();
+            break;
         case 2  :
-           animation->switchAnimation(3, infoDisplay);
-           break;
+            animation->switchAnimation(3, infoDisplay);
+            break;
         case 3  :
-           animation->switchAnimation(4, infoDisplay);
-           break;
+            animation->switchAnimation(4, infoDisplay);
+            break;
         case 4  :
-           animation->switchAnimation(5, infoDisplay);
-           break;
+            animation->switchAnimation(5, infoDisplay);
+            break;
 
         case 5  :
-           animation->switchAnimation(6, infoDisplay);
-           break;
+            animation->switchAnimation(6, infoDisplay);
+            break;
         case 6  :
-           animation->switchAnimation(7, infoDisplay);
-           break;
+            animation->switchAnimation(7, infoDisplay);
+            break;
         case 7  :
-           animation->switchAnimation(8, infoDisplay);
-           break;
+            animation->switchAnimation(8, infoDisplay);
+            break;
         case 8  :
-           animation->switchAnimation(9, infoDisplay);
-           break;
+            animation->switchAnimation(9, infoDisplay);
+            break;
         case 9  :
-           animation->switchAnimation(10, infoDisplay);
-           break;
-      
-        default : 
-           animation->switchAnimation(6, infoDisplay);
+            animation->switchAnimation(10, infoDisplay);
+            break;
+
+        default :
+            animation->switchAnimation(6, infoDisplay);
     }
 
     // animation->getCurrentAnimation();

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <fstream>
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
@@ -20,6 +21,7 @@ typedef struct {
     ClutterActor *infoDisplay;
     TCLControl *tcl;
     int *animationNumber;
+    Animation *animationObject;
 } AnimationData;
 
 typedef struct {
@@ -69,20 +71,20 @@ gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
 //        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
 //        "}\n";
 
-const gchar *fragShader = "" //"#version 110\n\n"
-        "uniform float iGlobalTime;\n"
-        "uniform vec2 iResolution;\n"
-        "uniform vec2 iMouse;\n"
-        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
-        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
-        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
-        "}\n"
-        "void main(void) {\n"
-        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
-        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
-        "   mainImage(outFragColor, inFragCoord);\n"
-        "   cogl_color_out = outFragColor;\n"
-        "}";
+//const gchar *fragShader = "" //"#version 110\n\n"
+//        "uniform float iGlobalTime;\n"
+//        "uniform vec2 iResolution;\n"
+//        "uniform vec2 iMouse;\n"
+//        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
+//        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
+//        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
+//        "}\n"
+//        "void main(void) {\n"
+//        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
+//        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
+//        "   mainImage(outFragColor, inFragCoord);\n"
+//        "   cogl_color_out = outFragColor;\n"
+//        "}";
 
 // Original, mostly working shader:
 //const gchar *fragShader = "" //"#version 110\n\n"
@@ -141,7 +143,7 @@ void shaderAnimation(TCLControl *tcl) {
 }
 
 
-gboolean handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer user_data) {
+gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer user_data) {
 
     // Rebuild the struct from the pointer we handed in:
     TouchData *data;
@@ -186,12 +188,13 @@ gboolean handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer us
 
 // handleNewFrame is the function that is called ever 120 milliseconds via the timeline!
 // This is where ALL animation updates will happen.
-void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) {
+void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) {
 
     // Rebuild the struct from the pointer we handed in:
     AnimationData *data;
     data = (AnimationData *) user_data;
     TCLControl *tcl = data->tcl; // tcl is STILL a pointer to the main TCLControl object
+    Animation *animation = data->animationObject;
 
     // ToDo: Rework old animation system:
 //    // We hand in the ADDRESS of the current Animation:
@@ -274,8 +277,11 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 
     // Update the shader uniforms:
     animationTime += 0.1;
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
-                                      animationTime);
+    if (animation->currentShader>0) {
+        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
+                                          animationTime);
+    }
+
 }
 
 
@@ -317,6 +323,9 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
         printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
     }
 
+    // Make sure we don't have a current shader so we don't break the update loop:
+    currentShader = -1;
+
     // ToDo: Rework old animation system:
 //    // Draw the color image:
 //    // Loop through the (blank) image we just made...
@@ -350,23 +359,23 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
 //    clutter_actor_set_content(lightDisplay, colors);
 
 
-
-    //=============
-    // NOW we can just IGNORE that "color" image/object that we built... because we're just going to blow
-    // it all away with colors from a shader anyways!
-    //
-    // Setup the GLSL Fragment shaders that we'll use to generate colors
-    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
-    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
-    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShader);
-
-    // Bind uniforms to the shader so we can hand variables into them
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 0.0);
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, WIDTH*osd_scale, HEIGHT*osd_scale);
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
-
-    // Set the effect live on the on screen display actor...
-    clutter_actor_add_effect(lightDisplay, shaderEffect);
+    // ToDo: Yank this because we are managing it per shader file now:
+//    //=============
+//    // NOW we can just IGNORE that "color" image/object that we built... because we're just going to blow
+//    // it all away with colors from a shader anyways!
+//    //
+//    // Setup the GLSL Fragment shaders that we'll use to generate colors
+//    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
+//    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
+//    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShader);
+//
+//    // Bind uniforms to the shader so we can hand variables into them
+//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 0.0);
+//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, WIDTH*osd_scale, HEIGHT*osd_scale);
+//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
+//
+//    // Set the effect live on the on screen display actor...
+//    clutter_actor_add_effect(lightDisplay, shaderEffect);
 
 
 
@@ -430,6 +439,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
     data->infoDisplay = infoDisplay;
     data->tcl = tcl; // tcl is an pointer to the main TCLControl object.
     data->animationNumber = &currentAnimation;
+    data->animationObject = this;
 
     // The clutter timeline object takes a "duration" in milliseconds...
     timeline = clutter_timeline_new(120);
@@ -452,6 +462,7 @@ Animation::~Animation() {
 Animation::Animation() {
 }
 
+// Old Animation stuff:
 void Animation::switchAnimation(int animationNumber, ClutterActor *infoDisplay) {
     printf("Changing to animation: %i\n", animationNumber);
     currentAnimation = animationNumber;
@@ -461,4 +472,65 @@ int Animation::getCurrentAnimation() {
     printf("Called! Current animation is: %i\n", currentAnimation);
     return currentAnimation;
 }
+
+
+// New Shader Stuff:
+std::string Animation::readFile(const char *filePath) {
+    std::string content;
+    std::ifstream fileStream(filePath, std::ios::in);
+
+    if (!fileStream.is_open()) {
+        printf("Could not read file %s. File does not exist.\n", filePath);
+    }
+
+    std::string line = "";
+    while (!fileStream.eof()) {
+        std::getline(fileStream, line);
+        content.append(line + "\n");
+    }
+
+    fileStream.close();
+    return content;
+}
+
+void Animation::loadShader() {
+    std::string fragShaderStr = readFile("./shaders/basic.frag");
+    const gchar *fragShaderSrc = fragShaderStr.c_str();
+
+    // Pop off the old shader:
+    unloadShader();
+
+    // Setup the GLSL Fragment shaders that we'll use to generate colors
+    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
+    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
+    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShaderSrc);
+
+    // Bind uniforms to the shader so we can hand variables into them
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 0.0);
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, WIDTH*osd_scale, HEIGHT*osd_scale);
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
+
+    // Set the effect live on the on screen display actor...
+    clutter_actor_add_effect(lightDisplay, shaderEffect);
+    currentShader = 1;
+}
+
+void Animation::unloadShader() {
+    // Pop off the old shader:
+    if (currentShader > 0) {
+        currentShader = -1;
+        clutter_actor_remove_effect(lightDisplay, shaderEffect);
+    }
+}
+
+void Animation::switchShader(int shaderNumber) {
+    currentShader = shaderNumber;
+}
+
+int Animation::getCurrentShader() {
+    printf("Current shader is: %i\n", currentShader);
+    return currentShader;
+}
+
+
 
