@@ -159,11 +159,17 @@ CC = arm-angstrom-linux-gnueabi-gcc
 Once you've got those changes done, you should be able to run:
 
 ```
-mkdir /usr/include
 make install
 ```
 
+And at some point you should update and upgrade the opkg packages... Oh, and you need to STOP the services that are already installed on the image:
 
+```
+systemctl disable toggle.service
+systemctl disable redeem.service
+systemctl disable mjpg-streamer.service
+systemctl disable octoprint.service
+```
 
 
 Installing the Clutter as a service on the BBB

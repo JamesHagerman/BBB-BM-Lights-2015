@@ -385,7 +385,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
     clutter_actor_set_position(lightDisplay, 0, 0);
 //    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
     clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
-    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+8);
+//    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+8);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
 
@@ -450,6 +450,9 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
 
     // This actually starts the timeline animation!
     clutter_timeline_start(timeline);
+
+    // Load the first shader so we do not get a black screen:
+    loadShader("./shaders/basic.frag");
 
 }
 
