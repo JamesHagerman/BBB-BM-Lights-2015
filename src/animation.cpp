@@ -64,37 +64,6 @@ const gchar *fragShaderPostamble = ""
         "   mainImage(outFragColor, inFragCoord);\n"
         "   cogl_color_out = outFragColor;\n"
         "}";
-//
-//const gchar *fragShader = ""
-//        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
-//        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
-//        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
-//        "}\n";
-
-//const gchar *fragShader = "" //"#version 110\n\n"
-//        "uniform float iGlobalTime;\n"
-//        "uniform vec2 iResolution;\n"
-//        "uniform vec2 iMouse;\n"
-//        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
-//        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
-//        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
-//        "}\n"
-//        "void main(void) {\n"
-//        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
-//        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
-//        "   mainImage(outFragColor, inFragCoord);\n"
-//        "   cogl_color_out = outFragColor;\n"
-//        "}";
-
-// Original, mostly working shader:
-//const gchar *fragShader = "" //"#version 110\n\n"
-//        "uniform float iGlobalTime;\n"
-//        "uniform float width;\n"
-//        "uniform float height;\n"
-//        "void main(void) {\n"
-//        "   vec2 res = vec2(50, 12);\n"
-//        "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(iGlobalTime*cogl_tex_coord_in[0].x*500.0 + cogl_tex_coord_in[0].y), 1.0);\n"
-//        "}";
 
 void shaderAnimation(TCLControl *tcl) {
     int fbWidth = WIDTH;
@@ -359,32 +328,12 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
 //    clutter_actor_set_content(lightDisplay, colors);
 
 
-    // ToDo: Yank this because we are managing it per shader file now:
-//    //=============
-//    // NOW we can just IGNORE that "color" image/object that we built... because we're just going to blow
-//    // it all away with colors from a shader anyways!
-//    //
-//    // Setup the GLSL Fragment shaders that we'll use to generate colors
-//    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
-//    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
-//    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShader);
-//
-//    // Bind uniforms to the shader so we can hand variables into them
-//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 0.0);
-//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, WIDTH*osd_scale, HEIGHT*osd_scale);
-//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
-//
-//    // Set the effect live on the on screen display actor...
-//    clutter_actor_add_effect(lightDisplay, shaderEffect);
-
-
-
     // Resize the on screen color display/Shader output display Actor:
     clutter_actor_set_x_expand(lightDisplay, TRUE);
     clutter_actor_set_y_expand(lightDisplay, TRUE);
     clutter_actor_set_position(lightDisplay, 0, 0);
 //    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
-    clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
+    clutter_actor_set_size(lightDisplay, WIDTH*2, HEIGHT*2);
 //    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+8);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
@@ -399,27 +348,11 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
 
 
     // Wire up the event listener on this lightDisplay actor. This is the data object layout:
-    // typedef struct  {
-    //     ClutterActor *lightDisplay;
-    //     TCLControl *tcl;
-    //     int *animationNumber;
-    // } TouchData;
-    //
-    // Build a pointer to a struct in that format that we can pass through the g_signal_connect function
-    // and into the event handler:
     TouchData *touch_data;
     touch_data = g_slice_new(TouchData); // reserve memory for it...
     touch_data->lightDisplay = lightDisplay; // Place the button actor itself inside the struct
     touch_data->tcl = tcl; // TCLControl *tcl is just a POINTER here (unlike in main.cpp)
     touch_data->animationNumber = &currentAnimation;
-
-    // To get touch values back OUT of the callback, we will use variables in the global scope.
-    // This is what was left over from my attempts at handing data back out... but, per usual,
-    // I mess up my callback structures and forgot that calling things async = LOSING CONTEXT!!
-    // input_x = 0;
-    // input_y = 0;
-    // touch_data->input_x = input_x;
-    // touch_data->input_y = input_y;
 
     // Actually wire up the events and set up the data structs that the events need to operate:
     g_signal_connect(lightDisplay, "touch-event", G_CALLBACK(handleTouchEvents), touch_data);
@@ -429,13 +362,10 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
 
 
     // Once we have all that set up, we still need to START THE ACTUAL ANIMATION!!
-    // To do that, we'll need to use the event chain/callback system we have been using so far. This
-    // will take in some actor instances that the event handler can then update/modify in real time.
-    //
+    // To do that, we'll need to use the event chain/callback system we have been using so far.
     // Get ready to hand this display chunk in to the animation event:
     AnimationData *data;
     data = g_slice_new(AnimationData); // reserve memory for it...
-//    data->rotatingActor = rect;
     data->infoDisplay = infoDisplay;
     data->tcl = tcl; // tcl is an pointer to the main TCLControl object.
     data->animationNumber = &currentAnimation;
