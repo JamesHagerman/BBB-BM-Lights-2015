@@ -5,6 +5,35 @@
 #ifndef RUNMAKE_ANIMATIONHELPERS_H
 #define RUNMAKE_ANIMATIONHELPERS_H
 
+// Define the sizes of the image that shows the lights:
+#define HEIGHT 50
+#define WIDTH 12
+#define TCrgb(R, G, B) (((R) << 16) | ((G) << 8) | (B))
+
+gfloat osd_scale = 16;
+
+// Old variables we probably still need:
+int W, H;
+int timeout = 0;
+bool clearing = false;
+int cutoff = 0;
+gfloat finput_x;
+gfloat finput_y;
+int input_x = 1;
+int input_y = 1;
+int old_x, old_y;
+
+int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
+int memSize = totalPixels * sizeof(TCpixel);
+TCpixel *pixelBackupBuf = (TCpixel *) malloc(memSize);
+
+// int seedHSVColor = getHSVRandomColor();
+int tempHSV;
+TCpixel *HSVBuf = (TCpixel *) malloc(memSize);
+bool set = false;
+int tempColor;
+int counter = 5;
+
 
 // Unpack and packing colors into and out of int
 int pack(int a, int b, int c) { return (a << 16) | (b << 8) | c; }
@@ -224,36 +253,6 @@ int popCycle(int rate) {
 
 //==============================================
 // Old animations:
-
-
-
-
-int W, H;
-int timeout = 0;
-bool clearing = false;
-int cutoff = 0;
-gfloat finput_x;
-gfloat finput_y;
-int input_x = 1;
-int input_y = 1;
-int old_x, old_y;
-
-// Size of onscreen display:
-// Define the sizes of the image that shows the lights:
-#define HEIGHT 50
-#define WIDTH 12
-#define TCrgb(R, G, B) (((R) << 16) | ((G) << 8) | (B))
-
-int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
-int memSize = totalPixels * sizeof(TCpixel);
-TCpixel *pixelBackupBuf = (TCpixel *) malloc(memSize);
-
-// int seedHSVColor = getHSVRandomColor();
-int tempHSV;
-TCpixel *HSVBuf = (TCpixel *) malloc(memSize);
-bool set = false;
-int tempColor;
-int counter = 5;
 
 void animation10(TCLControl *tcl) {
     cutoff += 1;

@@ -32,23 +32,19 @@ typedef struct {
     gfloat *input_y;
 } TouchData;
 
-// Hold on to the Color Display:
-ClutterContent *colors;
-ClutterActor *lightDisplay;
-gfloat osd_scale = 16;
-
-GdkPixbuf *pixbuf;
-unsigned char *pixels;
-int rowstride;
-// We need an error object to store errors:
-GError *error;
-int AnimationID = 0;
+// On screen display stuff:
+ClutterActor *lightDisplay; // The actual object we'll draw the colors into
+ClutterContent *colors; // The delegate for painting the lightDisplay
+GdkPixbuf *pixbuf; // The color buffer for the colors content delegate
+unsigned char *pixels; // A list of pointers to the pixels in the color buffer
+int rowstride; // Size of the color buffer
 
 // GLSL Shader stuff:
+ClutterActor *shaderOutput;
 ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
 gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
-
+`
 // These are the pre and postambles for the Shader Toy shader import system.
 // Nothing too complex can run very well on the BBB GPU but it's better than nothing!
 const gchar *fragShaderPreamble = "" //"#version 110\n\n"
@@ -256,10 +252,14 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
 Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     printf("Building animation tools...\n");
 
-    // First, we need some Actor to actually display the light colors:
-    colors = clutter_image_new();
+    //====================
+    // On screen display:
+
+    // Build the Actor that will display what's going to the lights:
     lightDisplay = clutter_actor_new();
-    error = NULL;
+
+    // Build the color delegate for the lightDisplay's content/texture:
+    colors = clutter_image_new();
 
     // Load image data from some other data source...:
     // guchar *data =
@@ -267,14 +267,50 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
 
     // Load image data from a file:
     // const char *img_path = "./wut.png";
+    // We need an error object in case the file can't be loaded
+    // GError *error = NULL;
     // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
 
-    // Load image data from nothing. Build it manually.
+    // Build the color buffer:
     pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
-    // Then grab all of the pixels from that blank pixel buffer:
-    pixels = gdk_pixbuf_get_pixels(pixbuf);
-    // And figure out how many bytes wide that pixel buffer actually is.
-    rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+    pixels = gdk_pixbuf_get_pixels(pixbuf); // Grab it's pixels...
+    rowstride = gdk_pixbuf_get_rowstride(pixbuf); // figure out the width of the buffer...
+
+    // And put some RED into the buffer to start off with
+    for (int x = 0; x < WIDTH; x++) {
+        for (int y = 0; y < HEIGHT; y++) {
+
+            // Find the ADDRESS of each pixel in the pixbuf via the raw char buffer we built...
+            // and bind it to a pointer to a char...
+            unsigned char *pixel = &pixels[y * rowstride + x * 3];
+
+            // And directly update that memory location with a new color
+            // This AUTOMATICALLY updates the color of the pixbuf!
+            // It's just hitting the memory directly!
+            pixel[0] = 255;//red
+            pixel[1] = 0x0;//green
+            pixel[2] = 0x0;//blue
+        }
+    }
+
+    // Now that we've got some color in pixbuf (via the pixel
+    if (pixbuf != NULL) {
+        clutter_image_set_data(CLUTTER_IMAGE(colors),
+                            gdk_pixbuf_get_pixels (pixbuf),
+                            COGL_PIXEL_FORMAT_RGB_888,
+                            gdk_pixbuf_get_width (pixbuf),
+                            gdk_pixbuf_get_height (pixbuf),
+                            gdk_pixbuf_get_rowstride (pixbuf),
+                            &error);
+    }
+
+    // Set the on screen light display to the image that we hard coded to red earlier in this function..
+    clutter_actor_set_content(lightDisplay, colors);
+
+
+    // End On screen display
+    //=============================
+    // Shader setup and wirings:
 
     // Allocate the memory for the shader output buffer:
     // Figure out how big our buffer needs to be. *3 because three bytes per pixel (r, g, b)
@@ -293,38 +329,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
 
     // Make sure we don't have a current shader so we don't break the update loop:
     currentShader = -1;
-
-    // ToDo: Rework old animation system:
-//    // Draw the color image:
-//    // Loop through the (blank) image we just made...
-//    for (int x = 0; x < WIDTH; x++) {
-//        for (int y = 0; y < HEIGHT; y++) {
-//
-//            // Find the address of each pixel in turn...
-//            // This next line grabs the address of single pixel out of the pixels char buffer
-//            // and points a char at it so that it's value can be set:
-//            unsigned char *pixel = &pixels[y * rowstride + x * 3];
-//
-//            // And set that specific pixel's color to red.
-//            pixel[0] = 255;//red
-//            pixel[1] = 0x0;//green
-//            pixel[2] = 0x0;//blue
-//        }
-//    }
-//
-//    // Assuming the buffer is defined, throw the image at the on screen display:
-//    if (pixbuf != NULL) {
-//        clutter_image_set_data(CLUTTER_IMAGE(colors),
-//                            gdk_pixbuf_get_pixels (pixbuf),
-//                            COGL_PIXEL_FORMAT_RGB_888,
-//                            gdk_pixbuf_get_width (pixbuf),
-//                            gdk_pixbuf_get_height (pixbuf),
-//                            gdk_pixbuf_get_rowstride (pixbuf),
-//                            &error);
-//    }
-//
-//    // Set the on screen light display to the image that we hard coded to red earlier in this function..
-//    clutter_actor_set_content(lightDisplay, colors);
 
 
     // Resize the on screen color display/Shader output display Actor:

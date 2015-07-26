@@ -53,7 +53,7 @@ void changeAnimation(int id, Animation *animation) {
             break;
         case 2  :
 //            animation->switchAnimation(3);
-            animation->loadShader("./shaders/flame.frag");
+//            animation->loadShader("./shaders/flame.frag");
             break;
         case 3  :
             // animation->switchAnimation(4);
