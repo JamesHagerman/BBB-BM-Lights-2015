@@ -44,7 +44,7 @@ ClutterActor *shaderOutput;
 ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
 gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
-`
+
 // These are the pre and postambles for the Shader Toy shader import system.
 // Nothing too complex can run very well on the BBB GPU but it's better than nothing!
 const gchar *fragShaderPreamble = "" //"#version 110\n\n"
@@ -261,17 +261,18 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // Build the color delegate for the lightDisplay's content/texture:
     colors = clutter_image_new();
 
+    // Error object for GDK/Clutter calls that need them
+    GError *error = NULL;
+
     // Load image data from some other data source...:
     // guchar *data =
     // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(data);
 
     // Load image data from a file:
     // const char *img_path = "./wut.png";
-    // We need an error object in case the file can't be loaded
-    // GError *error = NULL;
     // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
 
-    // Build the color buffer:
+    // Build the color buffer we'll store the actual colors in:
     pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
     pixels = gdk_pixbuf_get_pixels(pixbuf); // Grab it's pixels...
     rowstride = gdk_pixbuf_get_rowstride(pixbuf); // figure out the width of the buffer...
@@ -293,7 +294,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
         }
     }
 
-    // Now that we've got some color in pixbuf (via the pixel
+    // Dump the colors from the color buffer into the ClutterContent delegate!
     if (pixbuf != NULL) {
         clutter_image_set_data(CLUTTER_IMAGE(colors),
                             gdk_pixbuf_get_pixels (pixbuf),
@@ -304,20 +305,43 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
                             &error);
     }
 
-    // Set the on screen light display to the image that we hard coded to red earlier in this function..
+    // Tell the lightDisplay that it's content should be whatever we've dumped in the content delegate:
     clutter_actor_set_content(lightDisplay, colors);
+
+    // Define the size of the On Screen Display:
+    clutter_actor_set_x_expand(lightDisplay, TRUE);
+    clutter_actor_set_y_expand(lightDisplay, TRUE);
+    clutter_actor_set_position(lightDisplay, 0, WIDTH);
+//    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
+    clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
+    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale);
+    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
+    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
+
+    // Actually add that actor to the stage!
+    clutter_actor_add_child(stage, lightDisplay);
+
+    // Allow for UI events on this crazy thing!
+    clutter_actor_set_reactive(lightDisplay, TRUE);
 
 
     // End On screen display
     //=============================
     // Shader setup and wirings:
 
+    // Build the Actor that the shader will dump to directly:
+    shaderOutput = clutter_actor_new();
+    clutter_actor_set_position(shaderOutput, 0, 0);
+    clutter_actor_set_size(shaderOutput, WIDTH, HEIGHT);
+    clutter_actor_set_rotation_angle(shaderOutput, CLUTTER_Z_AXIS, -90);
+    clutter_actor_set_rotation_angle(shaderOutput, CLUTTER_Y_AXIS, 180);
+    clutter_actor_add_child(stage, shaderOutput);
+
     // Allocate the memory for the shader output buffer:
     // Figure out how big our buffer needs to be. *3 because three bytes per pixel (r, g, b)
 //    int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
     int shaderBufferSize = ceil(WIDTH) * ceil(HEIGHT) * 4;
-    // Actually malloc the buffer!!
-    shaderBuffer = (guint8 *) malloc(shaderBufferSize);
+    shaderBuffer = (guint8 *) malloc(shaderBufferSize); // malloc the buffer!!
 
     // Double check that we built the buffer correctly.
     if (shaderBuffer == NULL) {
@@ -331,21 +355,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     currentShader = -1;
 
 
-    // Resize the on screen color display/Shader output display Actor:
-    clutter_actor_set_x_expand(lightDisplay, TRUE);
-    clutter_actor_set_y_expand(lightDisplay, TRUE);
-    clutter_actor_set_position(lightDisplay, 0, 0);
-//    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
-    clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
-//    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+8);
-    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
-    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
 
-    // Actually add that actor to the stage!
-    clutter_actor_add_child(stage, lightDisplay);
-
-    // Allow for UI events on this crazy thing!
-    clutter_actor_set_reactive(lightDisplay, TRUE);
 
 
 
@@ -453,7 +463,7 @@ void Animation::loadShader(const char *fragment_path) {
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
 
     // Set the effect live on the on screen display actor...
-    clutter_actor_add_effect(lightDisplay, shaderEffect);
+    clutter_actor_add_effect(shaderOutput, shaderEffect);
     currentShader = 1;
 }
 
@@ -462,7 +472,7 @@ void Animation::unloadShader() {
     // Pop off the old shader:
     if (currentShader > 0) {
         currentShader = -1;
-        clutter_actor_remove_effect(lightDisplay, shaderEffect);
+        clutter_actor_remove_effect(shaderOutput, shaderEffect);
     }
 }
 
