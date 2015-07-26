@@ -95,6 +95,9 @@ sudo apt-get install libclutter-1.0-dev libclutter-gst-2.0-dev libcogl-dev libpa
 Building on Windows
 ===================
 
+
+Just doesn't work. Cygwin is a pain in the butt because of a bunch of reasons...
+
 --clafgs:
 ```
 -pthread -I/usr/include/clutter-1.0 -I/usr/include/pango-1.0 -I/usr/include/cogl -I/usr/include/cairo -I/usr/include/atk-1.0 -I/usr/include/json-glib-1.0 -I/usr/include/gtk-3.0 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libdrm -I/usr/include/libpng12 -I/usr/include/pixman-1 -I/usr/include/gio-unix-2.0/
@@ -104,6 +107,67 @@ Building on Windows
 ```
 -pthread -lclutter-1.0 -latk-1.0 -lcogl-pango -ljson-glib-1.0 -lgdk-3 -lXi -lcogl -lgmodule-2.0 -lwayland-egl -lgbm -ldrm -lwayland-server -lEGL -lX11 -lXext -lXdamage -lXcomposite -lXrandr -lwayland-client -lgio-2.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo-gobject -lpango-1.0 -lcairo -lgobject-2.0 -lglib-2.0 -lXfixes
 ```
+
+
+Getting a fresh BBB up and running
+==================================
+
+Download the latest image:
+
+```
+http://feeds.thing-printer.com/images/BBB-eMMC-flasher-v2014-06-2014.11.28.img.xz
+```
+
+Which is talked more about on this page:
+
+```
+http://wiki.thing-printer.com/index.php?title=Thing_image
+```
+
+Once you've got that on the BBB, you'll need to update the opkg binary repo and install these items:
+
+```
+opkg install libclutter-1.0-dev --force-overwrite 
+opkg install libglib-2.0-dev systemd-dev
+```
+
+You may also need some of these:
+
+```
+cogl-1.0-dev libcogl-dev libcogl-pango-dev libgles-omap3-dev libjson-glib-1.0-dev pango-dev
+```
+
+Then you need to get your hands on the ARM Hard Float (hf)  version of the FTDI drivers: `libftd2xx1.1.12.tar.gz`
+
+```
+cd orange_box/FTDI_Hack/release
+cp *.h /usr/include
+cd build/arm926-hf
+mkdir /usr/local
+mkdir /usr/local/lib
+cp -R lib* /usr/local/lib
+chmod 0755 /usr/local/lib/libftd2xx.so.1.2.7
+ln -sf /usr/local/lib/libftd2xx.so.1.2.7 /usr/local/lib/libftd2xx.so
+```
+
+
+Annnnnd then you need to p9813 library installed too. That includes updating the Makefile so you can build it on the BBB itself.
+
+```
+In the Makefile:
+CC = arm-angstrom-linux-gnueabi-gcc
+LDFLAGS = -l/usr/local/lib/libftd2xx.so.1.2.7
+```
+
+Once you've got those changes done, you should be able to run:
+
+```
+mkdir /usr/local/include
+make install
+```
+
+
+
 
 Installing the Clutter as a service on the BBB
 ===============================================
