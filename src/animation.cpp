@@ -177,82 +177,83 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
     data = (AnimationData *) user_data;
     TCLControl *tcl = data->tcl; // tcl is STILL a pointer to the main TCLControl object
 
-    // We hand in the ADDRESS of the current Animation:
-    int *animation_number = data->animationNumber;
+    // ToDo: Rework old animation system:
+//    // We hand in the ADDRESS of the current Animation:
+//    int *animation_number = data->animationNumber;
+//    // Run which ever animation we're on:
+//    switch (*animation_number) {
+//        case 1  :
+//            animation1(tcl);
+//            break;
+//        case 2  :
+//            animation2(tcl);
+//            break;
+//        case 3  :
+//            animation3(tcl);
+//            break;
+//        case 4  :
+//            animation4(tcl);
+//            break;
+//        case 5  :
+//            animation5(tcl);
+//            break;
+//        case 6  :
+//            animation6(tcl);
+//            break;
+//        case 7  :
+//            animation7(tcl);
+//            break;
+//        case 8  :
+//            animation8(tcl);
+//            break;
+//        case 9  :
+//            animation9(tcl);
+//            break;
+//        case 10  :
+//            animation10(tcl);
+//            break;
+//
+//        default :
+//            shaderAnimation(tcl);
+//    }
 
-    // Run which ever animation we're on:
-    switch (*animation_number) {
-        case 1  :
-            animation1(tcl);
-            break;
-        case 2  :
-            animation2(tcl);
-            break;
-        case 3  :
-            animation3(tcl);
-            break;
-        case 4  :
-            animation4(tcl);
-            break;
-        case 5  :
-            animation5(tcl);
-            break;
-        case 6  :
-            animation6(tcl);
-            break;
-        case 7  :
-            animation7(tcl);
-            break;
-        case 8  :
-            animation8(tcl);
-            break;
-        case 9  :
-            animation9(tcl);
-            break;
-        case 10  :
-            animation10(tcl);
-            break;
-
-        default :
-            shaderAnimation(tcl);
-    }
-
-//    shaderAnimation(tcl);
+    shaderAnimation(tcl);
 
     // Send the updated color buffer to the strands
     if (tcl->enabled) {
         tcl->Update();
     }
 
-    // Update the on screen color display using the colors FROM THE PRE-LIGHT ARRAY ITSELF!
-    // Draw onscreen color map display:
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // This next line grabs the address of single pixel out of the pixels char buffer
-            // and points a char at it so that it's value can be set:
-            unsigned char *pixel = &pixels[y * rowstride + x * 3];
-
-            TCpixel thisPixel = tcl->pixelBuf[index];
-            // #define TCrgb(R,G,B) (((R) << 16) | ((G) << 8) | (B))
-            pixel[0] = ((thisPixel) >> 16) & 0xff;//red
-            pixel[1] = ((thisPixel) >> 8) & 0xff;//green
-            pixel[2] = (thisPixel) & 0xff;//blue
-            index += 1;
-        }
-    }
-    if (pixbuf != NULL) {
-        // THIS actually draws the image on the screen.
-       clutter_image_set_data(CLUTTER_IMAGE(colors),
-                           gdk_pixbuf_get_pixels (pixbuf),
-                           COGL_PIXEL_FORMAT_RGB_888,
-                           gdk_pixbuf_get_width (pixbuf),
-                           gdk_pixbuf_get_height (pixbuf),
-                           gdk_pixbuf_get_rowstride (pixbuf),
-                           &error);
-    }
-    clutter_actor_set_content(lightDisplay, colors);
+    // ToDo: Rework old animation system:
+//    // Update the on screen color display using the colors FROM THE PRE-LIGHT ARRAY ITSELF!
+//    // Draw onscreen color map display:
+//    int index = 0;
+//    for (int x = 0; x < WIDTH; x++) {
+//        for (int y = 0; y < HEIGHT; y++) {
+//
+//            // This next line grabs the address of single pixel out of the pixels char buffer
+//            // and points a char at it so that it's value can be set:
+//            unsigned char *pixel = &pixels[y * rowstride + x * 3];
+//
+//            TCpixel thisPixel = tcl->pixelBuf[index];
+//            // #define TCrgb(R,G,B) (((R) << 16) | ((G) << 8) | (B))
+//            pixel[0] = ((thisPixel) >> 16) & 0xff;//red
+//            pixel[1] = ((thisPixel) >> 8) & 0xff;//green
+//            pixel[2] = (thisPixel) & 0xff;//blue
+//            index += 1;
+//        }
+//    }
+//    if (pixbuf != NULL) {
+//        // THIS actually draws the image on the screen.
+//       clutter_image_set_data(CLUTTER_IMAGE(colors),
+//                           gdk_pixbuf_get_pixels (pixbuf),
+//                           COGL_PIXEL_FORMAT_RGB_888,
+//                           gdk_pixbuf_get_width (pixbuf),
+//                           gdk_pixbuf_get_height (pixbuf),
+//                           gdk_pixbuf_get_rowstride (pixbuf),
+//                           &error);
+//    }
+//    clutter_actor_set_content(lightDisplay, colors);
 
 
     // Update the shader uniforms:
@@ -300,36 +301,37 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
         printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
     }
 
-    // Draw the color image:
-    // Loop through the (blank) image we just made...
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // Find the address of each pixel in turn...
-            // This next line grabs the address of single pixel out of the pixels char buffer
-            // and points a char at it so that it's value can be set:
-            unsigned char *pixel = &pixels[y * rowstride + x * 3];
-
-            // And set that specific pixel's color to red.
-            pixel[0] = 255;//red
-            pixel[1] = 0x0;//green
-            pixel[2] = 0x0;//blue
-        }
-    }
-
-    // Assuming the buffer is defined, throw the image at the on screen display:
-    if (pixbuf != NULL) {
-        clutter_image_set_data(CLUTTER_IMAGE(colors),
-                            gdk_pixbuf_get_pixels (pixbuf),
-                            COGL_PIXEL_FORMAT_RGB_888,
-                            gdk_pixbuf_get_width (pixbuf),
-                            gdk_pixbuf_get_height (pixbuf),
-                            gdk_pixbuf_get_rowstride (pixbuf),
-                            &error);
-    }
-
-    // Set the on screen light display to the image that we hard coded to red earlier in this function..
-    clutter_actor_set_content(lightDisplay, colors);
+    // ToDo: Rework old animation system:
+//    // Draw the color image:
+//    // Loop through the (blank) image we just made...
+//    for (int x = 0; x < WIDTH; x++) {
+//        for (int y = 0; y < HEIGHT; y++) {
+//
+//            // Find the address of each pixel in turn...
+//            // This next line grabs the address of single pixel out of the pixels char buffer
+//            // and points a char at it so that it's value can be set:
+//            unsigned char *pixel = &pixels[y * rowstride + x * 3];
+//
+//            // And set that specific pixel's color to red.
+//            pixel[0] = 255;//red
+//            pixel[1] = 0x0;//green
+//            pixel[2] = 0x0;//blue
+//        }
+//    }
+//
+//    // Assuming the buffer is defined, throw the image at the on screen display:
+//    if (pixbuf != NULL) {
+//        clutter_image_set_data(CLUTTER_IMAGE(colors),
+//                            gdk_pixbuf_get_pixels (pixbuf),
+//                            COGL_PIXEL_FORMAT_RGB_888,
+//                            gdk_pixbuf_get_width (pixbuf),
+//                            gdk_pixbuf_get_height (pixbuf),
+//                            gdk_pixbuf_get_rowstride (pixbuf),
+//                            &error);
+//    }
+//
+//    // Set the on screen light display to the image that we hard coded to red earlier in this function..
+//    clutter_actor_set_content(lightDisplay, colors);
 
 
 
@@ -348,7 +350,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
 
     // Set the effect live on the on screen display actor...
-//    clutter_actor_add_effect(lightDisplay, shaderEffect);
+    clutter_actor_add_effect(lightDisplay, shaderEffect);
 
 
 
