@@ -100,7 +100,7 @@ void shaderAnimation(TCLControl *tcl) {
     int fbWidth = WIDTH;
     int fbHeight = HEIGHT;
     cogl_read_pixels(   0, // start x
-                        50, // stary y
+                        0, // stary y
                         fbWidth,  // width (4 bytes per pixel)
                         fbHeight, // height in pixels
                         COGL_READ_PIXELS_COLOR_BUFFER,
