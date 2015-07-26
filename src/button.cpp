@@ -53,8 +53,8 @@ void changeAnimation(int id, Animation *animation, ClutterActor *infoDisplay) {
             animation->unloadShader();
             break;
         case 2  :
-//            animation->switchAnimation(3, infoDisplay);
-            animation->loadShader("./shaders/flame.frag");
+            animation->switchAnimation(3, infoDisplay);
+//            animation->loadShader("./shaders/flame.frag");
             break;
         case 3  :
             // animation->switchAnimation(4, infoDisplay);
