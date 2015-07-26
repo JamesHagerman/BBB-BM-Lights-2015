@@ -143,11 +143,9 @@ Then you need to get your hands on the ARM Hard Float (hf)  version of the FTDI 
 cd orange_box/FTDI_Hack/release
 cp *.h /usr/include
 cd build/arm926-hf
-mkdir /usr/local
-mkdir /usr/local/lib
-cp -R lib* /usr/local/lib
-chmod 0755 /usr/local/lib/libftd2xx.so.1.2.7
-ln -sf /usr/local/lib/libftd2xx.so.1.2.7 /usr/local/lib/libftd2xx.so
+cp -R lib* /usr/lib
+chmod 0755 /usr/lib/libftd2xx.so.1.2.7
+ln -sf /usr/lib/libftd2xx.so.1.2.7 /usr/lib/libftd2xx.so
 ```
 
 
@@ -156,13 +154,12 @@ Annnnnd then you need to p9813 library installed too. That includes updating the
 ```
 In the Makefile:
 CC = arm-angstrom-linux-gnueabi-gcc
-LDFLAGS = -l/usr/local/lib/libftd2xx.so.1.2.7
 ```
 
 Once you've got those changes done, you should be able to run:
 
 ```
-mkdir /usr/local/include
+mkdir /usr/include
 make install
 ```
 

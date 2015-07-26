@@ -32,7 +32,8 @@ endif
 
 $(warning Building for $(MACHINE)_$(ARCH))
 ifeq ($(MACHINE)_$(ARCH),Linux_armv7l)
-	LDFLAGS += -lpthread -lrt -lm -l/usr/lib/libftd2xx.so.1.2.7 -l/usr/local/lib/libp9813.a
+	LDFLAGS += -lpthread -lrt -lm -lftd2xx -lp9813
+	#-l/usr/lib/libftd2xx.so.1.2.7 -l/usr/lib/libp9813.a
 	CFLAGS += -O3 -fomit-frame-pointer
 endif
 
