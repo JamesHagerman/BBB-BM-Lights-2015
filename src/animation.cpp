@@ -18,7 +18,6 @@
 #include "AnimationHelpers.h"
 
 typedef struct {
-    ClutterActor *infoDisplay;
     TCLControl *tcl;
     int *animationNumber;
     Animation *animationObject;
@@ -254,7 +253,7 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
 }
 
 
-Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDisplay) {
+Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     printf("Building animation tools...\n");
 
     // First, we need some Actor to actually display the light colors:
@@ -333,7 +332,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
     clutter_actor_set_y_expand(lightDisplay, TRUE);
     clutter_actor_set_position(lightDisplay, 0, 0);
 //    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
-    clutter_actor_set_size(lightDisplay, WIDTH*3, HEIGHT*3);
+    clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
 //    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+8);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
@@ -366,7 +365,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
     // Get ready to hand this display chunk in to the animation event:
     AnimationData *data;
     data = g_slice_new(AnimationData); // reserve memory for it...
-    data->infoDisplay = infoDisplay;
     data->tcl = tcl; // tcl is an pointer to the main TCLControl object.
     data->animationNumber = &currentAnimation;
     data->animationObject = this;
@@ -396,7 +394,7 @@ Animation::Animation() {
 }
 
 // Old Animation stuff:
-void Animation::switchAnimation(int animationNumber, ClutterActor *infoDisplay) {
+void Animation::switchAnimation(int animationNumber) {
     printf("Changing to animation: %i\n", animationNumber);
     currentAnimation = animationNumber;
 }

@@ -23,8 +23,7 @@ class Animation {
 public:
     Animation();
 
-    Animation(ClutterActor *stage, TCLControl *tcl,
-              ClutterActor *infoDisplay); //TCLControl tcl
+    Animation(ClutterActor *stage, TCLControl *tcl); //TCLControl tcl
     ~Animation();
 
     // Event Handlers:
@@ -39,7 +38,7 @@ public:
     int i;
     int currentAnimation;
 
-    void switchAnimation(int animation_num, ClutterActor *infoDisplay);
+    void switchAnimation(int animation_num);
     int getCurrentAnimation();
 
 

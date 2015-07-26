@@ -6,7 +6,6 @@
 #include "animation.h"
 
 typedef struct  {
-    ClutterActor *statusLabel;
 } EventData;
 
 class Events {

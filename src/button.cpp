@@ -7,7 +7,7 @@
 
 #include "configurations.h"
 
-Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations, ClutterActor *infoDisplay) {
+Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations) {
 
     uniqueId = id;
     animation = mainAnimations;
@@ -24,7 +24,6 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
     ButtonData *data;
     data = g_slice_new (ButtonData); // reserve memory for it...
     data->actor = buttonActor; // Place the button actor itself inside the struct
-    data->infoDisplay = infoDisplay;
     // Build a "down" color (hard coded for now...)
     ClutterColor downColor = { 255, 0, 47, 0xFF };
     data->upColor = upColor;
@@ -42,46 +41,46 @@ Button::~Button() {
 
 }
 
-void changeAnimation(int id, Animation *animation, ClutterActor *infoDisplay) {
+void changeAnimation(int id, Animation *animation) {
     switch (id) {
         case 0  :
-//            animation->switchAnimation(1, infoDisplay);
+//            animation->switchAnimation(1);
             animation->loadShader("./shaders/basic.frag");
             break;
         case 1  :
-//            animation->switchAnimation(2, infoDisplay);
+//            animation->switchAnimation(2);
             animation->unloadShader();
             break;
         case 2  :
-            animation->switchAnimation(3, infoDisplay);
+            animation->switchAnimation(3);
 //            animation->loadShader("./shaders/flame.frag");
             break;
         case 3  :
-            // animation->switchAnimation(4, infoDisplay);
+            // animation->switchAnimation(4);
             animation->loadShader("./shaders/jason01.frag");
             break;
         case 4  :
-            animation->switchAnimation(5, infoDisplay);
+            animation->switchAnimation(5);
             break;
 
         case 5  :
-            animation->switchAnimation(6, infoDisplay);
+            animation->switchAnimation(6);
             break;
         case 6  :
-            animation->switchAnimation(7, infoDisplay);
+            animation->switchAnimation(7);
             break;
         case 7  :
-            animation->switchAnimation(8, infoDisplay);
+            animation->switchAnimation(8);
             break;
         case 8  :
-            animation->switchAnimation(9, infoDisplay);
+            animation->switchAnimation(9);
             break;
         case 9  :
-            animation->switchAnimation(10, infoDisplay);
+            animation->switchAnimation(10);
             break;
 
         default :
-            animation->switchAnimation(6, infoDisplay);
+            animation->switchAnimation(6);
     }
 
     // animation->getCurrentAnimation();
@@ -100,7 +99,6 @@ gboolean Button::handleEvents (ClutterActor *actor,
 
     // And yank the values we need out of the rebuilt struct:
     ClutterActor *button = CLUTTER_ACTOR (data->actor);
-    ClutterActor *infoDisplay = CLUTTER_ACTOR (data->infoDisplay);
     ClutterColor upColor = data->upColor;
     ClutterColor downColor = data->downColor;
     int id = data->uniqueId;
@@ -114,7 +112,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
         clutter_actor_set_background_color (button, &downColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
-        changeAnimation(id, animation, infoDisplay);
+        changeAnimation(id, animation);
 
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
@@ -134,7 +132,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
         clutter_actor_set_background_color (button, &upColor);
         clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
         // On bluebutton presses...
-        changeAnimation(id, animation, infoDisplay);
+        changeAnimation(id, animation);
 
     } else if (eventType == CLUTTER_LEAVE) {
         // printf("Leave event......\n");
