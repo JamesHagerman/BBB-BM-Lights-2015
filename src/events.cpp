@@ -19,11 +19,6 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
     ClutterEvent *event,
     gpointer      user_data) {
 
-
-    // Rebuild the struct from the pointer we handed in:
-    EventData *data;
-    data = (EventData *)user_data;
-
     guint keyval = clutter_event_get_key_symbol (event);
 
     ClutterModifierType state = clutter_event_get_state (event);
@@ -108,9 +103,6 @@ gboolean Events::handleMouseEvents (ClutterActor *actor,
     ClutterEvent *event,
     gpointer      user_data) {
 
-
-    ClutterActor *rect_actor = CLUTTER_ACTOR (user_data);
-
     /* get the coordinates where the pointer crossed into the actor */
     gfloat stage_x, stage_y;
     clutter_event_get_coords (event, &stage_x, &stage_y);
@@ -128,8 +120,6 @@ gboolean Events::handleMouseEvents (ClutterActor *actor,
     printf("pointer at stage x %.0f, y %.0f; actor x %.0f, y %.0f\n",
            stage_x, stage_y,
            actor_x, actor_y);
-
-    clutter_actor_set_position (rect_actor, stage_x, stage_y);
 
     return CLUTTER_EVENT_STOP;
 }

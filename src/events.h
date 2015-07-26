@@ -5,9 +5,6 @@
 #include <glib/gprintf.h>
 #include "animation.h"
 
-typedef struct  {
-} EventData;
-
 class Events {
     public:
         Events();
@@ -17,6 +14,5 @@ class Events {
         static gboolean handleMouseEvents (ClutterActor *actor, ClutterEvent *event, gpointer user_data);
 
     private:
-
         
 };

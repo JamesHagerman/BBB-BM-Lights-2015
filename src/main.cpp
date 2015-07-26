@@ -97,9 +97,7 @@ int main(int argc, char *argv[]) {
     g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
 
     // Set up the keyboard listener for the arrow, enter, and esc keys:
-    EventData *data;
-    data = g_slice_new (EventData); // reserve memory for it...
-    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), data);
+    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
 
     // Start animation loop:
     Animation animation = Animation(stage, &tcl); // pointer TO the main tcl object.
