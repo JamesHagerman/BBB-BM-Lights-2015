@@ -52,18 +52,18 @@ gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
 
 // These are the pre and postambles for the Shader Toy shader import system.
 // Nothing too complex can run very well on the BBB GPU but it's better than nothing!
-//const gchar *fragShaderPreamble = "" //"#version 110\n\n"
-//        "uniform float iGlobalTime;\n"
-//        "uniform vec2 iResolution;\n"
-//        "uniform vec2 iMouse;\n";
-//
-//const gchar *fragShaderPostamble = ""
-//        "void main(void) {\n"
-//        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
-//        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
-//        "   mainImage(outFragColor, inFragCoord);\n"
-//        "   cogl_color_out = outFragColor;\n"
-//        "}";
+const gchar *fragShaderPreamble = "" //"#version 110\n\n"
+        "uniform float iGlobalTime;\n"
+        "uniform vec2 iResolution;\n"
+        "uniform vec2 iMouse;\n";
+
+const gchar *fragShaderPostamble = ""
+        "void main(void) {\n"
+        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
+        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
+        "   mainImage(outFragColor, inFragCoord);\n"
+        "   cogl_color_out = outFragColor;\n"
+        "}";
 //
 //const gchar *fragShader = ""
 //        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
@@ -483,22 +483,29 @@ std::string Animation::readFile(const char *filePath) {
         printf("Could not read file %s. File does not exist.\n", filePath);
     }
 
+    content.append(fragShaderPreamble);
+
     std::string line = "";
     while (!fileStream.eof()) {
         std::getline(fileStream, line);
         content.append(line + "\n");
     }
 
+    content.append(fragShaderPostamble);
+
     fileStream.close();
     return content;
 }
 
-void Animation::loadShader() {
-    std::string fragShaderStr = readFile("./shaders/basic.frag");
+void Animation::loadShader(const char *fragment_path) {
+
+    std::string fragShaderStr = readFile(fragment_path);
     const gchar *fragShaderSrc = fragShaderStr.c_str();
 
     // Pop off the old shader:
     unloadShader();
+
+    printf("Loading shader: '%s' \n", fragment_path);
 
     // Setup the GLSL Fragment shaders that we'll use to generate colors
     // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
@@ -516,6 +523,7 @@ void Animation::loadShader() {
 }
 
 void Animation::unloadShader() {
+    printf("Unloading previous shader...\n");
     // Pop off the old shader:
     if (currentShader > 0) {
         currentShader = -1;

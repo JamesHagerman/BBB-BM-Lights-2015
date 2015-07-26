@@ -46,7 +46,7 @@ public:
     // New Shader stuff:
     int currentShader;
     std::string readFile(const char *filePath);
-    void loadShader();
+    void loadShader(const char *fragment_path);
     void unloadShader();
     void switchShader(int shaderNumber);
     int getCurrentShader();

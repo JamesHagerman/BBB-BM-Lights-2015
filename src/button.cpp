@@ -45,17 +45,16 @@ Button::~Button() {
 void changeAnimation(int id, Animation *animation, ClutterActor *infoDisplay) {
     switch (id) {
         case 0  :
-            printf("Button 0 pressed\n");
 //            animation->switchAnimation(1, infoDisplay);
-            animation->loadShader();
+            animation->loadShader("./shaders/basic.frag");
             break;
         case 1  :
-            printf("Button 1 pressed\n");
 //            animation->switchAnimation(2, infoDisplay);
             animation->unloadShader();
             break;
         case 2  :
-            animation->switchAnimation(3, infoDisplay);
+//            animation->switchAnimation(3, infoDisplay);
+            animation->loadShader("./shaders/flame.frag");
             break;
         case 3  :
             animation->switchAnimation(4, infoDisplay);
