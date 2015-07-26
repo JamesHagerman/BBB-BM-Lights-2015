@@ -333,7 +333,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
     clutter_actor_set_y_expand(lightDisplay, TRUE);
     clutter_actor_set_position(lightDisplay, 0, 0);
 //    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
-    clutter_actor_set_size(lightDisplay, WIDTH*2, HEIGHT*2);
+    clutter_actor_set_size(lightDisplay, WIDTH*3, HEIGHT*3);
 //    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+8);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
