@@ -14,16 +14,9 @@
 #include "p9813.h"
 #include "TCLControl.h"
 #include "configurations.h"
-
-
-// Size of onscreen display:
-// Define the sizes of the image that shows the lights:
-#define HEIGHT 12
-#define WIDTH 50
-#define TCrgb(R, G, B) (((R) << 16) | ((G) << 8) | (B))
+#include "AnimationHelpers.h"
 
 typedef struct {
-//    ClutterActor *rotatingActor;
     ClutterActor *infoDisplay;
     TCLControl *tcl;
     int *animationNumber;
@@ -38,30 +31,43 @@ typedef struct {
     gfloat *input_y;
 } TouchData;
 
-int cutoff = 0;
-
 // Hold on to the Color Display:
 ClutterContent *colors;
 ClutterActor *lightDisplay;
+gfloat osd_scale = 16;
+
+GdkPixbuf *pixbuf;
+unsigned char *pixels;
+int rowstride;
+// We need an error object to store errors:
+GError *error;
+int AnimationID = 0;
 
 // GLSL Shader stuff:
 ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
 gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
-//const gchar *fragShader = "" //"#version 110\n\n"
-//        "uniform float iGlobalTime;\n"
-//        "uniform vec2 iResolution;\n"
-//        "uniform vec2 iMouse;\n"
-//        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
-//        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
-//        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
-//        "}\n"
-//        "void main(void) {\n"
-//        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
-//        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
-//        "   mainImage(outFragColor, inFragCoord);\n"
-//        "   cogl_color_out = outFragColor;\n"
-//        "}";
+
+// These are the pre and postambles for the Shader Toy shader import system.
+// Nothing too complex can run very well on the BBB GPU but it's better than nothing!
+const gchar *fragShaderPreamble = "" //"#version 110\n\n"
+        "uniform float iGlobalTime;\n"
+        "uniform vec2 iResolution;\n"
+        "uniform vec2 iMouse;\n";
+
+const gchar *fragShaderPostamble = ""
+        "void main(void) {\n"
+        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
+        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
+        "   mainImage(outFragColor, inFragCoord);\n"
+        "   cogl_color_out = outFragColor;\n"
+        "}";
+
+const gchar *fragShader = ""
+        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
+        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
+        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
+        "}\n";
 
 //const gchar *fragShader = "" //"#version 110\n\n"
 //        "uniform float iGlobalTime;\n"
@@ -71,720 +77,6 @@ gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
 //        "   vec2 res = vec2(50, 12);\n"
 //        "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(iGlobalTime*cogl_tex_coord_in[0].x*500.0 + cogl_tex_coord_in[0].y), 1.0);\n"
 //        "}";
-const gchar *fragShader = "" //"#version 110\n\n"
-        "uniform float iGlobalTime;\n"
-        "uniform vec2 iResolution;\n"
-        "uniform vec2 iMouse;\n"
-        "float noise(vec3 p) //Thx to Las^Mercury\n"
-        "{\n"
-        "	vec3 i = floor(p);\n"
-        "	vec4 a = dot(i, vec3(1., 57., 21.)) + vec4(0., 57., 21., 78.);\n"
-        "	vec3 f = cos((p-i)*acos(-1.))*(-.5)+.5;\n"
-        "	a = mix(sin(cos(a)*a),sin(cos(1.+a)*(1.+a)), f.x);\n"
-        "	a.xy = mix(a.xz, a.yw, f.y);\n"
-        "	return mix(a.x, a.y, f.z);\n"
-        "}\n"
-        "\n"
-        "float sphere(vec3 p, vec4 spr)\n"
-        "{\n"
-        "	return length(spr.xyz-p) - spr.w;\n"
-        "}\n"
-        "\n"
-        "float flame(vec3 p)\n"
-        "{\n"
-        "	float d = sphere(p*vec3(1.,.5,1.), vec4(.0,-1.,.0,1.));\n"
-        "	return d + (noise(p+vec3(.0,iGlobalTime*2.,.0)) + noise(p*3.)*.5)*.25*(p.y) ;\n"
-        "}\n"
-        "\n"
-        "float scene(vec3 p)\n"
-        "{\n"
-        "	return min(100.-length(p) , abs(flame(p)) );\n"
-        "}\n"
-        "\n"
-        "vec4 raymarch(vec3 org, vec3 dir)\n"
-        "{\n"
-        "	float d = 0.0, glow = 0.0, eps = 0.02;\n"
-        "	vec3  p = org;\n"
-        "	bool glowed = false;\n"
-        "\n"
-        "	for(int i=0; i<64; i++)\n"
-        "	{\n"
-        "		d = scene(p) + eps;\n"
-        "		p += d * dir;\n"
-        "		if( d>eps )\n"
-        "		{\n"
-        "			if(flame(p) < .0)\n"
-        "				glowed=true;\n"
-        "			if(glowed)\n"
-        "       			glow = float(i)/64.;\n"
-        "		}\n"
-        "	}\n"
-        "	return vec4(p,glow);\n"
-        "}\n"
-        "\n"
-        "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n"
-        "{\n"
-        "	vec2 v = -1.0 + 2.0 * fragCoord.xy / iResolution.xy;\n"
-        "	v.x *= iResolution.x/iResolution.y;\n"
-        "\n"
-        "	vec3 org = vec3(0., -2., 4.);\n"
-        "	vec3 dir = normalize(vec3(v.x*1.6, -v.y, -1.5));\n"
-        "\n"
-        "	vec4 p = raymarch(org, dir);\n"
-        "	float glow = p.w;\n"
-        "\n"
-        "	vec4 col = mix(vec4(1.,.5,.1,1.), vec4(0.1,.5,1.,1.), p.y*.02+.4);\n"
-        "\n"
-        "	fragColor = mix(vec4(0.), col, pow(glow*2.,4.));\n"
-        "	//fragColor = mix(vec4(1.), mix(vec4(1.,.5,.1,1.),vec4(0.1,.5,1.,1.),p.y*.02+.4), pow(glow*2.,4.));\n"
-        "\n"
-        "}\n"
-        "void main(void) {\n"
-        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
-        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
-        "   mainImage(outFragColor, inFragCoord);\n"
-        "   cogl_color_out = outFragColor;\n"
-        "}";
-
-GdkPixbuf *pixbuf;
-unsigned char *pixels;
-int rowstride;
-// We need an error object to store errors:
-GError *error;
-
-gfloat osd_scale = 16;
-
-int AnimationID = 0;
-
-//=======================
-// Helpful color tools:
-
-// Unpack and packing colors into and out of int
-int pack(int a, int b, int c) { return (a << 16) | (b << 8) | c; }
-
-int unpackA(int color) { return (color >> 16) & 0xff; }
-
-int unpackB(int color) { return (color >> 8) & 0xff; }
-
-int unpackC(int color) { return (color) & 0xff; }
-
-
-// convert HSB to RGB:
-int rgb_colors[3]; // holder for rgb color from hsb conversion
-int hue;
-int saturation;
-//int brightness; // defined above, set using AN3
-const unsigned char dim_curve[] = {
-        0, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3,
-        3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-        4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6,
-        6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8,
-        8, 8, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 11, 11, 11,
-        11, 11, 12, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15,
-        15, 15, 16, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 20,
-        20, 20, 21, 21, 22, 22, 22, 23, 23, 24, 24, 25, 25, 25, 26, 26,
-        27, 27, 28, 28, 29, 29, 30, 30, 31, 32, 32, 33, 33, 34, 35, 35,
-        36, 36, 37, 38, 38, 39, 40, 40, 41, 42, 43, 43, 44, 45, 46, 47,
-        48, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
-        63, 64, 65, 66, 68, 69, 70, 71, 73, 74, 75, 76, 78, 79, 81, 82,
-        83, 85, 86, 88, 90, 91, 93, 94, 96, 98, 99, 101, 103, 105, 107, 109,
-        110, 112, 114, 116, 118, 121, 123, 125, 127, 129, 132, 134, 136, 139, 141, 144,
-        146, 149, 151, 154, 157, 159, 162, 165, 168, 171, 174, 177, 180, 183, 186, 190,
-        193, 196, 200, 203, 207, 211, 214, 218, 222, 226, 230, 234, 238, 242, 248, 255,
-};
-
-int getRGB(int hue, int sat, int val) {
-    // These values should come in in the range of 0-255, not 0-360!
-    hue = hue * 359 / 255;
-    /* convert hue, saturation and brightness ( HSB/HSV ) to RGB
-       The dim_curve is used only on brightness/value and on saturation (inverted).
-       This looks the most natural.
-    */
-
-    val = dim_curve[val];
-    sat = 255 - dim_curve[255 - sat];
-
-    int colors[3];
-
-    int r = 0;
-    int g = 0;
-    int b = 0;
-    int base;
-
-    if (sat == 0) { // Acromatic color (gray). Hue doesn't mind.
-        colors[0] = val;
-        colors[1] = val;
-        colors[2] = val;
-    } else {
-
-        base = ((255 - sat) * val) >> 8;
-
-        switch (hue / 60) {
-            case 0:
-                r = val;
-                g = (((val - base) * hue) / 60) + base;
-                b = base;
-                break;
-
-            case 1:
-                r = (((val - base) * (60 - (hue % 60))) / 60) + base;
-                g = val;
-                b = base;
-                break;
-
-            case 2:
-                r = base;
-                g = val;
-                b = (((val - base) * (hue % 60)) / 60) + base;
-                break;
-
-            case 3:
-                r = base;
-                g = (((val - base) * (60 - (hue % 60))) / 60) + base;
-                b = val;
-                break;
-
-            case 4:
-                r = (((val - base) * (hue % 60)) / 60) + base;
-                g = base;
-                b = val;
-                break;
-
-            case 5:
-                r = val;
-                g = base;
-                b = (((val - base) * (60 - (hue % 60))) / 60) + base;
-                break;
-        }
-
-        colors[0] = r;
-        colors[1] = g;
-        colors[2] = b;
-    }
-
-    // unsigned char toRet = TCrgb(r, g, b);
-    return TCrgb(colors[0], colors[1], colors[2]);
-
-}
-
-int getRGB(int hsvColor) {
-    return getRGB(unpackA(hsvColor), unpackB(hsvColor), unpackC(hsvColor));
-}
-
-// Random functions: 
-int getrand(int min, int max) {
-    if (max == min) {
-        max += 1;
-    }
-    return (rand() % (max - min) + min);
-}
-
-int randColor() {
-    return getrand(0, 255);
-}
-
-int getRandomColor() {
-    return TCrgb(randColor(), randColor(), randColor());
-}
-
-int getBetterRandomColor() {
-    return getRGB(randColor(), 255, 255);
-}
-
-int getBetterRandomColor(int sat) {
-    return getRGB(randColor(), sat, 255);
-}
-
-int getHSVRandomColor() {
-    return pack(randColor(), 255, 255);
-}
-
-int jitter(int toJitter, int jitterAmount) {
-    // printf("Derp: %i   %i\n", toJitter-jitterAmount, toJitter+jitterAmount);
-    return getrand(toJitter - jitterAmount, toJitter + jitterAmount);
-}
-
-int colorJitter(int color, int jitterAmount) {
-    int toRet = color;
-
-    int r = (toRet >> 16) & 0xff;
-    int g = (toRet >> 8) & 0xff;
-    int b = toRet & 0xff;
-
-    // int new_r = jitter(r, jitterAmount);
-    // int new_g = jitter(r, jitterAmount);
-    // int new_b = jitter(r, jitterAmount);
-
-    r = jitter(r, jitterAmount);
-    g = jitter(r, jitterAmount);
-    b = jitter(r, jitterAmount);
-
-    toRet = (r << 16) | (g << 8) | b;
-
-    return toRet;
-}
-
-int HSVJitter(int hsvColor, int amt) {
-    return pack(jitter(unpackA(hsvColor), amt), unpackB(hsvColor), unpackC(hsvColor));
-}
-
-int HSVShift(int hsvColor, int amt) {
-    return pack(unpackA(hsvColor) + amt, unpackB(hsvColor), unpackC(hsvColor));
-}
-
-int h_angle = 0;
-
-int popRainbow(int h_rate) {
-    h_angle += h_rate;
-
-    int toRet = getRGB(h_angle, 255, 255);
-
-    if (h_angle >= 255) {
-        h_angle = 0;
-    }
-    return toRet;
-}
-
-int popHSVRainbow(int h_rate) {
-    h_angle += h_rate;
-
-    int toRet = pack(h_angle, 255, 255);
-
-    if (h_angle >= 255) {
-        h_angle = 0;
-    }
-    return toRet;
-}
-
-int invertHSV(int hsvColor) {
-    int temp = unpackA(hsvColor);
-    temp = temp + 126;
-    if (temp > 255) {
-        temp -= 255;
-    }
-    return pack(temp, unpackB(hsvColor), unpackC(hsvColor));
-}
-
-int cycle = 0;
-
-int popCycle(int rate) {
-    cycle += rate;
-    return cycle;
-}
-
-
-
-//===================
-// Animation code!
-//
-// The theory is that all of these animations will need to take in some input from the touch screen.
-// We will need global variables that all of these functions can see.
-// We will need pointers to these global objects that can be handed in to the event listeners so that
-// the event data can be sent over to these functions.
-
-int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
-int memSize = totalPixels * sizeof(TCpixel);
-TCpixel *pixelBackupBuf = (TCpixel *) malloc(memSize);
-
-gfloat finput_x;
-gfloat finput_y;
-int input_x = 1;
-int input_y = 1;
-int old_x, old_y;
-
-int W, H;
-int timeout = 0;
-bool clearing = false;
-
-void animation10(TCLControl *tcl) {
-    cutoff += 1;
-    if (cutoff > (input_y * 50 / 255)) {
-        cutoff = 0;
-        W = getrand(0, WIDTH);
-        H = getrand(0, HEIGHT);
-    }
-
-    timeout += 1;
-    if (timeout > (input_x * 100 / 255)) {
-        timeout = 0;
-        clearing = true;
-    }
-
-    // int thresh = 4;
-
-    int temp = popHSVRainbow(1);
-    int inverted_temp = invertHSV(temp);
-
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            if (abs(W - x) < 2 && abs(H - y) < 2) {
-                tcl->pixelBuf[index] = getRGB(temp);
-            } else {
-                if (clearing) {
-                    tcl->pixelBuf[index] = getRGB(inverted_temp);
-                }
-            }
-            index += 1;
-        }
-    }
-    if (clearing) {
-        clearing = false;
-    }
-}
-
-void animation9(TCLControl *tcl) {
-    // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
-    // int jitterAmount = input_y*50/255;
-    // printf( "Jitter: %i\n", jitterAmount);
-
-    int rainbowPass = popHSVRainbow(input_y * 50 / 255);
-
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-            pixelBackupBuf[index] = tcl->pixelBuf[index];
-            index += 1;
-        }
-    }
-
-    index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        // int wandOffset = input_x*11/255;
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            int hsvColor = rainbowPass; //HSVJitter(rainbowPass, jitterAmount);
-            int jitColor = getRGB(unpackA(hsvColor), unpackB(hsvColor), unpackC(hsvColor));
-
-            if (y >= 1) {
-                tcl->pixelBuf[index] = pixelBackupBuf[index - 1];
-            } else {
-                if (input_x == old_x && input_y == old_y) {
-                    tcl->pixelBuf[index] = tcl->pixelBuf[index + 49];
-                } else {
-                    if (x == input_x * 12 / 255) {
-                        tcl->pixelBuf[index] = jitColor;
-                    }
-                }
-
-
-            }
-
-            index += 1;
-        }
-    }
-    old_x = input_x;
-    old_y = input_y;
-}
-
-void animation8(TCLControl *tcl) {
-    // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
-    // int jitterAmount = input_y*50/255;
-    // printf( "Jitter: %i\n", jitterAmount);
-
-    int rainbowPass = popHSVRainbow(input_x * 10 / 255);
-
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // // This next line grabs the address of single pixel out of the pixels char buffer
-            // // and points a char at it so that it's value can be set:
-            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
-
-            pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            index += 1;
-        }
-    }
-
-    index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            int hsvColor = rainbowPass; //HSVJitter(rainbowPass, jitterAmount);
-            int jitColor = getRGB(unpackA(hsvColor), unpackB(hsvColor), unpackC(hsvColor));
-
-            if (y >= 1 && y < input_y * 50 / 255) {
-                tcl->pixelBuf[index] = pixelBackupBuf[index - 1];
-            } else if (y >= input_y * 50 / 255) {
-                if (x == 11) {
-                    tcl->pixelBuf[index] = pixelBackupBuf[index - 49];
-                } else {
-                    tcl->pixelBuf[index] = pixelBackupBuf[index + 1];
-                }
-            } else {
-                tcl->pixelBuf[index] = jitColor;
-            }
-
-            index += 1;
-        }
-    }
-}
-
-void animation7(TCLControl *tcl) {
-
-    // Handle inputs:
-    int rate = input_y * 50 / 255;
-    int skew = popCycle(input_x * 50 / 255);
-    rate = rate - rate / 2;
-
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        // h_angle = 0;
-        for (int y = 0; y < HEIGHT; y++) {
-
-
-            // // This next line grabs the address of single pixel out of the pixels char buffer
-            // // and points a char at it so that it's value can be set:
-            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
-
-            tcl->pixelBuf[index] = getRGB(HSVShift(popHSVRainbow(rate), skew));
-
-            index += 1;
-        }
-    }
-}
-
-// Old light update:
-// Calculate the new values for the pixelBuf:
-// Update the lights:
-// x += (double)tcl.pixelsPerStrand / 20000.0;
-// s1 = sin(x                 ) *  11.0;
-// s2 = sin(x *  0.857 - 0.214) * -13.0;
-// s3 = sin(x * -0.923 + 1.428) *  17.0;
-// for(i=0;i<tcl.totalPixels;i++)
-// {
-//     r   = (int)((sin(s1) + 1.0) * 127.5);
-//     g   = (int)((sin(s2) + 1.0) * 127.5);
-//     b   = (int)((sin(s3) + 1.0) * 127.5);
-//     tcl.pixelBuf[i] = TCrgb(r,g,b);
-//     s1 += 0.273;
-//     s2 -= 0.231;
-//     s3 += 0.428;
-// }
-
-void animation6(TCLControl *tcl) {
-    // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
-    int jitterAmount = input_y * 50 / 255;
-    // printf( "Jitter: %i\n", jitterAmount);
-
-    int rainbowPass = popHSVRainbow(input_x * 10 / 255);
-
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // // This next line grabs the address of single pixel out of the pixels char buffer
-            // // and points a char at it so that it's value can be set:
-            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
-
-            pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            index += 1;
-        }
-    }
-
-    index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            int hsvColor = HSVJitter(rainbowPass, jitterAmount);
-            int jitColor = getRGB(unpackA(hsvColor), unpackB(hsvColor), unpackC(hsvColor));
-
-            if (y >= 1) {
-                tcl->pixelBuf[index] = pixelBackupBuf[index - 1];
-            } else {
-                tcl->pixelBuf[index] = jitColor;
-            }
-
-            index += 1;
-        }
-    }
-}
-
-int tempHSV;
-
-void animation5(TCLControl *tcl) {
-     // printf("input_x: %i \ninput_y: %i\n\n", input_x, input_y);
-     if (input_x != old_x || input_y != old_y) {
-         tempHSV = pack(input_y, 255, 255);
-     } else {
-         tempHSV = HSVJitter(tempHSV, input_x*5/255);
-     }
-
-
-     int index = 0;
-     for(int x = 0; x < WIDTH; x++) {
-         for(int y = 0; y < HEIGHT; y++) {
-
-             // // This next line grabs the address of single pixel out of the pixels char buffer
-             // // and points a char at it so that it's value can be set:
-             // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
-
-             tcl->pixelBuf[index] = getRGB(tempHSV);
-
-             index += 1;
-         }
-     }
-
-     old_x = input_x;
-     old_y = input_y;
-}
-
-void animation4(TCLControl *tcl) {
-
-    int temp = popRainbow(input_y * 100 / 255);
-
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // // This next line grabs the address of single pixel out of the pixels char buffer
-            // // and points a char at it so that it's value can be set:
-            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
-
-            if (y == input_y * WIDTH / 255) {
-                tcl->pixelBuf[index] = temp;
-            } else {
-                tcl->pixelBuf[index] = tcl->pixelBuf[index ^ (input_x * HEIGHT / 255)] + temp;
-            }
-
-            // tcl->pixelBuf[index] = temp;
-
-            index += 1;
-        }
-    }
-}
-
-
-void animation3(TCLControl *tcl) {
-    cutoff += 1;
-    if (cutoff > (input_y * 50 / 255)) {
-        cutoff = 0;
-
-        for (int i = 0; i < tcl->totalPixels; i++) {
-            // int temp = TCrgb(200,200,10);
-            // int temp = (200<<16)|(200<<8)|10;
-            // int temp = getRGB(0,255,255);
-            int temp = popRainbow(input_x * 10 / 255);
-            tcl->pixelBuf[i] = temp;
-        }
-    }
-}
-
-// int seedHSVColor = getHSVRandomColor();
-
-TCpixel *HSVBuf = (TCpixel *) malloc(memSize);
-bool set = false;
-
-void animation2(TCLControl *tcl) {
-
-    if (!set) {
-        for (int i = 0; i < tcl->totalPixels; i++) {
-            HSVBuf[i] = pack(255, 255, 255);
-        }
-        set = true;
-    }
-
-    // int nextSeed = getrand(0,tcl->totalPixels);
-    // int tempColor;
-
-    // for(int i=0; i < tcl->totalPixels; i++) {
-    //     tempColor = HSVJitter(seedHSVColor, 1);
-    //     tcl->pixelBuf[i] = getRGB(unpackA(tempColor), unpackB(tempColor), unpackC(tempColor));
-    // }
-
-    // seedHSVColor = tcl->pixelBuf[nextSeed];
-
-    // int temp = getBetterRandomColor();
-
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // // This next line grabs the address of single pixel out of the pixels char buffer
-            // // and points a char at it so that it's value can be set:
-            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
-
-            HSVBuf[index] = HSVJitter(HSVBuf[index], input_y * 50 / 255);
-
-            index += 1;
-        }
-    }
-
-    // index = 0;
-    // for(int x = 0; x < WIDTH; x++) {
-    //     for(int y = 0; y < HEIGHT; y++) {
-
-    //         // pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-    //         if (y>=1) {
-    //             tcl->pixelBuf[index] = pixelBackupBuf[index-1];
-    //         } else {
-    //             tcl->pixelBuf[index] = temp;
-    //         }
-
-    //         index += 1;
-    //     }
-    // }
-
-    for (int i = 0; i < tcl->totalPixels; i++) {
-        tcl->pixelBuf[i] = getRGB(unpackA(HSVBuf[i]), unpackB(HSVBuf[i]), unpackC(HSVBuf[i]));
-    }
-
-}
-
-
-int tempColor;
-int counter = 5;
-
-void animation1(TCLControl *tcl) {
-
-    counter += 1;
-    if (counter > (input_y * 50 / 255)) {
-        int sat = input_x;
-        tempColor = getBetterRandomColor(sat);
-        counter = 0;
-    }
-
-    int index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // // This next line grabs the address of single pixel out of the pixels char buffer
-            // // and points a char at it so that it's value can be set:
-            // unsigned char* pixel =  &pixels[y * rowstride + x * 3];
-
-            pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            index += 1;
-        }
-    }
-
-    index = 0;
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // pixelBackupBuf[index] = tcl->pixelBuf[index];
-
-            if (y >= 1) {
-                tcl->pixelBuf[index] = pixelBackupBuf[index - 1];
-            } else {
-                tcl->pixelBuf[index] = tempColor;
-            }
-
-            index += 1;
-        }
-    }
-}
 
 void shaderAnimation(TCLControl *tcl) {
     int fbWidth = WIDTH;
@@ -832,8 +124,6 @@ void shaderAnimation(TCLControl *tcl) {
 
 }
 
-// End Animation Code
-//===================
 
 gboolean handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer user_data) {
 
@@ -927,57 +217,57 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
             shaderAnimation(tcl);
     }
 
+//    shaderAnimation(tcl);
+
     // Send the updated color buffer to the strands
     if (tcl->enabled) {
         tcl->Update();
     }
 
-//    // Update the on screen color display using the colors FROM THE PRE-LIGHT ARRAY ITSELF!
-//    // Draw onscreen color map display:
-//    int index = 0;
-//    for (int x = 0; x < WIDTH; x++) {
-//        for (int y = 0; y < HEIGHT; y++) {
-//
-//            // This next line grabs the address of single pixel out of the pixels char buffer
-//            // and points a char at it so that it's value can be set:
-//            unsigned char *pixel = &pixels[y * rowstride + x * 3];
-//
-//            TCpixel thisPixel = tcl->pixelBuf[index];
-//            // #define TCrgb(R,G,B) (((R) << 16) | ((G) << 8) | (B))
-//            pixel[0] = ((thisPixel) >> 16) & 0xff;//red
-//            pixel[1] = ((thisPixel) >> 8) & 0xff;//green
-//            pixel[2] = (thisPixel) & 0xff;//blue
-//            index += 1;
-//        }
-//    }
-//    if (pixbuf != NULL) {
-//        // THIS actually draws the image on the screen.
-//       clutter_image_set_data(CLUTTER_IMAGE(colors),
-//                           gdk_pixbuf_get_pixels (pixbuf),
-//                           COGL_PIXEL_FORMAT_RGB_888,
-//                           gdk_pixbuf_get_width (pixbuf),
-//                           gdk_pixbuf_get_height (pixbuf),
-//                           gdk_pixbuf_get_rowstride (pixbuf),
-//                           &error);
-//    }
-//    clutter_actor_set_content(lightDisplay, colors);
+    // Update the on screen color display using the colors FROM THE PRE-LIGHT ARRAY ITSELF!
+    // Draw onscreen color map display:
+    int index = 0;
+    for (int x = 0; x < WIDTH; x++) {
+        for (int y = 0; y < HEIGHT; y++) {
+
+            // This next line grabs the address of single pixel out of the pixels char buffer
+            // and points a char at it so that it's value can be set:
+            unsigned char *pixel = &pixels[y * rowstride + x * 3];
+
+            TCpixel thisPixel = tcl->pixelBuf[index];
+            // #define TCrgb(R,G,B) (((R) << 16) | ((G) << 8) | (B))
+            pixel[0] = ((thisPixel) >> 16) & 0xff;//red
+            pixel[1] = ((thisPixel) >> 8) & 0xff;//green
+            pixel[2] = (thisPixel) & 0xff;//blue
+            index += 1;
+        }
+    }
+    if (pixbuf != NULL) {
+        // THIS actually draws the image on the screen.
+       clutter_image_set_data(CLUTTER_IMAGE(colors),
+                           gdk_pixbuf_get_pixels (pixbuf),
+                           COGL_PIXEL_FORMAT_RGB_888,
+                           gdk_pixbuf_get_width (pixbuf),
+                           gdk_pixbuf_get_height (pixbuf),
+                           gdk_pixbuf_get_rowstride (pixbuf),
+                           &error);
+    }
+    clutter_actor_set_content(lightDisplay, colors);
 
 
     // Update the shader uniforms:
-    animationTime += 0.1;
+    animationTime += 1.0;
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                       animationTime);
 }
 
 
-Animation::Animation(ClutterActor *stage, TCLControl *tcl,
-                     ClutterActor *infoDisplay) { //TCLControl tcl
+Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDisplay) {
     printf("Building animation tools...\n");
 
     // First, we need some Actor to actually display the light colors:
     colors = clutter_image_new();
     lightDisplay = clutter_actor_new();
-
     error = NULL;
 
     // Load image data from some other data source...:
@@ -1010,36 +300,36 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
         printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
     }
 
-//    // Draw the color image:
-//    // Loop through the (blank) image we just made...
-//    for (int x = 0; x < WIDTH; x++) {
-//        for (int y = 0; y < HEIGHT; y++) {
-//
-//            // Find the address of each pixel in turn...
-//            // This next line grabs the address of single pixel out of the pixels char buffer
-//            // and points a char at it so that it's value can be set:
-//            unsigned char *pixel = &pixels[y * rowstride + x * 3];
-//
-//            // And set that specific pixel's color to red.
-//            pixel[0] = 255;//red
-//            pixel[1] = 0x0;//green
-//            pixel[2] = 0x0;//blue
-//        }
-//    }
-//
-//    // Assuming the buffer is defined, throw the image at the on screen display:
-//    if (pixbuf != NULL) {
-//        clutter_image_set_data(CLUTTER_IMAGE(colors),
-//                            gdk_pixbuf_get_pixels (pixbuf),
-//                            COGL_PIXEL_FORMAT_RGB_888,
-//                            gdk_pixbuf_get_width (pixbuf),
-//                            gdk_pixbuf_get_height (pixbuf),
-//                            gdk_pixbuf_get_rowstride (pixbuf),
-//                            &error);
-//    }
-//
-//    // Set the on screen light display to the image that we hard coded to red earlier in this function..
-//    clutter_actor_set_content(lightDisplay, colors);
+    // Draw the color image:
+    // Loop through the (blank) image we just made...
+    for (int x = 0; x < WIDTH; x++) {
+        for (int y = 0; y < HEIGHT; y++) {
+
+            // Find the address of each pixel in turn...
+            // This next line grabs the address of single pixel out of the pixels char buffer
+            // and points a char at it so that it's value can be set:
+            unsigned char *pixel = &pixels[y * rowstride + x * 3];
+
+            // And set that specific pixel's color to red.
+            pixel[0] = 255;//red
+            pixel[1] = 0x0;//green
+            pixel[2] = 0x0;//blue
+        }
+    }
+
+    // Assuming the buffer is defined, throw the image at the on screen display:
+    if (pixbuf != NULL) {
+        clutter_image_set_data(CLUTTER_IMAGE(colors),
+                            gdk_pixbuf_get_pixels (pixbuf),
+                            COGL_PIXEL_FORMAT_RGB_888,
+                            gdk_pixbuf_get_width (pixbuf),
+                            gdk_pixbuf_get_height (pixbuf),
+                            gdk_pixbuf_get_rowstride (pixbuf),
+                            &error);
+    }
+
+    // Set the on screen light display to the image that we hard coded to red earlier in this function..
+    clutter_actor_set_content(lightDisplay, colors);
 
 
 
@@ -1058,7 +348,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
 
     // Set the effect live on the on screen display actor...
-    clutter_actor_add_effect(lightDisplay, shaderEffect);
+//    clutter_actor_add_effect(lightDisplay, shaderEffect);
 
 
 
@@ -1066,11 +356,11 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
     clutter_actor_set_x_expand(lightDisplay, TRUE);
     clutter_actor_set_y_expand(lightDisplay, TRUE);
     clutter_actor_set_position(lightDisplay, 0, 0);
-//    clutter_actor_set_size(lightDisplay, WIDTH * osd_scale, HEIGHT * osd_scale);
+//    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
     clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
     clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+8);
-//    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -45);
-//    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
+    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
+    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
 
     // Actually add that actor to the stage!
     clutter_actor_add_child(stage, lightDisplay);
