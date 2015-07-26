@@ -39,6 +39,9 @@ GdkPixbuf *pixbuf; // The color buffer for the colors content delegate
 unsigned char *pixels; // A list of pointers to the pixels in the color buffer
 int rowstride; // Size of the color buffer
 
+// Error object for GDK/Clutter calls that need them
+GError *error;
+
 // GLSL Shader stuff:
 ClutterActor *shaderOutput;
 ClutterEffect *shaderEffect;
@@ -96,6 +99,18 @@ void shaderAnimation(TCLControl *tcl) {
     int fbIndex = 0;  // This is the pixel BYTE offset in the
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
+
+            // Find the ADDRESS of each pixel in the pixbuf via the raw char buffer we built...
+            // and bind it to a pointer to a char...
+            unsigned char *pixel = &pixels[y * rowstride + x * 3];
+
+            // And directly update that memory location with a new color
+            // This AUTOMATICALLY updates the color of the pixbuf!
+            // It's just hitting the memory directly!
+            pixel[0] = shaderBuffer[fbIndex];//red
+            pixel[1] = shaderBuffer[fbIndex+1];//green
+            pixel[2] = shaderBuffer[fbIndex+2];//blue
+
             uint32_t thisColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
             fbIndex += 4;
 
@@ -160,6 +175,9 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
     TCLControl *tcl = data->tcl; // tcl is STILL a pointer to the main TCLControl object
     Animation *animation = data->animationObject;
 
+    // Error object for GDK/Clutter calls that need them
+    error = NULL;
+
     // ToDo: Rework old animation system:
 //    // We hand in the ADDRESS of the current Animation:
 //    int *animation_number = data->animationNumber;
@@ -207,7 +225,7 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
         tcl->Update();
     }
 
-    // ToDo: Rework old animation system:
+    // Old animation loop stuff:
 //    // Update the on screen color display using the colors FROM THE PRE-LIGHT ARRAY ITSELF!
 //    // Draw onscreen color map display:
 //    int index = 0;
@@ -226,17 +244,19 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
 //            index += 1;
 //        }
 //    }
-//    if (pixbuf != NULL) {
-//        // THIS actually draws the image on the screen.
-//       clutter_image_set_data(CLUTTER_IMAGE(colors),
-//                           gdk_pixbuf_get_pixels (pixbuf),
-//                           COGL_PIXEL_FORMAT_RGB_888,
-//                           gdk_pixbuf_get_width (pixbuf),
-//                           gdk_pixbuf_get_height (pixbuf),
-//                           gdk_pixbuf_get_rowstride (pixbuf),
-//                           &error);
-//    }
-//    clutter_actor_set_content(lightDisplay, colors);
+
+
+    // Dump the colors from the color buffer into the ClutterContent delegate!
+    if (pixbuf != NULL) {
+        clutter_image_set_data(CLUTTER_IMAGE(colors),
+                               gdk_pixbuf_get_pixels (pixbuf),
+                               COGL_PIXEL_FORMAT_RGB_888,
+                               gdk_pixbuf_get_width (pixbuf),
+                               gdk_pixbuf_get_height (pixbuf),
+                               gdk_pixbuf_get_rowstride (pixbuf),
+                               &error);
+    }
+    clutter_actor_set_content(lightDisplay, colors); // Bind that delegate to the lightDisplay
 
 
     // Update the shader uniforms:
@@ -262,7 +282,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     colors = clutter_image_new();
 
     // Error object for GDK/Clutter calls that need them
-    GError *error = NULL;
+    error = NULL;
 
     // Load image data from some other data source...:
     // guchar *data =
