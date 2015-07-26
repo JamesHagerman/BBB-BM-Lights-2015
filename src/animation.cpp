@@ -50,12 +50,33 @@ gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
 
 // These are the pre and postambles for the Shader Toy shader import system.
 // Nothing too complex can run very well on the BBB GPU but it's better than nothing!
-const gchar *fragShaderPreamble = "" //"#version 110\n\n"
+//const gchar *fragShaderPreamble = "" //"#version 110\n\n"
+//        "uniform float iGlobalTime;\n"
+//        "uniform vec2 iResolution;\n"
+//        "uniform vec2 iMouse;\n";
+//
+//const gchar *fragShaderPostamble = ""
+//        "void main(void) {\n"
+//        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
+//        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
+//        "   mainImage(outFragColor, inFragCoord);\n"
+//        "   cogl_color_out = outFragColor;\n"
+//        "}";
+//
+//const gchar *fragShader = ""
+//        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
+//        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
+//        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
+//        "}\n";
+
+const gchar *fragShader = "" //"#version 110\n\n"
         "uniform float iGlobalTime;\n"
         "uniform vec2 iResolution;\n"
-        "uniform vec2 iMouse;\n";
-
-const gchar *fragShaderPostamble = ""
+        "uniform vec2 iMouse;\n"
+        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
+        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
+        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
+        "}\n"
         "void main(void) {\n"
         "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
         "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
@@ -63,12 +84,7 @@ const gchar *fragShaderPostamble = ""
         "   cogl_color_out = outFragColor;\n"
         "}";
 
-const gchar *fragShader = ""
-        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
-        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
-        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
-        "}\n";
-
+// Original, mostly working shader:
 //const gchar *fragShader = "" //"#version 110\n\n"
 //        "uniform float iGlobalTime;\n"
 //        "uniform float width;\n"
@@ -257,7 +273,7 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 
 
     // Update the shader uniforms:
-    animationTime += 1.0;
+    animationTime += 0.1;
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                       animationTime);
 }
@@ -399,7 +415,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl, ClutterActor *infoDis
     // Actually wire up the events and set up the data structs that the events need to operate:
     g_signal_connect(lightDisplay, "touch-event", G_CALLBACK(handleTouchEvents), touch_data);
     g_signal_connect(lightDisplay, "button-press-event", G_CALLBACK(handleTouchEvents), touch_data);
-    g_signal_connect(lightDisplay, "motion-event", G_CALLBACK(handleTouchEvents), touch_data);
+//    g_signal_connect(lightDisplay, "motion-event", G_CALLBACK(handleTouchEvents), touch_data);
     g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK(handleTouchEvents), touch_data);
 
 

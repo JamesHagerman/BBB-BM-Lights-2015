@@ -138,8 +138,6 @@ gboolean Button::handleEvents (ClutterActor *actor,
         // printf("Some other event %i\n", eventType);
     }
 
-    // And now we need to figure out how to display that we've captured the event...
 
-    
     return CLUTTER_EVENT_PROPAGATE;
 }
