@@ -18,8 +18,8 @@
 
 // Size of onscreen display:
 // Define the sizes of the image that shows the lights:
-#define WIDTH 12
-#define HEIGHT 50
+#define HEIGHT 12
+#define WIDTH 50
 #define TCrgb(R, G, B) (((R) << 16) | ((G) << 8) | (B))
 
 typedef struct {
@@ -58,10 +58,28 @@ gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
 //"   cogl_color_out = cogl_tex_coord_in[0];\n" //cogl_color_out = vec4(0.0, 1.0, 0.0, 1.0);
 //"}";
 
+//const gchar *fragShader = "" //"#version 110\n\n"
+//        "uniform float iGlobalTime;\n"
+//        "uniform float width;\n"
+//        "uniform float height;\n"
+//        "void main(void) {\n"
+//        "   vec2 res = vec2(50, 12);\n"
+//        "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(iGlobalTime*cogl_tex_coord_in[0].x*500.0 + cogl_tex_coord_in[0].y), 1.0);\n"
+//        "}";
+
 const gchar *fragShader = "" //"#version 110\n\n"
         "uniform float iGlobalTime;\n"
+        "uniform vec2 iResolution;\n"
+        "uniform vec2 iMouse;\n"
+        "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n"
+        "   vec2 uv = fragCoord.xy / iResolution.xy;\n"
+        "   fragColor = vec4(uv.x, uv.y, 0.5+0.5*sin(iGlobalTime), 1.0);\n"
+        "}\n"
         "void main(void) {\n"
-        "   cogl_color_out = vec4(cogl_tex_coord_in[0].x+sin(iGlobalTime*0.05), cogl_tex_coord_in[0].y+cos(iGlobalTime*0.01), sin(iGlobalTime*cogl_tex_coord_in[0].x*500.0 + cogl_tex_coord_in[0].y), 1.0);\n"
+        "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
+        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
+        "   mainImage(outFragColor, inFragCoord);\n"
+        "   cogl_color_out = outFragColor;\n"
         "}";
 
 // End shaders
@@ -890,7 +908,7 @@ void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) 
 //    }
 //    clutter_actor_set_content(lightDisplay, colors);
 
-    animationTime += 1.0;
+    animationTime += 0.1;
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                       animationTime);
 }
@@ -927,7 +945,8 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
     // ToDo: Uncomment shader stuff
     // Allocate the memory for the shader output buffer:
     // Figure out how big our buffer needs to be. *3 because three bytes per pixel (r, g, b)
-    int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
+//    int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
+    int shaderBufferSize = ceil(WIDTH) * ceil(HEIGHT) * 4;
     // Actually malloc the buffer!!
     shaderBuffer = (guint8 *) malloc(shaderBufferSize);
 
@@ -939,24 +958,25 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
         printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
     }
 
-    // Loop through the (blank) image we just made...
-    for (int x = 0; x < WIDTH; x++) {
-        for (int y = 0; y < HEIGHT; y++) {
-
-            // Find the address of each pixel in turn...
-            // This next line grabs the address of single pixel out of the pixels char buffer
-            // and points a char at it so that it's value can be set:
-            unsigned char *pixel = &pixels[y * rowstride + x * 3];
-
-            // And set that specific pixel's color to red.
-            pixel[0] = 255;//red
-            pixel[1] = 0x0;//green
-            pixel[2] = 0x0;//blue
-        }
-    }
-
-    // Assuming the buffer is defined, throw the image at the on screen display:
-    if (pixbuf != NULL) {
+//    // Draw the color image:
+//    // Loop through the (blank) image we just made...
+//    for (int x = 0; x < WIDTH; x++) {
+//        for (int y = 0; y < HEIGHT; y++) {
+//
+//            // Find the address of each pixel in turn...
+//            // This next line grabs the address of single pixel out of the pixels char buffer
+//            // and points a char at it so that it's value can be set:
+//            unsigned char *pixel = &pixels[y * rowstride + x * 3];
+//
+//            // And set that specific pixel's color to red.
+//            pixel[0] = 255;//red
+//            pixel[1] = 0x0;//green
+//            pixel[2] = 0x0;//blue
+//        }
+//    }
+//
+//    // Assuming the buffer is defined, throw the image at the on screen display:
+//    if (pixbuf != NULL) {
 //        clutter_image_set_data(CLUTTER_IMAGE(colors),
 //                            gdk_pixbuf_get_pixels (pixbuf),
 //                            COGL_PIXEL_FORMAT_RGB_888,
@@ -964,18 +984,48 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
 //                            gdk_pixbuf_get_height (pixbuf),
 //                            gdk_pixbuf_get_rowstride (pixbuf),
 //                            &error);
-    }
+//    }
+//
+//    // Set the on screen light display to the image that we hard coded to red earlier in this function..
+//    clutter_actor_set_content(lightDisplay, colors);
 
 
-    // Actually build the on screen color display/Shader output display Actor:
-#define THUMBNAIL_SIZE 30
+
+    //=============
+    // NOW we can just IGNORE that "color" image/object that we built... because we're just going to blow
+    // it all away with colors from a shader anyways!
+    //
+    // Setup the GLSL Fragment shaders that we'll use to generate colors
+    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
+    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
+    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShader);
+
+    // Bind uniforms to the shader so we can hand variables into them
+    // ToDo: Figure out what uniforms we'll need to implement to get Shader Toys to import cleanly!!
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 0.0);
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, WIDTH*osd_scale, HEIGHT*osd_scale);
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
+
+    // Set the effect live on the on screen display actor...
+    clutter_actor_add_effect(lightDisplay, shaderEffect);
+
+
+    // End shader stuff
+    //=============
+
+
+    // Resize the on screen color display/Shader output display Actor:
     clutter_actor_set_x_expand(lightDisplay, TRUE);
     clutter_actor_set_y_expand(lightDisplay, TRUE);
-    clutter_actor_set_position(lightDisplay, 0, 50);
-    clutter_actor_set_size(lightDisplay, WIDTH * osd_scale, HEIGHT * osd_scale);
-    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
-    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
+    clutter_actor_set_position(lightDisplay, 0, 0);
+//    clutter_actor_set_size(lightDisplay, WIDTH * osd_scale, HEIGHT * osd_scale);
+    clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
+    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+8);
+//    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -45);
+//    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
 
+    // Actually add that actor to the stage!
+    clutter_actor_add_child(stage, lightDisplay);
 
     // Allow for UI events on this crazy thing!
     clutter_actor_set_reactive(lightDisplay, TRUE);
@@ -1008,32 +1058,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl,
     g_signal_connect(lightDisplay, "button-press-event", G_CALLBACK(handleTouchEvents), touch_data);
     g_signal_connect(lightDisplay, "motion-event", G_CALLBACK(handleTouchEvents), touch_data);
     g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK(handleTouchEvents), touch_data);
-
-
-
-    // Set the on screen light display to the image that we hard coded to red earlier in this function..
-    clutter_actor_set_content(lightDisplay, colors);
-
-    //=============
-    // NOW we can just IGNORE that "color" image/object that we built... because we're just going to blow
-    // it all away with colors from a shader anyways!
-    //
-    // Setup the GLSL Fragment shaders that we'll use to generate colors
-    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
-    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
-    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShader);
-
-    // Bind uniforms to the shader so we can hand variables into them
-    // ToDo: Figure out what uniforms we'll need to implement to get Shader Toys to import cleanly!!
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 100.0);
-//    clutter_shader_effect_set_uniform (CLUTTER_SHADER_EFFECT (shaderEffect), "factor", G_TYPE_FLOAT, 1, 0.66);
-
-    // Set the effect live on the on screen display actor... and then add that actor to the stage!
-    clutter_actor_add_effect(lightDisplay, shaderEffect);
-    clutter_actor_add_child(stage, lightDisplay);
-
-    // End shader stuff
-    //=============
 
 
     // Once we have all that set up, we still need to START THE ACTUAL ANIMATION!!
