@@ -63,13 +63,55 @@ const gchar *fragShaderPostamble = ""
         "   cogl_color_out = outFragColor;\n"
         "}";
 
+gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer user_data) {
+
+    // Rebuild the struct from the pointer we handed in:
+    TouchData *data;
+    data = (TouchData *) user_data;
+
+    // ClutterActor *lightDisplay = CLUTTER_ACTOR (data->lightDisplay);
+    // TCLControl *tcl = data->tcl;
+    // int *animation_number = data->animationNumber;
+    // gfloat *input_x = data->input_x;
+    // gfloat *input_y = data->input_y;
+
+    ClutterEventType eventType = clutter_event_type(event);
+    gfloat stage_x, stage_y;
+    gfloat actor_x = 0, actor_y = 0;
+
+    if (eventType == CLUTTER_TOUCH_END) {
+        // printf("Touch end!\n");
+
+    } else if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
+        clutter_event_get_coords(event, &stage_x, &stage_y);
+        clutter_actor_transform_stage_point(actor, stage_x, stage_y, &actor_x, &actor_y);
+
+        // Now we have some x,y coordinates we can throw back at those animations!
+        //  but we should probably scale them now since we have all the stuff we need
+        //  to do so in this block...
+        //
+        // This will scale both to 0.0 <-> 255.0:
+        actor_x = actor_x / clutter_actor_get_width(actor) * 255;
+        actor_y = actor_y / clutter_actor_get_height(actor) * 255;
+
+        // printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
+        input_x = static_cast<int>(actor_x);
+        input_y = static_cast<int>(actor_y);
+
+    } else {
+        // printf("Some other touch event %i\n", eventType);
+    }
+
+    return CLUTTER_EVENT_STOP;
+}
+
 void shaderAnimation(TCLControl *tcl) {
-    int fbWidth = WIDTH;
-    int fbHeight = HEIGHT;
+    int fbWidth = HEIGHT;
+    int fbHeight = WIDTH;
     cogl_read_pixels(   0, // start x
                         0, // stary y
-                        fbWidth,  // width (4 bytes per pixel)
-                        fbHeight, // height in pixels
+                        fbWidth,  // width
+                        fbHeight, // height
                         COGL_READ_PIXELS_COLOR_BUFFER,
                         COGL_PIXEL_FORMAT_RGBA_8888,
                         shaderBuffer);
@@ -122,47 +164,7 @@ void shaderAnimation(TCLControl *tcl) {
 }
 
 
-gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer user_data) {
 
-    // Rebuild the struct from the pointer we handed in:
-    TouchData *data;
-    data = (TouchData *) user_data;
-
-    // ClutterActor *lightDisplay = CLUTTER_ACTOR (data->lightDisplay);
-    // TCLControl *tcl = data->tcl;
-    // int *animation_number = data->animationNumber;
-    // gfloat *input_x = data->input_x;
-    // gfloat *input_y = data->input_y;
-
-    ClutterEventType eventType = clutter_event_type(event);
-    gfloat stage_x, stage_y;
-    gfloat actor_x = 0, actor_y = 0;
-
-    if (eventType == CLUTTER_TOUCH_END) {
-        // printf("Touch end!\n");
-
-    } else if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
-        clutter_event_get_coords(event, &stage_x, &stage_y);
-        clutter_actor_transform_stage_point(actor, stage_x, stage_y, &actor_x, &actor_y);
-
-        // Now we have some x,y coordinates we can throw back at those animations!
-        //  but we should probably scale them now since we have all the stuff we need
-        //  to do so in this block...
-        //
-        // This will scale both to 0.0 <-> 255.0:
-        actor_x = actor_x / clutter_actor_get_width(actor) * 255;
-        actor_y = actor_y / clutter_actor_get_height(actor) * 255;
-
-        // printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
-        input_x = static_cast<int>(actor_x);
-        input_y = static_cast<int>(actor_y);
-
-    } else {
-        // printf("Some other touch event %i\n", eventType);
-    }
-
-    return CLUTTER_EVENT_STOP;
-}
 
 
 // handleNewFrame is the function that is called ever 120 milliseconds via the timeline!

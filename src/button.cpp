@@ -61,7 +61,7 @@ void changeAnimation(int id, Animation *animation) {
             break;
         case 4  :
             // animation->switchAnimation(5);
-            animation->loadShader("./shaders/jason01.frag");
+            animation->loadShader("./shaders/james01.frag");
             break;
 
         case 5  :
