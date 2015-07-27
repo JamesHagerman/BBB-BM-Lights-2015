@@ -68,40 +68,40 @@ const gchar *fragShaderPostamble = ""
 
 gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer user_data) {
 
-    ClutterEventType eventType = clutter_event_type(event);
-
-//    if (eventType == CLUTTER_TOUCH_END) {
-//        // printf("Touch end!\n");
+//    ClutterEventType eventType = clutter_event_type(event);
 //
-//    } else
-
-    if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
-
-        // Rebuild the struct from the pointer we handed in:
-//        TouchData *data;
-//        data = (TouchData *) user_data;
-        gfloat stage_x, stage_y;
-        gfloat actor_x = 0, actor_y = 0;
-
-        clutter_event_get_coords(event, &stage_x, &stage_y);
-        clutter_actor_transform_stage_point(actor, stage_x, stage_y, &actor_x, &actor_y);
-
-        // Now we have some x,y coordinates we can throw back at those animations!
-        //  but we should probably scale them now since we have all the stuff we need
-        //  to do so in this block...
-        //
-        // This will scale both to 0.0 <-> 255.0:
-        actor_x = actor_x / clutter_actor_get_width(actor) * 255;
-        actor_y = actor_y / clutter_actor_get_height(actor) * 255;
-
-//        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
-        input_x = static_cast<int>(actor_x);
-        input_y = static_cast<int>(actor_y);
-
-    }
-//    else {
-//        // printf("Some other touch event %i\n", eventType);
+////    if (eventType == CLUTTER_TOUCH_END) {
+////        // printf("Touch end!\n");
+////
+////    } else
+//
+//    if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
+//
+//        // Rebuild the struct from the pointer we handed in:
+////        TouchData *data;
+////        data = (TouchData *) user_data;
+//        gfloat stage_x, stage_y;
+//        gfloat actor_x = 0, actor_y = 0;
+//
+//        clutter_event_get_coords(event, &stage_x, &stage_y);
+//        clutter_actor_transform_stage_point(actor, stage_x, stage_y, &actor_x, &actor_y);
+//
+//        // Now we have some x,y coordinates we can throw back at those animations!
+//        //  but we should probably scale them now since we have all the stuff we need
+//        //  to do so in this block...
+//        //
+//        // This will scale both to 0.0 <-> 255.0:
+//        actor_x = actor_x / clutter_actor_get_width(actor) * 255;
+//        actor_y = actor_y / clutter_actor_get_height(actor) * 255;
+//
+////        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
+//        input_x = static_cast<int>(actor_x);
+//        input_y = static_cast<int>(actor_y);
+//
 //    }
+////    else {
+////        // printf("Some other touch event %i\n", eventType);
+////    }
 
     return CLUTTER_EVENT_STOP;
 }
@@ -259,7 +259,7 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
                                gdk_pixbuf_get_rowstride (pixbuf),
                                &error);
     }
-    clutter_actor_set_content(lightDisplay, colors); // Bind that delegate to the lightDisplay
+//    clutter_actor_set_content(lightDisplay, colors); // Bind that delegate to the lightDisplay
 
 
     // Update the shader uniforms:
