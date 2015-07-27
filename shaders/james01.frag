@@ -34,7 +34,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
 	vec2 uv = fragCoord.xy / iResolution.xy;
 	
-	vec3 hsl = vec3( uv.x+iGlobalTime*0.1+uv.y, 1.0, 1.0 );
+	vec3 hsl = vec3( uv.x+iGlobalTime*0.1+uv.y*(iMouse.x/iResolution.x), 1.0, 1.0 );
 
 	vec3 rgb_o = hsv2rgb( hsl );
 	vec3 rgb_s = hsv2rgb_smooth( hsl );

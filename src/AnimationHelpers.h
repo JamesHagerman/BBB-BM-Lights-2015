@@ -19,9 +19,9 @@ bool clearing = false;
 int cutoff = 0;
 gfloat finput_x;
 gfloat finput_y;
+int old_x, old_y;
 int input_x = 1;
 int input_y = 1;
-int old_x, old_y;
 
 int totalPixels = TCLControl::nStrands * TCLControl::pixelsPerStrand;
 int memSize = totalPixels * sizeof(TCpixel);

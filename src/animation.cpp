@@ -42,6 +42,9 @@ int rowstride; // Size of the color buffer
 // Error object for GDK/Clutter calls that need them
 GError *error;
 
+
+
+
 // GLSL Shader stuff:
 ClutterActor *shaderOutput;
 ClutterEffect *shaderEffect;
@@ -58,7 +61,7 @@ const gchar *fragShaderPreamble = "" //"#version 110\n\n"
 const gchar *fragShaderPostamble = ""
         "void main(void) {\n"
         "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
-        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
+        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, (1.0-cogl_tex_coord_in[0].y)*iResolution.y);\n"
         "   mainImage(outFragColor, inFragCoord);\n"
         "   cogl_color_out = outFragColor;\n"
         "}";
@@ -94,7 +97,7 @@ gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, 
         actor_x = actor_x / clutter_actor_get_width(actor) * 255;
         actor_y = actor_y / clutter_actor_get_height(actor) * 255;
 
-        // printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
+//        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
         input_x = static_cast<int>(actor_x);
         input_y = static_cast<int>(actor_y);
 
@@ -266,6 +269,7 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
     if (animation->currentShader>0) {
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                           animationTime);
+        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, input_x*1.0);
     }
 
 }
@@ -336,7 +340,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     clutter_actor_set_position(lightDisplay, 0, WIDTH);
 //    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
     clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
-    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale);
+    clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+7);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
 
@@ -345,6 +349,19 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
 
     // Allow for UI events on this crazy thing!
     clutter_actor_set_reactive(lightDisplay, TRUE);
+
+    // Wire up the event listener on this lightDisplay actor.
+    TouchData *touch_data;
+    touch_data = g_slice_new(TouchData); // reserve memory for it...
+    touch_data->lightDisplay = lightDisplay; // Place the button actor itself inside the struct
+    touch_data->tcl = tcl; // TCLControl *tcl is just a POINTER here (unlike in main.cpp)
+    touch_data->animationNumber = &currentAnimation;
+
+    // Actually wire up the events and set up the data structs that the events need to operate:
+    g_signal_connect(lightDisplay, "touch-event", G_CALLBACK(handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "button-press-event", G_CALLBACK(handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "motion-event", G_CALLBACK(handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK(handleTouchEvents), touch_data);
 
 
     // End On screen display
@@ -377,23 +394,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     currentShader = -1;
 
 
-
-
-
-
-
-    // Wire up the event listener on this lightDisplay actor. This is the data object layout:
-    TouchData *touch_data;
-    touch_data = g_slice_new(TouchData); // reserve memory for it...
-    touch_data->lightDisplay = lightDisplay; // Place the button actor itself inside the struct
-    touch_data->tcl = tcl; // TCLControl *tcl is just a POINTER here (unlike in main.cpp)
-    touch_data->animationNumber = &currentAnimation;
-
-    // Actually wire up the events and set up the data structs that the events need to operate:
-    g_signal_connect(lightDisplay, "touch-event", G_CALLBACK(handleTouchEvents), touch_data);
-    g_signal_connect(lightDisplay, "button-press-event", G_CALLBACK(handleTouchEvents), touch_data);
-//    g_signal_connect(lightDisplay, "motion-event", G_CALLBACK(handleTouchEvents), touch_data);
-    g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK(handleTouchEvents), touch_data);
 
 
     // Once we have all that set up, we still need to START THE ACTUAL ANIMATION!!
