@@ -68,24 +68,21 @@ const gchar *fragShaderPostamble = ""
 
 gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer user_data) {
 
-    // Rebuild the struct from the pointer we handed in:
-    TouchData *data;
-    data = (TouchData *) user_data;
-
-    // ClutterActor *lightDisplay = CLUTTER_ACTOR (data->lightDisplay);
-    // TCLControl *tcl = data->tcl;
-    // int *animation_number = data->animationNumber;
-    // gfloat *input_x = data->input_x;
-    // gfloat *input_y = data->input_y;
-
     ClutterEventType eventType = clutter_event_type(event);
-    gfloat stage_x, stage_y;
-    gfloat actor_x = 0, actor_y = 0;
 
-    if (eventType == CLUTTER_TOUCH_END) {
-        // printf("Touch end!\n");
+//    if (eventType == CLUTTER_TOUCH_END) {
+//        // printf("Touch end!\n");
+//
+//    } else
 
-    } else if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
+    if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
+
+        // Rebuild the struct from the pointer we handed in:
+//        TouchData *data;
+//        data = (TouchData *) user_data;
+        gfloat stage_x, stage_y;
+        gfloat actor_x = 0, actor_y = 0;
+
         clutter_event_get_coords(event, &stage_x, &stage_y);
         clutter_actor_transform_stage_point(actor, stage_x, stage_y, &actor_x, &actor_y);
 
@@ -101,9 +98,10 @@ gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, 
         input_x = static_cast<int>(actor_x);
         input_y = static_cast<int>(actor_y);
 
-    } else {
-        // printf("Some other touch event %i\n", eventType);
     }
+//    else {
+//        // printf("Some other touch event %i\n", eventType);
+//    }
 
     return CLUTTER_EVENT_STOP;
 }
@@ -359,9 +357,9 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
 
     // Actually wire up the events and set up the data structs that the events need to operate:
     g_signal_connect(lightDisplay, "touch-event", G_CALLBACK(handleTouchEvents), touch_data);
-//    g_signal_connect(lightDisplay, "button-press-event", G_CALLBACK(handleTouchEvents), touch_data);
-//    g_signal_connect(lightDisplay, "motion-event", G_CALLBACK(handleTouchEvents), touch_data);
-//    g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK(handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "button-press-event", G_CALLBACK(handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "motion-event", G_CALLBACK(handleTouchEvents), touch_data);
+    g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK(handleTouchEvents), touch_data);
 
 
     // End On screen display
