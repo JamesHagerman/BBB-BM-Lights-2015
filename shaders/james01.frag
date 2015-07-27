@@ -1,18 +1,44 @@
+// Created by inigo quilez - iq/2014
+// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
 
+// Converting from HSV to RGB leads to C1 discontinuities, for the RGB components
+// are driven by picewise linear segments. Using a cubic smoother (smoothstep) makes 
+// the color transitions in RGB C1 continuous when linearly interpolating the hue H.
+
+// C2 continuity can be achieved as well by replacing smoothstep with a quintic
+// polynomial. Of course all these cubic, quintic and trigonometric variations break 
+// the standard (http://en.wikipedia.org/wiki/HSL_and_HSV), but they look better.
+
+
+// Official HSV to RGB conversion 
+vec3 hsv2rgb( in vec3 c )
+{
+    vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
+
+	return c.z * mix( vec3(1.0), rgb, c.y);
+}
+
+// Smooth HSV to RGB conversion 
+vec3 hsv2rgb_smooth( in vec3 c )
+{
+    vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
+
+	rgb = rgb*rgb*(3.0-2.0*rgb); // cubic smoothing	
+
+	return c.z * mix( vec3(1.0), rgb, c.y);
+}
+
+// compare
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-    vec2 p = -1.0 + 2.0 * fragCoord.xy / iResolution.xy;
-    
-// main code, *original shader by: 'Plasma' by Viktor Korsun (2011)
-float x = p.x;
-float y = p.y;
-float mov0 = x+y+cos(sin(iGlobalTime)*2.0)*100.+sin(x/100.)*1000.;
-float mov1 = y / 0.9 +  iGlobalTime;
-float mov2 = x / 0.2;
-float c1 = abs(sin(mov1+iGlobalTime)/2.+mov2/2.-mov1-mov2+iGlobalTime);
-float c2 = abs(sin(c1+sin(mov0/1000.+iGlobalTime)+sin(y/40.+iGlobalTime)+sin((x+y)/100.)*3.));
-float c3 = abs(sin(c2+cos(mov1+mov2+c2)+cos(mov2)+sin(x/1000.)));
-fragColor = vec4(c1,c2,c3,1);
-    
+	vec2 uv = fragCoord.xy / iResolution.xy;
+	
+	vec3 hsl = vec3( uv.x+iGlobalTime*0.1+uv.y, 1.0, 1.0 );
+
+	vec3 rgb_o = hsv2rgb( hsl );
+	vec3 rgb_s = hsv2rgb_smooth( hsl );
+	
+	vec3 rgb = mix( rgb_o, rgb_s, smoothstep( -0.2, 0.2, 0.0) ); //sin(2.0*iGlobalTime)
+	fragColor = vec4( rgb, 1.0 );
 }
