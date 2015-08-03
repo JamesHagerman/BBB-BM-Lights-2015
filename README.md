@@ -172,6 +172,33 @@ systemctl disable octoprint.service
 ```
 
 
+Turn on the boot log
+===================================
+
+By Default, the image we're using from Thing Printer doesn't spit out a visual boot log
+
+So, to get the boot log to load up on the screen on boot:
+
+```
+mkdir /mnt/boot
+mount /dev/mmcblk0p1 /mnt/boot
+vi /mnt/boot/uEnv.txt
+```
+
+Once you're in there, go to the end of the line and add:
+
+```
+console=ttyO0,115200n8 console=tty0,115200n8 video=HDMI-A-1:800x480M@60
+```
+
+This will turn on a boot console on the first hardware UART, the first virtual terminal (alt-F1), and force the HDMI output to a size that the 7" LCD touchscreen can support.
+
+
+WiFi on the BBB
+===============
+
+opkg install linux-firmware-rtl8192cu
+
 Installing the Clutter as a service on the BBB
 ===============================================
 
