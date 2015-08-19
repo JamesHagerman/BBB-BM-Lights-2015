@@ -8,11 +8,15 @@ Three assets: green spinning rectangle, "Hello, World." text, and a tiny yellowi
 
 Things to do
 ============
-
 - LOAD SHADERS FROM FILES!
-- Figure out shader-to-led map! Way more pixels on the screen than on the LEDS...
-- Clean up animation switching
-- Figure out how to swap shader programs!
+    - Clean up animation switching
+    - Figure out how to swap shader programs!
+    - Build a UI state machine
+- AUDIO INPUT!
+    - Alsa mixer level maybe set via command line? or maybe a config file?
+    - Onscreen volume control so we can control source input attenuation
+- Interface updates!
+
 
 - Remove the stupid text and all calls trying to put crap on the screen
 - Remove the status square and text at the top of the screen
@@ -28,10 +32,22 @@ Things to do
 - Update the events handlers so they are all defined in the same area of main.cpp
 - Make the "features" into command line switches where appropriate.
 - abstract UI layout so that the UI can be swapped out more easily (VIEWS!)
-- Build a UI state machine
 - Abstract the UI elements themselves so they are easier to use
-- Look into the motion-event signal and see if it might stop the weird "dragging causes system pause" issue.
 - Perhaps write a shim to handle the difference between touches, movements, and mouse events.
+
+
+Future Features
+===============
+
+- WIFI INTERFACING!! We should seriously get this to act as an AP somehow. Or just bring along a tiny WiFi AP and give
+  the BBB a static IP. All other wifi controllers could attach to that AP and offload a bunch of bullshit like the 
+  possible antenna issues and such. They'll be better with the power issues anyways.
+  
+- dump1090 integration! Not a big deal but might be kinda fun somehow...
+
+- Multiple touch zones in the main display object??
+    - Not just X-Y, but multiple X-Y fields to play with.
+    - Can this be done easily with a drop in GLSL function? If so, it would allow us to build these shaders in Shader Toy more easily...
 
 
 Bugs
@@ -47,18 +63,6 @@ Bugs
     
     SOLVED: It was just running out of memory. There is just enough memory to draw to the screen once.
     We were drawing two large status areas to the screen and that was overflowing as far as I can tell...
-
-Future Features
-===============
-
-- WIFI INTERFACING!! We should seriously get this to act as an AP somehow. Or just bring along a tiny WiFi AP and give
-  the BBB a static IP. All other wifi controllers could attach to that AP and offload a bunch of bullshit like the 
-  possible antenna issues and such. They'll be better with the power issues anyways.
-  
-- dump1090 integration! Not a big deal but might be kinda fun somehow...
-
-
-
 
 
 
@@ -170,6 +174,18 @@ systemctl disable redeem.service
 systemctl disable mjpg-streamer.service
 systemctl disable octoprint.service
 ```
+
+
+
+Oh. Alsa. Audio stuff
+=====================
+
+Now that we're trying to get audio stuff to work, we'll need to get some other packages installed on the BBB:
+
+```
+opkg install alsa-utils alsa-lib
+```
+
 
 
 Turn on the boot log

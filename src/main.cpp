@@ -33,10 +33,33 @@
   nc = not connected
   
   orange box:
-  1 ground  brown
-  2 clock   orange
-  3 5volts  red
-  4 data    black
+  1 ground  brown   black
+  2 clock   orange  white
+  3 5volts  red     red
+  4 data    black   green
+
+
+Looking TOWARDS the holes on the female connector:
+
+Official connector colors:
+     |
+blue yellow
+green red
+
+My wire colors:
+     |
+brown orange
+black red
+
+
+Official wire colors:
+     |
+black white
+green red
+
+
+
+
 */
 
 // The TotalControl processing library doesn't define the FTDI pins so we do:
