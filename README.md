@@ -186,6 +186,11 @@ Now that we're trying to get audio stuff to work, we'll need to get some other p
 opkg install alsa-utils alsa-lib
 ```
 
+and on Ubuntu
+```
+sudo apt-get install alsa-utils libasound-dev libsndfile-dev fftw3-dev
+```
+
 
 
 Turn on the boot log
