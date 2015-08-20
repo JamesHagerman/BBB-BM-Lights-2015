@@ -87,6 +87,9 @@ green red
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include <alsa/asoundlib.h>
+
+// Order of these two matters. Complex needs to be first:
+#include <complex.h>
 #include <fftw3.h>
 
 #include "p9813.h"
@@ -98,6 +101,9 @@ green red
 #include "configurations.h"
 
 #include "alsa.h"
+
+int i; // for loops. deal with it.
+#define PI 3.14159265 // ya know... for our waveform generator :facepalm:
 
 TCLControl tcl;
 Events eventHandlers;
@@ -133,6 +139,8 @@ int main(int argc, char *argv[]) {
     // Set up the keyboard listener for the arrow, enter, and esc keys:
     g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
 
+
+
     // Try getting alsa loaded!!
     audio.format = -1;
     audio.rate = 0;
@@ -164,7 +172,7 @@ int main(int argc, char *argv[]) {
         }
     }
 #ifdef DEBUG
-    printf("got format: %d and rate %d\n", audio.format, audio.rate);
+    printf("got format: %d rate: %d and buffer size: %d\n", audio.format, audio.rate, audio.actualBufferSize);
 #endif
 
     // Just a test thread to see if they even work on ARM:
@@ -172,93 +180,166 @@ int main(int argc, char *argv[]) {
 //    thr_id = pthread_create(&p_thread, NULL, derpthread, (void *)&dumb); // STUPID THREAD.
 
     // Setup FFTW:
-    int M = 2048;
-    double in[2 * (M / 2 + 1)];
-    fftw_complex out[M / 2 + 1][2];
-    fftw_plan p;
-    long int lpeak, hpeak;
-    int sleep = 0;
-    float peak[201];
-    int bands = 25;
-    int f[200];
-    int y[M / 2 + 1];
-    float temp;
-    float k[200];
-    int i, o, sens = 50, ignore = 0;
 
-    // freq band stuff:
-    float fc[200];
-    float fr[200];
-    unsigned int lowcf = 20, highcf = 10000;
-    double freqconst = log10((float)lowcf / (float)highcf) /  ((float)1 / ((float)bands + (float)1) - 1);
-    int lcf[200], hcf[200];
 
-    // build plan for fftw3:
-    printf("Building plan...\n");
-    p = fftw_plan_dft_r2c_1d(M, in, *out, FFTW_MEASURE);
-    printf("Plan completed!\n");
+//    // From cava:
+//    int M = 2048; // Basically, this is a shit variable name for "sample count". (blame karl@stavestrand.no)
+//    double in[2 * (M / 2 + 1)];
+//    fftw_complex out[M / 2 + 1][2];
+//    fftw_plan p;
+//    long int lpeak, hpeak;
+//    int sleep = 0;
+//    float peak[201];
+//    int bands = 25;
+//    int f[200];
+//    int y[M / 2 + 1];
+//    float temp;
+//    float k[200];
+//    int o, sens = 50, ignore = 0;
+//
+//    // freq band stuff:
+//    float fc[200];
+//    float fr[200];
+//    unsigned int lowcf = 20, highcf = 10000;
+//    double freqconst = log10((float)lowcf / (float)highcf) /  ((float)1 / ((float)bands + (float)1) - 1);
+//    int lcf[200], hcf[200];
+//
+//    // build plan for fftw3:
+//    printf("Building plan...\n");
+//    p = fftw_plan_dft_r2c_1d(M, in, *out, FFTW_MEASURE);
+//    printf("Plan completed!\n");
+
+    // Fuck cava with it's shit program flow and variable names
+    // Things needed for fftw3:
+    int actualBufferSize =  audio.actualBufferSize;
+    int samples_count = 2 * (actualBufferSize / 2 + 1);
+    double *samples = fftw_alloc_real(samples_count);
+    fftw_complex *output = fftw_alloc_complex(samples_count);
+    fftw_plan plan;
+
+    // Things needed for alsa (because I'm too lazy to build the full arch right now:
+    int channels = 2;
+    int ch; //for loop
+
+    // A little cleanup help:
+    double max = 0;
+
+    // Fill buffers with zeros. Because stupid shit happens otherwise:
+    for (i = 0; i < samples_count; i++) {
+        samples[i] = 0;
+        output[i] = 0;
+    }
+
+    // Build the plan:
+    plan = fftw_plan_dft_r2c_1d(samples_count, samples, output, 0);
+
+    int count = 0;
+    while(count<1) {
+        // naive input read:
+//        for (i = 0; i< samples_count; i++) {
+//            samples[i] = audio.audio_out[i];
+//        }
+
+
+
+        for (i=0; i<samples_count; i++) {
+//            printf("%i, ", audio.audio_out[i]);
+            printf("%f, ", sin((i*100)*PI/180));
+            samples[i] = sin((i*10)*PI/180);
+        }
+        printf("Audio read END\n");
+
+        // Averaging. The audio data we get in is really noisy.
+//        for (i = 0; i < samples_count; i++) {
+//            samples[i] = 0;
+//            for (ch = 0; ch < channels; ch++) {
+//                samples[i] += audio.audio_out[i * channels + ch];
+//            }
+//            samples[i] /= channels;
+//        }
+
+        // compute fftw
+        fftw_execute(plan);
+
+        // The next for loop pulls the absolute value of the complex fft output and plops it back into
+        // the INPUT ARRAY! (named samples here). This allows us to reuse samples for "maximizing" and
+        // maybe even smoothing...
+        for (i = 0; i < samples_count / 2; i++) {
+            samples[i] = cabs(output[i]);
+            if (samples[i] > max) {
+                max = samples[i];
+            }
+        }
+
+        // output:
+        for (i = 0; i < samples_count / 2; i++) {
+            printf("%.1f, ", samples[i]);
+        }
+        printf("FFT compute end\n");
+        max = 0; // reset for next pass
+        count++;
+    }
+
 
     // figure out bands:
-    for (n = 0; n < bands + 1; n++) {
-        fc[n] = highcf * pow(10, freqconst * (-1) + ((((float)n + 1) / ((float)bands + 1)) * freqconst)); //decided to cut it at 10k, little interesting to hear above
-        fr[n] = fc[n] / (audio.rate /2); //remember nyquist!, pr my calculations this should be rate/2 and  nyquist freq in M/2 but testing shows it is not... or maybe the nq freq is in M/4
-        lcf[n] = fr[n] * (M /4); //lfc stores the lower cut frequency foo each band in the fft out buffer
-        if (n != 0) {
-            hcf[n - 1] = lcf[n] - 1;
-            if (lcf[n] <= lcf[n - 1])lcf[n] = lcf[n - 1] + 1; //pushing the spectrum up if the expe function gets "clumped"
-            hcf[n - 1] = lcf[n] - 1;
-        }
-
-#ifdef DEBUG
-        if (n != 0) {
-            printf("%i: %f -> %f (%d -> %d) \n", n, fc[n - 1], fc[n], lcf[n - 1], hcf[n - 1]);
-        }
-#endif
-    }
-
-    // HACK an FFT together:
-    while (1) {
-
-        // process: populate input buffer and check if input is present
-        lpeak = 0;
-        hpeak = 0;
-        for (i = 0; i < (2 * (M / 2 + 1)); i++) {
-            if (i < M) {
-                in[i] = audio.audio_out[i];
-                if (audio.audio_out[i] > hpeak) hpeak = audio.audio_out[i];
-                if (audio.audio_out[i] < lpeak) lpeak = audio.audio_out[i];
-            } else in[i] = 0;
-        }
-        peak[bands] = (hpeak + abs(lpeak));
-        if (peak[bands] == 0)sleep++;
-        else sleep = 0;
-
-        if (sleep < 400) {
-            fftw_execute(p);
-
-            // process: separate frequency bands
-            for (o = 0; o < bands; o++) {
-                //flastd[o] = f[o]; //saving last value for drawing
-                peak[o] = 0;
-
-                // process: get peaks
-                for (i = lcf[o]; i <= hcf[o]; i++) {
-                    y[i] =  pow(pow(*out[i][0], 2) + pow(*out[i][1], 2), 0.5); //getting r of compex
-                    peak[o] += y[i]; //adding upp band
-                }
-                peak[o] = peak[o] / (hcf[o]-lcf[o]+1); //getting average
-                temp = peak[o] * k[o] * ((float)sens / 100); //multiplying with k and adjusting to sens settings
-                if (temp > height * 8)temp = height * 8; //just in case
-                if (temp <= ignore)temp = 0;
-                f[o] = temp;
-            }
-            for (o = 0; o < bands; o++) {
-                printf("%.1f, ", peak[o]);
-            }
-            printf("END OF LINE\n");
-        }
-
-    }
+//    for (n = 0; n < bands + 1; n++) {
+//        fc[n] = highcf * pow(10, freqconst * (-1) + ((((float)n + 1) / ((float)bands + 1)) * freqconst)); //decided to cut it at 10k, little interesting to hear above
+//        fr[n] = fc[n] / (audio.rate /2); //remember nyquist!, pr my calculations this should be rate/2 and  nyquist freq in M/2 but testing shows it is not... or maybe the nq freq is in M/4
+//        lcf[n] = fr[n] * (M /4); //lfc stores the lower cut frequency foo each band in the fft out buffer
+//        if (n != 0) {
+//            hcf[n - 1] = lcf[n] - 1;
+//            if (lcf[n] <= lcf[n - 1])lcf[n] = lcf[n - 1] + 1; //pushing the spectrum up if the expe function gets "clumped"
+//            hcf[n - 1] = lcf[n] - 1;
+//        }
+//
+//        if (n != 0) {
+//            printf("%i: %f -> %f (%d -> %d) \n", n, fc[n - 1], fc[n], lcf[n - 1], hcf[n - 1]);
+//        }
+//    }
+//
+//    // HACK an FFT together:
+//    while (1) {
+//
+//        // process: populate input buffer and check if input is present
+//        lpeak = 0;
+//        hpeak = 0;
+//        for (i = 0; i < (2 * (M / 2 + 1)); i++) {
+//            if (i < M) {
+//                in[i] = audio.audio_out[i];
+//                if (audio.audio_out[i] > hpeak) hpeak = audio.audio_out[i];
+//                if (audio.audio_out[i] < lpeak) lpeak = audio.audio_out[i];
+//            } else in[i] = 0;
+//        }
+//        peak[bands] = (hpeak + abs(lpeak));
+//        if (peak[bands] == 0)sleep++;
+//        else sleep = 0;
+//
+//        if (sleep < 400) {
+//            fftw_execute(p);
+//
+//            // process: separate frequency bands
+//            for (o = 0; o < bands; o++) {
+//                //flastd[o] = f[o]; //saving last value for drawing
+//                peak[o] = 0;
+//
+//                // process: get peaks
+//                for (i = lcf[o]; i <= hcf[o]; i++) {
+//                    y[i] =  pow(pow(*out[i][0], 2) + pow(*out[i][1], 2), 0.5); //getting r of compex
+//                    peak[o] += y[i]; //adding upp band
+//                }
+//                peak[o] = peak[o] / (hcf[o]-lcf[o]+1); //getting average
+//                temp = peak[o] * k[o] * ((float)sens / 100); //multiplying with k and adjusting to sens settings
+//                if (temp > height * 8)temp = height * 8; //just in case
+//                if (temp <= ignore)temp = 0;
+//                f[o] = temp;
+//            }
+//            for (o = 0; o < bands; o++) {
+//                printf("%.1f, ", peak[o]);
+//            }
+//            printf("END OF LINE\n");
+//        }
+//
+//    }
 
     // Start animation loop:
     Animation animation = Animation(stage, &tcl); // pointer TO the main tcl object.

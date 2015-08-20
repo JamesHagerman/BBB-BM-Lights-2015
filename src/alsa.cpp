@@ -23,9 +23,7 @@ void* input_alsa(void* data)
 
     // alsa: open device to capture audio
     if ((err = snd_pcm_open(&handle, audio-> source, SND_PCM_STREAM_CAPTURE, 0) < 0)) {
-        fprintf(stderr,
-                "error opening stream: %s\n",
-                snd_strerror(err));
+        fprintf(stderr, "error opening stream: %s\n", snd_strerror(err));
         exit(EXIT_FAILURE);
     } else {
         printf("open stream successful\n");
@@ -33,27 +31,21 @@ void* input_alsa(void* data)
 
     snd_pcm_hw_params_alloca(&params); //assembling params
     snd_pcm_hw_params_any (handle, params); //setting defaults or something
-    snd_pcm_hw_params_set_access(handle, params,
-                                 SND_PCM_ACCESS_RW_INTERLEAVED); //interleaved mode right left right left
-    snd_pcm_hw_params_set_format(handle, params,
-                                 SND_PCM_FORMAT_S16_LE); //trying to set 16bit
+    snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED); //interleaved mode right left right left
+    snd_pcm_hw_params_set_format(handle, params, SND_PCM_FORMAT_S16_LE); //trying to set 16bit
     snd_pcm_hw_params_set_channels(handle, params, 2); //assuming stereo
     val = 44100;
     snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir); //trying 44100 rate
     frames = 256;
-    snd_pcm_hw_params_set_period_size_near(handle, params, &frames,
-                                           &dir); //number of frames pr read
+    snd_pcm_hw_params_set_period_size_near(handle, params, &frames, &dir); //number of frames pr read
 
     err = snd_pcm_hw_params(handle, params); //attempting to set params
     if (err < 0) {
-        fprintf(stderr,
-                "unable to set hw parameters: %s\n",
-                snd_strerror(err));
+        fprintf(stderr, "unable to set hw parameters: %s\n", snd_strerror(err));
         exit(EXIT_FAILURE);
     }
 
-    snd_pcm_hw_params_get_format(params,
-                                 (snd_pcm_format_t * )&val); //getting actual format
+    snd_pcm_hw_params_get_format(params, (snd_pcm_format_t * )&val); //getting actual format
     //converting result to number of bits
     if (val < 6)audio->format = 16;
     else if (val > 5 && val < 10)audio->format = 24;
@@ -66,6 +58,7 @@ void* input_alsa(void* data)
 
     size = frames * (audio->format / 8) * 2; // frames * bits/8 * 2 channels
     buffer = (char *) malloc(size);
+    audio->actualBufferSize = size;
     radj = audio->format / 4; //adjustments for interleaved
     ladj = audio->format / 8;
     o = 0;
@@ -82,8 +75,8 @@ void* input_alsa(void* data)
             fprintf(stderr, "short read, read %d %d frames\n", err, (int)frames);
         }
 
-        if (err ) {
-
+        if (err >=0) {
+            audio->readCount = err;
         }
 
         //sorting out one channel and only biggest octet
@@ -114,8 +107,6 @@ void* input_alsa(void* data)
             n++;
         }
 
-//        printf("%i\n", buffer[0]);
-//        printf("READ END\n");
     }
 }
 
