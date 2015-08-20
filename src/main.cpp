@@ -86,6 +86,8 @@ green red
 #include <glib/gprintf.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
+#include <alsa/asoundlib.h>
+
 #include "p9813.h"
 
 #include "TCLControl.h"
@@ -94,8 +96,16 @@ green red
 #include "animation.h"
 #include "configurations.h"
 
+#include "alsa.h"
+
 TCLControl tcl;
 Events eventHandlers;
+
+// Stuff pulled from cava
+#define GCC_UNUSED /* nothing */
+pthread_t  p_thread;
+int        thr_id GCC_UNUSED;
+struct audio_data audio;
 
 int main(int argc, char *argv[]) {
 
@@ -121,6 +131,40 @@ int main(int argc, char *argv[]) {
 
     // Set up the keyboard listener for the arrow, enter, and esc keys:
     g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
+
+    // Try getting alsa loaded!!
+#define DEBUG
+    audio.format = -1;
+    audio.rate = 0;
+    audio.source = new char[10];
+    strncpy( audio.source, "hw:0,0", 9 );
+    audio.im = 1;
+    struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
+
+    // Actually kick off the pthread that will grab audio:
+    thr_id = pthread_create(&p_thread, NULL, input_alsa, (void *)&audio); //starting alsamusic listener
+
+    // Check to make sure the audio is actually working...
+    int n = 0;
+    while (audio.format == -1 || audio.rate == 0) {
+        req.tv_sec = 0;
+        req.tv_nsec = 1000000;
+        nanosleep(&req, NULL);
+        n++;
+        if (n > 2000) {
+#ifdef DEBUG
+            fprintf(stderr, "could not get rate and/or format, problems with audio thread? quiting...\n");
+#endif
+            exit(EXIT_FAILURE);
+        }
+    }
+#ifdef DEBUG
+    printf("got format: %d and rate %d\n", audio.format, audio.rate);
+#endif
+
+    // Just a test thread to see if they even work on ARM:
+    int dumb = 12;
+    thr_id = pthread_create(&p_thread, NULL, derpthread, (void *)&dumb); // STUPID THREAD.
 
     // Start animation loop:
     Animation animation = Animation(stage, &tcl); // pointer TO the main tcl object.

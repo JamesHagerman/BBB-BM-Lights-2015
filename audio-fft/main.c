@@ -169,7 +169,7 @@ static void open_io(struct holder *holder, const char *filename)
 	if (holder->infile == NULL)
 		errx(1, "open in: %s", sf_strerror(NULL));
 
-	err = snd_pcm_open(&holder->alsa_handle, "default",
+	err = snd_pcm_open(&holder->alsa_handle, "hw:1,0",
 			SND_PCM_STREAM_PLAYBACK, 0);
 	if (err < 0)
 		errx(1, "alsa open: %s", snd_strerror(err));

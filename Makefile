@@ -17,27 +17,27 @@ endif
 
 
 CXX = $(CROSSCOMPILER)g++
-CFLAGS = -Wall -g
-LDFLAGS = `pkg-config clutter-1.0 --libs`
+CFLAGS = -Wall -g -DDEBUG
+LDFLAGS = `pkg-config clutter-1.0 --libs` -lm -lp9813 -lftd2xx  -lpthread -lfftw3 -lasound
 IFLAGS = `pkg-config clutter-1.0 --cflags`
 
 ifeq ($(MACHINE)_$(ARCH),Darwin_x86_64)
 	LDFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config gdk-pixbuf-2.0 clutter-1.0 --libs`
 	IFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config gdk-pixbuf-2.0 clutter-1.0 --cflags`
-	LDFLAGS += -lftd2xx -lp9813
+	LDFLAGS += -lftd2xx -lp9813 -lpthread -lfftw3
 	CFLAGS += -fomit-frame-pointer
 endif
 
 
 $(warning Building for $(MACHINE)_$(ARCH))
 ifeq ($(MACHINE)_$(ARCH),Linux_armv7l)
-	LDFLAGS += -lpthread -lrt -lm -lftd2xx -lp9813
+	LDFLAGS += -lrt -lasound
 	#-l/usr/lib/libftd2xx.so.1.2.7 -l/usr/lib/libp9813.a
 	CFLAGS += -O3 -fomit-frame-pointer -Wno-unused-result -Wno-unused-but-set-variable
 endif
 
 ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)
-	LDFLAGS += -lp9813 -lftd2xx 
+	LDFLAGS += -lasound
 	CFLAGS += -O3 -fomit-frame-pointer -Wno-unused-result -Wno-unused-but-set-variable
 endif
 
@@ -47,13 +47,13 @@ ifeq ($(MACHINE)_$(ARCH),CYGWIN_NT-6.3_x86_64)
 	IFLAGS = `pkg-config clutter-1.0 --cflags`
 #	LDFLAGS = -pthread -lclutter-1.0 -lcogl
 #	IFLAGS = -pthread -I/usr/include/clutter-1.0 -I/usr/include/pango-1.0 -I/usr/include/cogl -I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/atk-1.0 -I/usr/include/json-glib-1.0 -I/usr/include/gdk-pixbuf-2.0
-	LDFLAGS += -lftd2xx -lp9813
+	LDFLAGS += -lasound
 	CFLAGS += -fomit-frame-pointer
 endif
 
 
 OUTPUT = clutter_window
-OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o
+OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o src/alsa.o
 
 all: ${OUTPUT}
 

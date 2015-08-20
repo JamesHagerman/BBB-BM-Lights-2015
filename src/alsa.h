@@ -1,0 +1,14 @@
+#ifndef ALSA_CTL
+#define ALSA_CTL
+struct audio_data {
+    int audio_out[2048];
+    int format;
+    unsigned int rate ;
+    char *source; //alsa device or fifo path
+    int im; //input mode alsa or fifo
+};
+
+void* input_alsa(void* data);
+void* derpthread(void* data);
+
+#endif
