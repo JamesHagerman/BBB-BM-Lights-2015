@@ -242,10 +242,11 @@ int main(int argc, char *argv[]) {
 
 
 
-        for (i=0; i<samples_count; i++) {
-//            printf("%i, ", audio.audio_out[i]);
-            printf("%f, ", sin((i*100)*PI/180));
-            samples[i] = sin((i*10)*PI/180);
+        for (i = 0; i < samples_count; i++) {
+            printf("%i, ", audio.audio_out[i]);
+            samples[i] = audio.audio_out[i];
+//            printf("%f, ", sin((i*100)*PI/180));
+//            samples[i] = sin((i*10)*PI/180);
         }
         printf("Audio read END\n");
 
