@@ -192,7 +192,6 @@ sudo apt-get install alsa-utils libasound-dev libsndfile-dev fftw3-dev
 ```
 
 
-
 Turn on the boot log
 ===================================
 
