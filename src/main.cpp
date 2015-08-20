@@ -140,7 +140,8 @@ int main(int argc, char *argv[]) {
 
     // hw:1,0 = BBB usb snd card
     // hw:0,1 = Ubuntu mic input...
-    strncpy( audio.source, "hw:0,1", 9 );
+    strncpy( audio.source, "hw:1,0", 9 );
+//    strncpy( audio.source, "hw:0,1", 9 );
     audio.im = 1;
     struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
 
@@ -179,18 +180,41 @@ int main(int argc, char *argv[]) {
     int sleep = 0;
     float peak[201];
     int bands = 25;
-    int lcf[200], hcf[200];
     int f[200];
     int y[M / 2 + 1];
     float temp;
     float k[200];
-    int i, o, sens = 100, ignore = 0;
+    int i, o, sens = 50, ignore = 0;
+
+    // freq band stuff:
+    float fc[200];
+    float fr[200];
+    unsigned int lowcf = 20, highcf = 10000;
+    double freqconst = log10((float)lowcf / (float)highcf) /  ((float)1 / ((float)bands + (float)1) - 1);
+    int lcf[200], hcf[200];
 
     // build plan for fftw3:
     printf("Building plan...\n");
     p = fftw_plan_dft_r2c_1d(M, in, *out, FFTW_MEASURE);
     printf("Plan completed!\n");
 
+    // figure out bands:
+    for (n = 0; n < bands + 1; n++) {
+        fc[n] = highcf * pow(10, freqconst * (-1) + ((((float)n + 1) / ((float)bands + 1)) * freqconst)); //decided to cut it at 10k, little interesting to hear above
+        fr[n] = fc[n] / (audio.rate /2); //remember nyquist!, pr my calculations this should be rate/2 and  nyquist freq in M/2 but testing shows it is not... or maybe the nq freq is in M/4
+        lcf[n] = fr[n] * (M /4); //lfc stores the lower cut frequency foo each band in the fft out buffer
+        if (n != 0) {
+            hcf[n - 1] = lcf[n] - 1;
+            if (lcf[n] <= lcf[n - 1])lcf[n] = lcf[n - 1] + 1; //pushing the spectrum up if the expe function gets "clumped"
+            hcf[n - 1] = lcf[n] - 1;
+        }
+
+#ifdef DEBUG
+        if (n != 0) {
+            printf("%i: %f -> %f (%d -> %d) \n", n, fc[n - 1], fc[n], lcf[n - 1], hcf[n - 1]);
+        }
+#endif
+    }
 
     // HACK an FFT together:
     while (1) {
@@ -201,39 +225,38 @@ int main(int argc, char *argv[]) {
         for (i = 0; i < (2 * (M / 2 + 1)); i++) {
             if (i < M) {
                 in[i] = audio.audio_out[i];
-                //if (audio.audio_out[i] > hpeak) hpeak = audio.audio_out[i];
-                //if (audio.audio_out[i] < lpeak) lpeak = audio.audio_out[i];
+                if (audio.audio_out[i] > hpeak) hpeak = audio.audio_out[i];
+                if (audio.audio_out[i] < lpeak) lpeak = audio.audio_out[i];
             } else in[i] = 0;
         }
         peak[bands] = (hpeak + abs(lpeak));
         if (peak[bands] == 0)sleep++;
         else sleep = 0;
 
-        //if (sleep < 400) {
+        if (sleep < 400) {
             fftw_execute(p);
 
             // process: separate frequency bands
-//            for (o = 0; o < bands; o++) {
-//                //flastd[o] = f[o]; //saving last value for drawing
-//                peak[o] = 0;
-//
-//                // process: get peaks
-//                for (i = lcf[o]; i <= hcf[o]; i++) {
-//                    y[i] =  pow(pow(*out[i][0], 2) + pow(*out[i][1], 2), 0.5); //getting r of compex
-//                    peak[o] += y[i]; //adding upp band
-//                }
-//                peak[o] = peak[o] / (hcf[o]-lcf[o]+1); //getting average
-//                temp = peak[o] * k[o] * ((float)sens / 100); //multiplying with k and adjusting to sens settings
-//                if (temp > height * 8)temp = height * 8; //just in case
-//                if (temp <= ignore)temp = 0;
-//                f[o] = temp;
-//
-//            }
-            for (o = 0; o <= bands; o++) {
-                printf("%.4f, ", *out[o][0]);
+            for (o = 0; o < bands; o++) {
+                //flastd[o] = f[o]; //saving last value for drawing
+                peak[o] = 0;
+
+                // process: get peaks
+                for (i = lcf[o]; i <= hcf[o]; i++) {
+                    y[i] =  pow(pow(*out[i][0], 2) + pow(*out[i][1], 2), 0.5); //getting r of compex
+                    peak[o] += y[i]; //adding upp band
+                }
+                peak[o] = peak[o] / (hcf[o]-lcf[o]+1); //getting average
+                temp = peak[o] * k[o] * ((float)sens / 100); //multiplying with k and adjusting to sens settings
+                if (temp > height * 8)temp = height * 8; //just in case
+                if (temp <= ignore)temp = 0;
+                f[o] = temp;
+            }
+            for (o = 0; o < bands; o++) {
+                printf("%.1f, ", peak[o]);
             }
             printf("END OF LINE\n");
-        //}
+        }
 
     }
 
