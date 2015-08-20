@@ -148,8 +148,8 @@ int main(int argc, char *argv[]) {
 
     // hw:1,0 = BBB usb snd card
     // hw:0,1 = Ubuntu mic input...
-    strncpy( audio.source, "hw:1,0", 9 );
-//    strncpy( audio.source, "hw:0,1", 9 );
+    strncpy( audio.source, "hw:1,0", 9 ); // BBB
+//    strncpy( audio.source, "hw:0,1", 9 ); // UBUNTU
     audio.im = 1;
     struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
 
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
     plan = fftw_plan_dft_r2c_1d(samples_count, samples, output, 0);
 
     int count = 0;
-    while(count<1) {
+    while(count<50) {
         // naive input read:
 //        for (i = 0; i< samples_count; i++) {
 //            samples[i] = audio.audio_out[i];

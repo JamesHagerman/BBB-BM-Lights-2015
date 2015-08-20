@@ -18,8 +18,8 @@ void* input_alsa(void* data)
     snd_pcm_uframes_t frames;
     val = 44100;
     int i, n, o, size, dir, err, lo;
-    int tempr, templ;
-    int radj, ladj;
+//    int tempr, templ;
+//    int radj, ladj;
 
     // alsa: open device to capture audio
     if ((err = snd_pcm_open(&handle, audio-> source, SND_PCM_STREAM_CAPTURE, 0) < 0)) {
@@ -30,7 +30,7 @@ void* input_alsa(void* data)
     }
 
     snd_pcm_hw_params_alloca(&params); //assembling params
-    snd_pcm_hw_params_any (handle, params); //setting defaults or something
+    snd_pcm_hw_params_any (handle, params); //get current settings
     snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED); //interleaved mode right left right left
     snd_pcm_hw_params_set_format(handle, params, SND_PCM_FORMAT_S16_LE); //trying to set 16bit
     snd_pcm_hw_params_set_channels(handle, params, 2); //assuming stereo
@@ -59,9 +59,13 @@ void* input_alsa(void* data)
     size = frames * (audio->format / 8) * 2; // frames * bits/8 * 2 channels
     buffer = (char *) malloc(size);
     audio->actualBufferSize = size;
-    radj = audio->format / 4; //adjustments for interleaved
-    ladj = audio->format / 8;
-    o = 0;
+//    radj = audio->format / 4; //adjustments for interleaved
+//    ladj = audio->format / 8;
+//    o = 0;
+
+
+
+    int leftOffset = audio->format / 4;
     while (1) {
 
         err = snd_pcm_readi(handle, buffer, frames);
@@ -79,33 +83,44 @@ void* input_alsa(void* data)
             audio->readCount = err;
         }
 
-        //sorting out one channel and only biggest octet
-        n = 0; //frame counter
-        for (i = 0; i < size ; i = i + (ladj) * 2) {
+        // Forget cava's bullshit.
+        // err is how many "frames" we read.
+        // frames = "sample" in mono land...
+        // frames = left+right pair in stereo land
 
-            //first channel
-            //using the 10 upper bits this would give me a vert res of 1024, enough...
-            tempr = ((buffer[i + (radj) - 1 ] << 2));
-            lo = ((buffer[i + (radj) - 2] >> 6));
-            if (lo < 0)lo = abs(lo) + 1;
-            if (tempr >= 0)tempr = tempr + lo;
-            if (tempr < 0)tempr = tempr - lo;
+        for (i = 0; i < err; i += leftOffset*2) {
 
-            //other channel
-            templ = (buffer[i + (ladj) - 1] << 2);
-            lo = (buffer[i + (ladj) - 2] >> 6);
-            if (lo < 0)lo = abs(lo) + 1;
-            if (templ >= 0)templ = templ + lo;
-            else templ = templ - lo;
-
-            //adding channels and storing it in the buffer
-            audio->audio_out[o] = (tempr + templ) / 2;
-//            printf("%i, ", buffer[i]);
-            o++;
-            if (o == 2048 - 1)o = 0;
-
-            n++;
+//            audio->audio_out[i] = buffer[i]<<8|buffer[i+1]; // 16bit little endian. Never can remember....
+            audio->audio_out[i] = buffer[i+1]<<8|buffer[i]; // 16bit little endian. Never can remember....
         }
+
+        //sorting out one channel and only biggest octet
+//        n = 0; //frame counter
+//        for (i = 0; i < size ; i = i + (ladj) * 2) {
+//
+//            //first channel
+//            //using the 10 upper bits this would give me a vert res of 1024, enough...
+//            tempr = ((buffer[i + (radj) - 1 ] << 2));
+//            lo = ((buffer[i + (radj) - 2] >> 6));
+//            if (lo < 0)lo = abs(lo) + 1;
+//            if (tempr >= 0)tempr = tempr + lo;
+//            if (tempr < 0)tempr = tempr - lo;
+//
+//            //other channel
+//            templ = (buffer[i + (ladj) - 1] << 2);
+//            lo = (buffer[i + (ladj) - 2] >> 6);
+//            if (lo < 0)lo = abs(lo) + 1;
+//            if (templ >= 0)templ = templ + lo;
+//            else templ = templ - lo;
+//
+//            //adding channels and storing it in the buffer
+//            audio->audio_out[o] = (tempr + templ) / 2;
+////            printf("%i, ", buffer[i]);
+//            o++;
+//            if (o == 2048 - 1)o = 0;
+//
+//            n++;
+//        }
 
     }
 }
