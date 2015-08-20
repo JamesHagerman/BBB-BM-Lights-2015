@@ -192,6 +192,16 @@ sudo apt-get install alsa-utils libasound-dev libsndfile-dev fftw3-dev
 ```
 
 
+This worked to record on ubuntu:
+```
+arecord -D plughw:0,1 -r 16000 -f S16_LE -c 1 -d 3 recorded.wav
+```
+
+And this worked to play on ubuntu:
+```
+aplay -D plughw:0,0 recorded.wav
+```
+
 Turn on the boot log
 ===================================
 

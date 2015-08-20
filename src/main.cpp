@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
     audio.format = -1;
     audio.rate = 0;
     audio.source = new char[10];
-    strncpy( audio.source, "hw:0,0", 9 );
+    strncpy( audio.source, "hw:1,0", 9 );
     audio.im = 1;
     struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
 
@@ -145,6 +145,7 @@ int main(int argc, char *argv[]) {
     thr_id = pthread_create(&p_thread, NULL, input_alsa, (void *)&audio); //starting alsamusic listener
 
     // Check to make sure the audio is actually working...
+    // This is kind of a drag.... it just HANGS...
     int n = 0;
     while (audio.format == -1 || audio.rate == 0) {
         req.tv_sec = 0;
