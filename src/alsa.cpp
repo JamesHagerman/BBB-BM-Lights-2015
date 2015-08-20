@@ -114,7 +114,7 @@ void* input_alsa(void* data)
             n++;
         }
 
-        printf("%i\n", buffer[0]);
+//        printf("%i\n", buffer[0]);
 //        printf("READ END\n");
     }
 }

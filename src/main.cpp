@@ -87,6 +87,7 @@ green red
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include <alsa/asoundlib.h>
+#include <fftw3.h>
 
 #include "p9813.h"
 
@@ -133,11 +134,13 @@ int main(int argc, char *argv[]) {
     g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
 
     // Try getting alsa loaded!!
-#define DEBUG
     audio.format = -1;
     audio.rate = 0;
     audio.source = new char[10];
-    strncpy( audio.source, "hw:1,0", 9 );
+
+    // hw:1,0 = BBB usb snd card
+    // hw:0,1 = Ubuntu mic input...
+    strncpy( audio.source, "hw:0,1", 9 );
     audio.im = 1;
     struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
 
@@ -164,8 +167,75 @@ int main(int argc, char *argv[]) {
 #endif
 
     // Just a test thread to see if they even work on ARM:
-    int dumb = 12;
-    thr_id = pthread_create(&p_thread, NULL, derpthread, (void *)&dumb); // STUPID THREAD.
+//    int dumb = 12;
+//    thr_id = pthread_create(&p_thread, NULL, derpthread, (void *)&dumb); // STUPID THREAD.
+
+    // Setup FFTW:
+    int M = 2048;
+    double in[2 * (M / 2 + 1)];
+    fftw_complex out[M / 2 + 1][2];
+    fftw_plan p;
+    long int lpeak, hpeak;
+    int sleep = 0;
+    float peak[201];
+    int bands = 25;
+    int lcf[200], hcf[200];
+    int f[200];
+    int y[M / 2 + 1];
+    float temp;
+    float k[200];
+    int i, o, sens = 100, ignore = 0;
+
+    // build plan for fftw3:
+    printf("Building plan...\n");
+    p = fftw_plan_dft_r2c_1d(M, in, *out, FFTW_MEASURE);
+    printf("Plan completed!\n");
+
+
+    // HACK an FFT together:
+    while (1) {
+
+        // process: populate input buffer and check if input is present
+        lpeak = 0;
+        hpeak = 0;
+        for (i = 0; i < (2 * (M / 2 + 1)); i++) {
+            if (i < M) {
+                in[i] = audio.audio_out[i];
+                //if (audio.audio_out[i] > hpeak) hpeak = audio.audio_out[i];
+                //if (audio.audio_out[i] < lpeak) lpeak = audio.audio_out[i];
+            } else in[i] = 0;
+        }
+        peak[bands] = (hpeak + abs(lpeak));
+        if (peak[bands] == 0)sleep++;
+        else sleep = 0;
+
+        //if (sleep < 400) {
+            fftw_execute(p);
+
+            // process: separate frequency bands
+//            for (o = 0; o < bands; o++) {
+//                //flastd[o] = f[o]; //saving last value for drawing
+//                peak[o] = 0;
+//
+//                // process: get peaks
+//                for (i = lcf[o]; i <= hcf[o]; i++) {
+//                    y[i] =  pow(pow(*out[i][0], 2) + pow(*out[i][1], 2), 0.5); //getting r of compex
+//                    peak[o] += y[i]; //adding upp band
+//                }
+//                peak[o] = peak[o] / (hcf[o]-lcf[o]+1); //getting average
+//                temp = peak[o] * k[o] * ((float)sens / 100); //multiplying with k and adjusting to sens settings
+//                if (temp > height * 8)temp = height * 8; //just in case
+//                if (temp <= ignore)temp = 0;
+//                f[o] = temp;
+//
+//            }
+            for (o = 0; o <= bands; o++) {
+                printf("%.4f, ", *out[o][0]);
+            }
+            printf("END OF LINE\n");
+        //}
+
+    }
 
     // Start animation loop:
     Animation animation = Animation(stage, &tcl); // pointer TO the main tcl object.
