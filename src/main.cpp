@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
         }
     }
 #ifdef DEBUG
-    printf("got format: %d rate: %d and buffer size: %d\n", audio.format, audio.rate, audio.actualBufferSize);
+    printf("got format: %d, rate: %d, channels: %d, buffer size: %d\n", audio.format, audio.rate, audio.channelCount, audio.actualBufferSize);
 #endif
 
     // Just a test thread to see if they even work on ARM:
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
     plan = fftw_plan_dft_r2c_1d(samples_count, samples, output, 0);
 
     int count = 0;
-    while(count<50) {
+    while(count<1) {
         // naive input read:
 //        for (i = 0; i< samples_count; i++) {
 //            samples[i] = audio.audio_out[i];

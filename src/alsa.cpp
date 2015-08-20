@@ -14,10 +14,16 @@ void* input_alsa(void* data)
     char *buffer;
     snd_pcm_t *handle;
     snd_pcm_hw_params_t *params;
-    unsigned int val;
     snd_pcm_uframes_t frames;
-    val = 44100;
-    int i, n, o, size, dir, err, lo;
+    unsigned int channelCount = 2;
+    unsigned int sampleRate = 44100;
+
+    unsigned int val;
+    unsigned long bufferSize = 0;
+    unsigned long periodSize = 0;
+
+    int i, size, dir, err;
+//    int n, o, lo;
 //    int tempr, templ;
 //    int radj, ladj;
 
@@ -26,37 +32,54 @@ void* input_alsa(void* data)
         fprintf(stderr, "error opening stream: %s\n", snd_strerror(err));
         exit(EXIT_FAILURE);
     } else {
-        printf("open stream successful\n");
+        printf("stream opened successfully\n");
     }
 
-    snd_pcm_hw_params_alloca(&params); //assembling params
+    snd_pcm_hw_params_alloca(&params);
     snd_pcm_hw_params_any (handle, params); //get current settings
-    snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED); //interleaved mode right left right left
-    snd_pcm_hw_params_set_format(handle, params, SND_PCM_FORMAT_S16_LE); //trying to set 16bit
-    snd_pcm_hw_params_set_channels(handle, params, 2); //assuming stereo
-    val = 44100;
-    snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir); //trying 44100 rate
-    frames = 256;
-    snd_pcm_hw_params_set_period_size_near(handle, params, &frames, &dir); //number of frames pr read
+    snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED); // interleaved mode right left
+    snd_pcm_hw_params_set_format(handle, params, SND_PCM_FORMAT_S16_LE); // 16bit little endian
+    snd_pcm_hw_params_set_channels(handle, params, channelCount);
+    snd_pcm_hw_params_set_rate_near(handle, params, &sampleRate, 0); //trying 44100 rate
 
-    err = snd_pcm_hw_params(handle, params); //attempting to set params
+
+    // These values are pretty small, might be useful in situations where latency is a dirty word.
+//    snd_pcm_uframes_t buffer_size = 2048;
+//    snd_pcm_uframes_t period_size = 64;
+//
+//    snd_pcm_hw_params_set_buffer_size_near (pcm_handle, hw_params, &buffer_size);
+//    snd_pcm_hw_params_set_period_size_near (pcm_handle, hw_params, &period_size, NULL);
+    //snd_pcm_hw_params_set_period_size_near(handle, params, &frames, &dir); //number of frames pr read
+
+    // Set the parameters we just configured onto the hardware itself:
+    err = snd_pcm_hw_params(handle, params);
     if (err < 0) {
         fprintf(stderr, "unable to set hw parameters: %s\n", snd_strerror(err));
         exit(EXIT_FAILURE);
     }
 
-    snd_pcm_hw_params_get_format(params, (snd_pcm_format_t * )&val); //getting actual format
-    //converting result to number of bits
-    if (val < 6)audio->format = 16;
-    else if (val > 5 && val < 10)audio->format = 24;
-    else if (val > 9)audio->format = 32;
 
-    snd_pcm_hw_params_get_rate( params, &audio->rate, &dir); //getting rate
+    // Get some debug values and store them in the audio data struct so we can use them elsewhere:
+    snd_pcm_hw_params_get_format(params, (snd_pcm_format_t * )&val);// Audio format enum (snd_pcm_format_t):
+    if (val < 6) {
+        audio->format = 16;
+    } else if (val > 5 && val < 10) {
+        audio->format = 24;
+    }else if (val > 9) {
+        audio->format = 32;
+    }
+    snd_pcm_hw_params_get_rate( params, &audio->rate, &dir); // Get sample rate
+    snd_pcm_hw_params_get_channels(params, &audio->channelCount); // Get Channel count
+    snd_pcm_hw_params_get_buffer_size(params, (snd_pcm_uframes_t *)&bufferSize); // Get buffer size
+    snd_pcm_hw_params_get_period_size(params, &periodSize, &dir); // Get period size
+    printf("Buffer size: %d, Period size: %d\n", bufferSize);
 
+    // Now, I have no idea what he's doing here but I think this is wrong:
     snd_pcm_hw_params_get_period_size(params, &frames, &dir);
     snd_pcm_hw_params_get_period_time(params,  &val, &dir);
 
-    size = frames * (audio->format / 8) * 2; // frames * bits/8 * 2 channels
+//    size = frames * (audio->format / 8) * channelCount; // frames * 16 bits / 8 * 2 channels
+    size = periodSize;
     buffer = (char *) malloc(size);
     audio->actualBufferSize = size;
 //    radj = audio->format / 4; //adjustments for interleaved
@@ -65,7 +88,7 @@ void* input_alsa(void* data)
 
 
 
-    int leftOffset = audio->format / 4;
+    int leftOffset = 16 / 4;
     while (1) {
 
         err = snd_pcm_readi(handle, buffer, frames);
@@ -88,10 +111,10 @@ void* input_alsa(void* data)
         // frames = "sample" in mono land...
         // frames = left+right pair in stereo land
 
-        for (i = 0; i < err; i += leftOffset*2) {
+        for (i = 0; i < err; i += leftOffset) {
 
-//            audio->audio_out[i] = buffer[i]<<8|buffer[i+1]; // 16bit little endian. Never can remember....
-            audio->audio_out[i] = buffer[i+1]<<8|buffer[i]; // 16bit little endian. Never can remember....
+            audio->audio_out[i] = buffer[i]<<8|buffer[i+1]; // 16bit little endian. Never can remember....
+//            audio->audio_out[i] = buffer[i+1]<<8|buffer[i]; // 16bit little endian. Never can remember....
         }
 
         //sorting out one channel and only biggest octet
