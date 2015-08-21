@@ -218,8 +218,8 @@ int main(int argc, char *argv[]) {
     fftw_plan plan;
 
     // Things needed for alsa (because I'm too lazy to build the full arch right now:
-    int channels = 2;
-    int ch; //for loop
+//    int channels = 2;
+//    int ch; //for loop
 
     // A little cleanup help:
     double max = 0;
