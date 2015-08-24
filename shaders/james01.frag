@@ -44,7 +44,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     vec3 rgb;
 	if (uv.y > mouseY) {
-		rgb = vec3(0.0,0.0,0.0);
+		rgb = vec3(0.0,1.0,0.0);
 	} else {
 		rgb = mix( rgb_o, rgb_s, smoothstep( -0.2, 0.2, 0.0) ); //sin(2.0*iGlobalTime)
 	}

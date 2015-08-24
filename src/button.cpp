@@ -49,11 +49,11 @@ void changeAnimation(int id, Animation *animation) {
             break;
         case 1  :
 //            animation->switchAnimation(2);
-            animation->unloadShader();
+            animation->loadShader("./shaders/led_test.frag");
             break;
         case 2  :
 //            animation->switchAnimation(3);
-//            animation->loadShader("./shaders/flame.frag");
+            animation->loadShader("./shaders/timer.frag");
             break;
         case 3  :
             // animation->switchAnimation(4);
