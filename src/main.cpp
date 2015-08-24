@@ -148,8 +148,8 @@ int main(int argc, char *argv[]) {
 
     // hw:1,0 = BBB usb snd card
     // hw:0,1 = Ubuntu mic input...
-//    strncpy( audio.source, "hw:1,0", 9 ); // BBB
-    strncpy( audio.source, "hw:0,1", 9 ); // UBUNTU
+    strncpy( audio.source, "hw:1,0", 9 ); // BBB
+//    strncpy( audio.source, "hw:0,1", 9 ); // UBUNTU
     audio.im = 1;
     struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
 

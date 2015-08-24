@@ -104,8 +104,7 @@ gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, 
 //        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
         input_x = static_cast<int>(actor_x);
         input_y = static_cast<int>(actor_y);
-
-        printf("Touch Move!!\nx: %i\ny: %i\n\n", input_x, input_y );
+//        printf("Touch Move!!\nx: %i\ny: %i\n\n", input_x, input_y );
     }
 //    else {
 //        // printf("Some other touch event %i\n", eventType);
