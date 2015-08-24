@@ -54,7 +54,7 @@ void initAlsa() {
     // This is kind of a drag.... it just sleeps until the audio is live...
     struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
     i = 0;
-    while (audio.format == -1 || audio.rate == 0) {
+    while (audio.format == -1 || audio.rate == 0 || audio.actualBufferSize == 0) {
         req.tv_sec = 0;
         req.tv_nsec = 1000000;
         nanosleep(&req, NULL);
