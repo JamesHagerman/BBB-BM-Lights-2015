@@ -103,14 +103,14 @@ void executeFFT() {
     if (audio.audioLive) {
 
         for (i = 0; i < samples_count; i++) {
-//            printf("%i, ", audio.audio_out[i]);
+            printf("%i, ", audio.audio_out[i]);
             samples[i] = audio.audio_out[i];
 
             // generate a sine wave:
 //            printf("%f, ", sin((i*100)*PI/180));
 //            samples[i] = sin((i*100)*PI/180);
         }
-//        printf("Audio read END\n");
+        printf("Audio read END\n");
 
         // compute fftw
         fftw_execute(plan);
@@ -126,10 +126,10 @@ void executeFFT() {
         }
 
         // output:
-//        for (i = 0; i < samples_count / 2; i++) {
-//            printf("%.1f, ", samples[i]);
-//        }
-//        printf("FFT compute end, max = %.1f\n", max);
+        for (i = 0; i < samples_count / 2; i++) {
+            printf("%.1f, ", samples[i]);
+        }
+        printf("FFT compute end, max = %.1f\n", max);
         max = 0; // reset for next pass
     }
 //    else {
