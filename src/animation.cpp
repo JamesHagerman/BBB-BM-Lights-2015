@@ -410,7 +410,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     data->animationObject = this;
 
     // The clutter timeline object takes a "duration" in milliseconds...
-    timeline = clutter_timeline_new(120);
+    timeline = clutter_timeline_new(1);
     g_signal_connect(timeline, "new-frame", G_CALLBACK(handleNewFrame), data);
 
     // which will just continue repeating:
@@ -484,7 +484,8 @@ void Animation::loadShader(const char *fragment_path) {
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShaderSrc);
 
     // Bind uniforms to the shader so we can hand variables into them
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 0.0);
+    animationTime = 0.0;
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, HEIGHT*osd_scale, WIDTH*osd_scale);
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x*osd_scale, input_y*osd_scale);
 
@@ -504,6 +505,7 @@ void Animation::unloadShader() {
 
 void Animation::switchShader(int shaderNumber) {
     currentShader = shaderNumber;
+    animationTime = 0.0;
 }
 
 int Animation::getCurrentShader() {
