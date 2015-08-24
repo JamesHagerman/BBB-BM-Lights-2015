@@ -86,6 +86,8 @@ gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, 
         clutter_event_get_coords(event, &stage_x, &stage_y);
         clutter_actor_transform_stage_point(actor, stage_x, stage_y, &actor_x, &actor_y);
 
+//        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
+
         // Now we have some x,y coordinates we can throw back at those animations!
         //  but we should probably scale them now since we have all the stuff we need
         //  to do so in this block...
@@ -98,9 +100,18 @@ gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, 
         actor_x = actor_x * osd_scale;
         actor_y = actor_y * osd_scale;
 
-//        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
-        input_x = static_cast<int>(actor_x);
-        input_y = static_cast<int>(actor_y);
+        // We only want integers:
+        temp_x = static_cast<int>(actor_x);
+        temp_y = static_cast<int>(actor_y);
+
+        // And this will map the values around so that we can use the full range even though
+        // the edges of the touchscreen are not really touchable:
+        input_x = map(temp_x, 0, WIDTH*osd_scale, 0, WIDTH*osd_scale+(WIDTH*osd_scale-150));
+        input_y = map(temp_y, 0, HEIGHT*osd_scale, 0-50, HEIGHT*osd_scale+(HEIGHT*osd_scale-750));
+
+//        input_x = temp_x;
+//        input_y = temp_y;
+
         printf("Touch Move!!\nx: %i\ny: %i\n\n", input_x, input_y );
     }
 //    else {

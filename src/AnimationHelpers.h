@@ -20,6 +20,7 @@ int cutoff = 0;
 gfloat finput_x;
 gfloat finput_y;
 int old_x, old_y;
+int temp_x, temp_y;
 int input_x = 1;
 int input_y = 1;
 
@@ -37,13 +38,14 @@ int counter = 5;
 
 // Unpack and packing colors into and out of int
 int pack(int a, int b, int c) { return (a << 16) | (b << 8) | c; }
-
 int unpackA(int color) { return (color >> 16) & 0xff; }
-
 int unpackB(int color) { return (color >> 8) & 0xff; }
-
 int unpackC(int color) { return (color) & 0xff; }
 
+// Map one set of values to another:
+long map(long x, long in_min, long in_max, long out_min, long out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 // convert HSB to RGB:
 int rgb_colors[3]; // holder for rgb color from hsb conversion
