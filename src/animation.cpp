@@ -112,7 +112,7 @@ gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, 
 //        input_x = temp_x;
 //        input_y = temp_y;
 
-        printf("Touch Move!!\nx: %i\ny: %i\n\n", input_x, input_y );
+//        printf("Touch Move!!\nx: %i\ny: %i\n\n", input_x, input_y );
     }
 //    else {
 //        // printf("Some other touch event %i\n", eventType);
@@ -389,7 +389,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // Build the Actor that the shader will dump to directly:
     shaderOutput = clutter_actor_new();
     clutter_actor_set_position(shaderOutput, 0, 0);
-    clutter_actor_set_size(shaderOutput, WIDTH, HEIGHT);
+    clutter_actor_set_size(shaderOutput, WIDTH-1, HEIGHT);
     clutter_actor_set_rotation_angle(shaderOutput, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(shaderOutput, CLUTTER_Y_AXIS, 180);
     clutter_actor_add_child(stage, shaderOutput);
