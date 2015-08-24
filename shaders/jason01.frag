@@ -18,27 +18,27 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 uv = fragCoord.xy / iResolution.xy;
 
     float tFinalHue = 0.0;
-	if (uv.y > 11.0/12.0) {
+	if (uv.y > 12.0/12.0) {
         tFinalHue = 12.0/12.0;
-    } else if (uv.y > 10.0/12.0) {
+    } else if (uv.y > 11.0/12.0) {
         tFinalHue = 11.0/12.0;
-    } else if (uv.y > 9.0/12.0) {
+    } else if (uv.y > 10.0/12.0) {
         tFinalHue = 10.0/12.0;
-    } else if (uv.y > 8.0/12.0) {
+    } else if (uv.y > 9.0/12.0) {
         tFinalHue = 9.0/12.0;
-    } else if (uv.y > 7.0/12.0) {
+    } else if (uv.y > 8.0/12.0) {
         tFinalHue = 8.0/12.0;
-    } else if (uv.y > 6.0/12.0) {
+    } else if (uv.y > 7.0/12.0) {
         tFinalHue = 7.0/12.0;
-    } else if (uv.y > 5.0/12.0) {
+    } else if (uv.y > 6.0/12.0) {
         tFinalHue = 6.0/12.0;
-    } else if (uv.y > 4.0/12.0) {
+    } else if (uv.y > 5.0/12.0) {
         tFinalHue = 5.0/12.0;
-    } else if (uv.y > 3.0/12.0) {
+    } else if (uv.y > 4.0/12.0) {
         tFinalHue = 4.0/12.0;
-    } else if (uv.y > 2.0/12.0) {
+    } else if (uv.y > 3.0/12.0) {
         tFinalHue = 3.0/12.0;
-    } else if (uv.y > 1.0/12.0) {
+    } else if (uv.y > 2.0/12.0) {
         tFinalHue = 2.0/12.0;
     } else {
         tFinalHue = 1.0/12.0;
