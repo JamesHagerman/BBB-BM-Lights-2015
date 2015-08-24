@@ -6,7 +6,6 @@ struct audio_data {
     int format;
     unsigned int rate ;
     char *source; //alsa device or fifo path
-    int im; //input mode alsa or fifo
     int readCount; // how many samples we read this pass...
     int actualBufferSize; // How large our buffer actually is based on what the soundcard can give us
     unsigned int channelCount;

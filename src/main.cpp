@@ -89,6 +89,7 @@ green red
 #include <alsa/asoundlib.h>
 
 // Order of these two matters. Complex needs to be first:
+// This is a c library:
 #include <complex.h>
 #include <fftw3.h>
 
@@ -103,7 +104,7 @@ green red
 #include "alsa.h"
 
 int i; // for loops. deal with it.
-#define PI 3.14159265 // ya know... for our waveform generator :facepalm:
+#define PI 3.141592653589793 // ya know... for our waveform generator :facepalm:
 
 TCLControl tcl;
 Events eventHandlers;
@@ -114,34 +115,11 @@ pthread_t  p_thread;
 int        thr_id GCC_UNUSED;
 struct audio_data audio;
 
-int main(int argc, char *argv[]) {
-
-    if (clutter_check_version(1,2,0)) {
-        printf("Right version of clutter is installed!\n\n");
-    }
-
-    if (clutter_init(&argc, &argv) != CLUTTER_INIT_SUCCESS) {
-        printf("Clutter failed to initalize. Exiting...\n");
-        exit(1);
-    }
-
-    // Build some colors:
-    ClutterColor stage_color = { 0, 0, 0, 0xFF };
-
-    // Set up the stage:
-    ClutterActor *stage = clutter_stage_new();
-    clutter_actor_set_size(stage, width, height);
-    clutter_actor_set_background_color(stage, &stage_color);
-
-    // Set up a listener to close the app if the window is closed:
-    g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
-
-    // Set up the keyboard listener for the arrow, enter, and esc keys:
-    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
 
 
-
-    // Try getting alsa loaded!!
+//=======================
+// ALSA setup. This REALLY needs to be moved into a class...
+void initAlsa() {
     audio.format = -1;
     audio.rate = 0;
     audio.source = new char[10];
@@ -153,21 +131,20 @@ int main(int argc, char *argv[]) {
 #else
     strncpy( audio.source, "hw:0,1", 9 ); // UBUNTU
 #endif
-    audio.im = 1;
-    struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
 
     // Actually kick off the pthread that will grab audio:
     thr_id = pthread_create(&p_thread, NULL, input_alsa, (void *)&audio); //starting alsamusic listener
 
     // Check to make sure the audio is actually working...
-    // This is kind of a drag.... it just HANGS until the audio is live...
-    int n = 0;
+    // This is kind of a drag.... it just sleeps until the audio is live...
+    struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
+    i = 0;
     while (audio.format == -1 || audio.rate == 0) {
         req.tv_sec = 0;
         req.tv_nsec = 1000000;
         nanosleep(&req, NULL);
-        n++;
-        if (n > 2000) {
+        i++;
+        if (i > 2000) {
 #ifdef DEBUG
             fprintf(stderr, "could not get rate and/or format, problems with audio thread? quiting...\n");
 #endif
@@ -183,7 +160,6 @@ int main(int argc, char *argv[]) {
 //    thr_id = pthread_create(&p_thread, NULL, derpthread, (void *)&dumb); // STUPID THREAD.
 
     // Setup FFTW:
-
 
 //    // From cava:
 //    int M = 2048; // Basically, this is a shit variable name for "sample count". (blame karl@stavestrand.no)
@@ -214,7 +190,7 @@ int main(int argc, char *argv[]) {
 
     // Fuck cava with it's shit program flow and variable names
     // Things needed for fftw3:
-    int actualBufferSize =  audio.actualBufferSize/2;
+    int actualBufferSize =  audio.actualBufferSize; // number of actual 16bit audio values we're reading in
     int samples_count = actualBufferSize;//2 * (actualBufferSize / 2 + 1);
     double *samples = fftw_alloc_real(samples_count);
     fftw_complex *output = fftw_alloc_complex(samples_count);
@@ -234,7 +210,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Build the plan:
-    plan = fftw_plan_dft_r2c_1d(samples_count, samples, output, 0);
+    plan = fftw_plan_dft_r2c_1d(samples_count, samples, output, FFTW_ESTIMATE); // better to use FFTW_MEASURE
 
     int count = 0;
     while(count<1) {
@@ -272,7 +248,8 @@ int main(int argc, char *argv[]) {
             // the INPUT ARRAY! (named samples here). This allows us to reuse samples for "maximizing" and
             // maybe even smoothing...
             for (i = 0; i < samples_count / 2; i++) {
-                samples[i] = cabs(output[i]);
+                samples[i] = 10 * log(creal(output[i])*creal(output[i]) + cimag(output[i])*cimag(output[i]))/log(10); // power_in_db
+//                samples[i] = cabs(output[i]);
                 if (samples[i] > max) {
                     max = samples[i];
                 }
@@ -285,6 +262,8 @@ int main(int argc, char *argv[]) {
             printf("FFT compute end, max = %.1f\n", max);
             max = 0; // reset for next pass
             count++;
+        } else {
+            printf("waiting for audio...\n");
         }
     }
 
@@ -348,6 +327,38 @@ int main(int argc, char *argv[]) {
 //        }
 //
 //    }
+}
+
+
+int main(int argc, char *argv[]) {
+
+    if (clutter_check_version(1,2,0)) {
+        printf("Right version of clutter is installed!\n\n");
+    }
+
+    if (clutter_init(&argc, &argv) != CLUTTER_INIT_SUCCESS) {
+        printf("Clutter failed to initalize. Exiting...\n");
+        exit(1);
+    }
+
+    // Build some colors:
+    ClutterColor stage_color = { 0, 0, 0, 0xFF };
+
+    // Set up the stage:
+    ClutterActor *stage = clutter_stage_new();
+    clutter_actor_set_size(stage, width, height);
+    clutter_actor_set_background_color(stage, &stage_color);
+
+    // Set up a listener to close the app if the window is closed:
+    g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
+
+    // Set up the keyboard listener for the arrow, enter, and esc keys:
+    g_signal_connect(stage, "key-press-event", G_CALLBACK(eventHandlers.handleKeyPresses), NULL);
+
+
+
+    // Try getting alsa loaded!!
+    initAlsa();
 
     // Start animation loop:
     Animation animation = Animation(stage, &tcl); // pointer TO the main tcl object.

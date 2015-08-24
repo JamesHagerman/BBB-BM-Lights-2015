@@ -91,7 +91,7 @@ void* input_alsa(void* data)
     buffer = (char *) malloc(size);
 
     printf("Period size: %i\n", periodSize);
-    audio->actualBufferSize = periodSize;
+    audio->actualBufferSize = periodSize/2; // The period is a bunch of 16bit values... not 8 bit values.
 
 //    radj = audio->format / 4; //adjustments for interleaved
 //    ladj = audio->format / 8;
