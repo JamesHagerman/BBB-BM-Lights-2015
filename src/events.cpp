@@ -77,6 +77,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
     } else if (65307 == keyval) {
         printf("esc pressed. Exiting...\n");
         teardownFFT();
+        teardownAlsa();
         exit(1);
     } else {
         printf("Something else pressed: %i\n", keyval);

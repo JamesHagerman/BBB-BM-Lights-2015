@@ -289,11 +289,11 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
     // Use the timeline delta to determine how much time to add to the clock:
     int delta = clutter_timeline_get_delta(timeline);
 //    printf("Delta: %f\n", delta/1000.0);
+//    printf("Delta: %f\n", delta/1000.0);
     animationTime += delta/1000.0;
 
     if (animation->currentShader>0) {
-        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
-                                          animationTime);
+        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, input_x*1.0);
     }
 

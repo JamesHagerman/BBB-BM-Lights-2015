@@ -9,9 +9,11 @@ struct audio_data {
     int readCount; // how many samples we read this pass...
     int actualBufferSize; // How large our buffer actually is based on what the soundcard can give us
     unsigned int channelCount;
+    bool lockAudio;
 };
 
 void* input_alsa(void* data);
 void* derpthread(void* data);
+void teardownAlsa();
 
 #endif

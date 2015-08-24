@@ -11,9 +11,8 @@
 // This is a c library:
 #include <complex.h>
 #include <fftw3.h>
-#include "alsa.h"
 #include "fft.h"
-
+#include "alsa.h"
 
 #define PI 3.141592653589793 // ya know... for our waveform generator :facepalm:
 
@@ -99,10 +98,15 @@ void executeFFT() {
 
     int i;
 
-    // Only try doing the FFT if we actually have audio data:
-    if (audio.audioLive) {
+    int actualBufferSize =  audio.actualBufferSize; // number of actual 16bit audio values we're reading in
+    samples_count = actualBufferSize;//2 * (actualBufferSize / 2 + 1);
+//    printf("FFT EXECUTE: samples_count: %i\n", samples_count);
 
-        printf("FFT EXECUTE: samples_count: %i\n", samples_count);
+    // Only try doing the FFT if we actually have audio data:
+    if (audio.audioLive && samples_count>0) {
+        audio.lockAudio = true;
+
+
         for (i = 0; i < samples_count; i++) {
             printf("%i, ", audio.audio_out[i]);
             samples[i] = audio.audio_out[i];
@@ -132,6 +136,8 @@ void executeFFT() {
         }
         printf("FFT compute end, max = %.1f\n", max);
         max = 0; // reset for next pass
+
+        audio.lockAudio = false;
     }
 //    else {
 //        printf("waiting for audio...\n");
@@ -140,6 +146,6 @@ void executeFFT() {
 
 
 void teardownFFT() {
-    printf("Tearing down FFT...");
+    printf("Tearing down FFT...\n");
     fftw_destroy_plan(plan);
 }
