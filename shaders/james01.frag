@@ -38,7 +38,16 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
 	vec3 rgb_o = hsv2rgb( hsl );
 	vec3 rgb_s = hsv2rgb_smooth( hsl );
-	
-	vec3 rgb = mix( rgb_o, rgb_s, smoothstep( -0.2, 0.2, 0.0) ); //sin(2.0*iGlobalTime)
+
+
+	float mouseY = (iMouse.y/iResolution.y);
+
+    vec3 rgb;
+	if (uv.y > mouseY) {
+		rgb = vec3(0.0,0.0,0.0);
+	} else {
+		rgb = mix( rgb_o, rgb_s, smoothstep( -0.2, 0.2, 0.0) ); //sin(2.0*iGlobalTime)
+	}
+
 	fragColor = vec4( rgb, 1.0 );
 }

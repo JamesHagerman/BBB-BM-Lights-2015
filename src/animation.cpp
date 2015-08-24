@@ -49,7 +49,7 @@ GError *error;
 ClutterActor *shaderOutput;
 ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
-gfloat animationTime = 100.0; // A variable to hold the value of iGlobalTime
+gfloat animationTime = 0.0; // A variable to hold the value of iGlobalTime
 
 // These are the pre and postambles for the Shader Toy shader import system.
 // Nothing too complex can run very well on the BBB GPU but it's better than nothing!
@@ -91,13 +91,21 @@ gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, 
         //  to do so in this block...
         //
         // This will scale both to 0.0 <-> 255.0:
-        actor_x = actor_x / clutter_actor_get_width(actor) * 255;
-        actor_y = actor_y / clutter_actor_get_height(actor) * 255;
+        //actor_x = actor_x / clutter_actor_get_width(actor) * 255;
+        //actor_y = actor_y / clutter_actor_get_height(actor) * 255;
+
+        // This will scale both to the actual on screen pixel size:
+        actor_x = actor_x * osd_scale;
+        actor_y = actor_y * osd_scale;
+
+        // This will invert the x axis. We flipped our stupid actor around...
+        //actor_x = WIDTH*osd_scale-actor_x;
 
 //        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
         input_x = static_cast<int>(actor_x);
         input_y = static_cast<int>(actor_y);
 
+        printf("Touch Move!!\nx: %i\ny: %i\n\n", input_x, input_y );
     }
 //    else {
 //        // printf("Some other touch event %i\n", eventType);
@@ -139,7 +147,7 @@ void shaderAnimation(TCLControl *tcl) {
     // On screen display size is defined in main.cpp
 
     int ledIndex = 0; // This is the pixel offset in the actual color array. uint32_t
-    int fbIndex = 0;  // This is the pixel BYTE offset in the
+    int fbIndex = 0;  // This is the pixel BYTE offset in the shaderBuffer
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
 
@@ -154,6 +162,7 @@ void shaderAnimation(TCLControl *tcl) {
             pixel[1] = shaderBuffer[fbIndex+1];//green
             pixel[2] = shaderBuffer[fbIndex+2];//blue
 
+            // Then put colors to the lights themselves:
             uint32_t thisColor = pack(shaderBuffer[fbIndex],shaderBuffer[fbIndex+1],shaderBuffer[fbIndex+2]);
             fbIndex += 4;
 
@@ -267,7 +276,7 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
     if (animation->currentShader>0) {
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                           animationTime);
-        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, input_x*1.0);
+        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, (WIDTH*osd_scale)-(input_x*1.0));
     }
 
 }
@@ -336,7 +345,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     clutter_actor_set_x_expand(lightDisplay, TRUE);
     clutter_actor_set_y_expand(lightDisplay, TRUE);
     clutter_actor_set_position(lightDisplay, 0, WIDTH);
-//    clutter_actor_set_size(lightDisplay, HEIGHT * osd_scale, WIDTH * osd_scale);
     clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
     clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+7);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
@@ -375,9 +383,8 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     clutter_actor_add_child(stage, shaderOutput);
 
     // Allocate the memory for the shader output buffer:
-    // Figure out how big our buffer needs to be. *3 because three bytes per pixel (r, g, b)
-//    int shaderBufferSize = ceil(clutter_actor_get_width(stage)) * ceil(clutter_actor_get_height(stage)) * 3;
-    int shaderBufferSize = ceil(WIDTH) * ceil(HEIGHT) * 4;
+    // Figure out how big our buffer needs to be. *4 because four bytes per pixel (r, g, b, a) in shader land
+    int shaderBufferSize = WIDTH * HEIGHT * 4;
     shaderBuffer = (guint8 *) malloc(shaderBufferSize); // malloc the buffer!!
 
     // Double check that we built the buffer correctly.
@@ -479,8 +486,8 @@ void Animation::loadShader(const char *fragment_path) {
 
     // Bind uniforms to the shader so we can hand variables into them
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, 0.0);
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, WIDTH*osd_scale, HEIGHT*osd_scale);
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x, input_y);
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, HEIGHT*osd_scale, WIDTH*osd_scale);
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x*osd_scale, input_y*osd_scale);
 
     // Set the effect live on the on screen display actor...
     clutter_actor_add_effect(shaderOutput, shaderEffect);
