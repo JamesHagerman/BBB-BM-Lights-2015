@@ -148,7 +148,6 @@ int main(int argc, char *argv[]) {
 
     // hw:1,0 = BBB usb snd card
     // hw:0,1 = Ubuntu mic input...
-
 #ifdef BEAGLEBONEBLACK
     strncpy( audio.source, "hw:1,0", 9 ); // BBB
 #else
@@ -238,7 +237,7 @@ int main(int argc, char *argv[]) {
     plan = fftw_plan_dft_r2c_1d(samples_count, samples, output, 0);
 
     int count = 0;
-    while(count<10) {
+    while(count<100) {
         // naive input read:
 //        for (i = 0; i< samples_count; i++) {
 //            samples[i] = audio.audio_out[i];
@@ -250,7 +249,7 @@ int main(int argc, char *argv[]) {
             printf("%i, ", audio.audio_out[i]);
             samples[i] = audio.audio_out[i];
 //            printf("%f, ", sin((i*100)*PI/180));
-//            samples[i] = sin((i*10)*PI/180);
+//            samples[i] = sin((i*100)*PI/180);
         }
         printf("Audio read END\n");
 

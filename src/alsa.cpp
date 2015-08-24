@@ -77,6 +77,7 @@ void* input_alsa(void* data)
     snd_pcm_hw_params_get_period_time(params,  &periodTime, &dir);
     printf("Buffer size: %lu, Period size: %lu, Period time: %u \n", bufferSize, periodSize, periodTime);
 
+    printf("Audio format: %i\n", audio->format);
 
     size = periodSize * (audio->format / 8) * channelCount; // frames * 16 bits / 8 * 2 channels
     printf("Actual calculated buffer Size: %i\n", size);
