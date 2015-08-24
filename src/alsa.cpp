@@ -11,6 +11,7 @@ void* derpthread(void* data) {
 void* input_alsa(void* data)
 {
     audio_data *audio = (struct audio_data *)data;
+    audio->audioLive = false;
     char *buffer;
     snd_pcm_t *handle;
     snd_pcm_hw_params_t *params;
@@ -123,16 +124,14 @@ void* input_alsa(void* data)
         }
 
         // Grab the 16 bit audio data!!
-        printf("Read: %i bytes of audio\n", err);
         offset = 0;
-        for (i = 0; i < err; i += 1) {
-//            audio->audio_out[0] = buffer[offset];//|buffer[offset+1]<<8; // 16bit little endian. Never can remember....
-//            offset+= 1;
-//            printf("%i, ", audio->audio_out[i]);
-            printf("Derp\n");
+        for (i = 0; i < err; i += 2) {
+            audio->audio_out[offset] = buffer[i]|buffer[i+1]<<8; // 16bit little endian. Never can remember....
+            offset+= 1;
         }
-//        printf("end\n");
 
+        // Tell the rest of the app that we are actually capturing audio data:
+        audio->audioLive = true;
 
         // OLD SHIT:
         //sorting out one channel and only biggest octet

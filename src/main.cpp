@@ -214,8 +214,8 @@ int main(int argc, char *argv[]) {
 
     // Fuck cava with it's shit program flow and variable names
     // Things needed for fftw3:
-    int actualBufferSize =  audio.actualBufferSize;
-    int samples_count = 2 * (actualBufferSize / 2 + 1);
+    int actualBufferSize =  audio.actualBufferSize/2;
+    int samples_count = actualBufferSize;//2 * (actualBufferSize / 2 + 1);
     double *samples = fftw_alloc_real(samples_count);
     fftw_complex *output = fftw_alloc_complex(samples_count);
     fftw_plan plan;
@@ -237,23 +237,26 @@ int main(int argc, char *argv[]) {
     plan = fftw_plan_dft_r2c_1d(samples_count, samples, output, 0);
 
     int count = 0;
-    while(count<0) {
-        // naive input read:
+    while(count<1) {
+
+        // Only try doing the FFT if we actually have audio data:
+        if (audio.audioLive) {
+            // naive input read:
 //        for (i = 0; i< samples_count; i++) {
 //            samples[i] = audio.audio_out[i];
 //        }
 
 
 
-        for (i = 0; i < samples_count; i++) {
-            printf("%i, ", audio.audio_out[i]);
-            samples[i] = audio.audio_out[i];
+            for (i = 0; i < samples_count; i++) {
+                printf("%i, ", audio.audio_out[i]);
+                samples[i] = audio.audio_out[i];
 //            printf("%f, ", sin((i*100)*PI/180));
 //            samples[i] = sin((i*100)*PI/180);
-        }
-        printf("Audio read END\n");
+            }
+            printf("Audio read END\n");
 
-        // Averaging. The audio data we get in is really noisy.
+            // Averaging. The audio data we get in is really noisy.
 //        for (i = 0; i < samples_count; i++) {
 //            samples[i] = 0;
 //            for (ch = 0; ch < channels; ch++) {
@@ -262,26 +265,27 @@ int main(int argc, char *argv[]) {
 //            samples[i] /= channels;
 //        }
 
-        // compute fftw
-        fftw_execute(plan);
+            // compute fftw
+            fftw_execute(plan);
 
-        // The next for loop pulls the absolute value of the complex fft output and plops it back into
-        // the INPUT ARRAY! (named samples here). This allows us to reuse samples for "maximizing" and
-        // maybe even smoothing...
-        for (i = 0; i < samples_count / 2; i++) {
-            samples[i] = cabs(output[i]);
-            if (samples[i] > max) {
-                max = samples[i];
+            // The next for loop pulls the absolute value of the complex fft output and plops it back into
+            // the INPUT ARRAY! (named samples here). This allows us to reuse samples for "maximizing" and
+            // maybe even smoothing...
+            for (i = 0; i < samples_count / 2; i++) {
+                samples[i] = cabs(output[i]);
+                if (samples[i] > max) {
+                    max = samples[i];
+                }
             }
-        }
 
-        // output:
-        for (i = 0; i < samples_count / 2; i++) {
-            printf("%.1f, ", samples[i]);
+            // output:
+            for (i = 0; i < samples_count / 2; i++) {
+                printf("%.1f, ", samples[i]);
+            }
+            printf("FFT compute end, max = %.1f\n", max);
+            max = 0; // reset for next pass
+            count++;
         }
-        printf("FFT compute end\n");
-        max = 0; // reset for next pass
-        count++;
     }
 
 
