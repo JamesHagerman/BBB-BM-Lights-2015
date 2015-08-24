@@ -61,7 +61,7 @@ const gchar *fragShaderPreamble = "" //"#version 110\n\n"
 const gchar *fragShaderPostamble = ""
         "void main(void) {\n"
         "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
-        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, (1.0-cogl_tex_coord_in[0].y)*iResolution.y);\n"
+        "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
         "   mainImage(outFragColor, inFragCoord);\n"
         "   cogl_color_out = outFragColor;\n"
         "}";
@@ -280,7 +280,7 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
     if (animation->currentShader>0) {
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                           animationTime);
-        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, (WIDTH*osd_scale)-(input_x*1.0));
+        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, input_x*1.0);
     }
 
 }
@@ -348,11 +348,11 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // Define the size of the On Screen Display:
     clutter_actor_set_x_expand(lightDisplay, TRUE);
     clutter_actor_set_y_expand(lightDisplay, TRUE);
-    clutter_actor_set_position(lightDisplay, 0, WIDTH);
+    clutter_actor_set_position(lightDisplay, 0, WIDTH*(osd_scale+7)+WIDTH);
     clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
     clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+7);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
-    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
+//    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
 
     // Actually add that actor to the stage!
     clutter_actor_add_child(stage, lightDisplay);
@@ -381,7 +381,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // Build the Actor that the shader will dump to directly:
     shaderOutput = clutter_actor_new();
     clutter_actor_set_position(shaderOutput, 0, 0);
-    clutter_actor_set_size(shaderOutput, WIDTH-1, HEIGHT);
+    clutter_actor_set_size(shaderOutput, WIDTH, HEIGHT);
     clutter_actor_set_rotation_angle(shaderOutput, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(shaderOutput, CLUTTER_Y_AXIS, 180);
     clutter_actor_add_child(stage, shaderOutput);
