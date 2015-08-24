@@ -98,13 +98,10 @@ gboolean Animation::handleTouchEvents(ClutterActor *actor, ClutterEvent *event, 
         actor_x = actor_x * osd_scale;
         actor_y = actor_y * osd_scale;
 
-        // This will invert the x axis. We flipped our stupid actor around...
-        //actor_x = WIDTH*osd_scale-actor_x;
-
 //        printf("Touch Move!!\nx: %f\ny: %f\n\n", actor_x, actor_y );
         input_x = static_cast<int>(actor_x);
         input_y = static_cast<int>(actor_y);
-//        printf("Touch Move!!\nx: %i\ny: %i\n\n", input_x, input_y );
+        printf("Touch Move!!\nx: %i\ny: %i\n\n", input_x, input_y );
     }
 //    else {
 //        // printf("Some other touch event %i\n", eventType);
