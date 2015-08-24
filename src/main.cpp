@@ -158,26 +158,26 @@ int main(int argc, char *argv[]) {
     struct timespec req = { .tv_sec = 0, .tv_nsec = 0 };
 
     // Actually kick off the pthread that will grab audio:
-    //thr_id = pthread_create(&p_thread, NULL, input_alsa, (void *)&audio); //starting alsamusic listener
+    thr_id = pthread_create(&p_thread, NULL, input_alsa, (void *)&audio); //starting alsamusic listener
 
     // Check to make sure the audio is actually working...
-    // This is kind of a drag.... it just HANGS...
-//    int n = 0;
-//    while (audio.format == -1 || audio.rate == 0) {
-//        req.tv_sec = 0;
-//        req.tv_nsec = 1000000;
-//        nanosleep(&req, NULL);
-//        n++;
-//        if (n > 2000) {
-//#ifdef DEBUG
-//            fprintf(stderr, "could not get rate and/or format, problems with audio thread? quiting...\n");
-//#endif
-//            exit(EXIT_FAILURE);
-//        }
-//    }
-//#ifdef DEBUG
-//    printf("got format: %d, rate: %d, channels: %d, buffer size: %d\n", audio.format, audio.rate, audio.channelCount, audio.actualBufferSize);
-//#endif
+    // This is kind of a drag.... it just HANGS until the audio is live...
+    int n = 0;
+    while (audio.format == -1 || audio.rate == 0) {
+        req.tv_sec = 0;
+        req.tv_nsec = 1000000;
+        nanosleep(&req, NULL);
+        n++;
+        if (n > 2000) {
+#ifdef DEBUG
+            fprintf(stderr, "could not get rate and/or format, problems with audio thread? quiting...\n");
+#endif
+            exit(EXIT_FAILURE);
+        }
+    }
+#ifdef DEBUG
+    printf("got format: %d, rate: %d, channels: %d, buffer size: %d\n", audio.format, audio.rate, audio.channelCount, audio.actualBufferSize);
+#endif
 
     // Just a test thread to see if they even work on ARM:
 //    int dumb = 12;
