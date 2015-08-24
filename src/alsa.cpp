@@ -118,11 +118,11 @@ void* input_alsa(void* data)
         }
 
         // Grab the 16 bit audio data!!
-        printf("read: %i:", err);
+//        printf("read: %i:", err);
         offset = 0;
         for (i = 0; i < err-1; i += 1) {
-            audio->audio_out[i] = buffer[offset]|buffer[offset+1]<<8; // 16bit little endian. Never can remember....
-            offset++;
+            audio->audio_out[i] = buffer[offset];//|buffer[offset+1]<<8; // 16bit little endian. Never can remember....
+            offset+= 4;
 //            printf("%i, ", audio->audio_out[i]);
         }
 //        printf("end\n");
