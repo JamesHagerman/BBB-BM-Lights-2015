@@ -102,6 +102,7 @@ void executeFFT() {
     // Only try doing the FFT if we actually have audio data:
     if (audio.audioLive) {
 
+        printf("FFT EXECUTE: samples_count: %i\n", samples_count);
         for (i = 0; i < samples_count; i++) {
             printf("%i, ", audio.audio_out[i]);
             samples[i] = audio.audio_out[i];
