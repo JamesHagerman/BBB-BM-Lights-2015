@@ -44,9 +44,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         tFinalHue = 1.0/12.0;
     }
 
-    float mouseX = iMouse.x/iResolution.x;
+    float mouseY = iMouse.y/iResolution.y;
 
-    if (uv.y > mouseX) {
+    if (uv.y > mouseY) {
         fragColor = vec4(hsv2rgb_smooth(vec3(tFinalHue, 1.0, 0.0)), 1.0);
     } else {
         fragColor = vec4(outputColor(tFinalHue), 1.0);

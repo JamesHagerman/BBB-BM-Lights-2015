@@ -33,7 +33,7 @@ $(warning Building for $(MACHINE)_$(ARCH))
 ifeq ($(MACHINE)_$(ARCH),Linux_armv7l)
 	LDFLAGS += -lrt -lasound
 	#-l/usr/lib/libftd2xx.so.1.2.7 -l/usr/lib/libp9813.a
-	CFLAGS += -O3 -fomit-frame-pointer -Wno-unused-result -Wno-unused-but-set-variable
+	CFLAGS += -DBEAGLEBONEBLACK -O3 -fomit-frame-pointer -Wno-unused-result -Wno-unused-but-set-variable
 endif
 
 ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)

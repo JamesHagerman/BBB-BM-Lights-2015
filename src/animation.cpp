@@ -376,7 +376,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // Build the Actor that the shader will dump to directly:
     shaderOutput = clutter_actor_new();
     clutter_actor_set_position(shaderOutput, 0, 0);
-    clutter_actor_set_size(shaderOutput, WIDTH, HEIGHT);
+    clutter_actor_set_size(shaderOutput, WIDTH-1, HEIGHT);
     clutter_actor_set_rotation_angle(shaderOutput, CLUTTER_Z_AXIS, -90);
     clutter_actor_set_rotation_angle(shaderOutput, CLUTTER_Y_AXIS, 180);
     clutter_actor_add_child(stage, shaderOutput);
