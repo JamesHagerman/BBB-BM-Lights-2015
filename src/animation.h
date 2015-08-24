@@ -27,7 +27,7 @@ public:
     ~Animation();
 
     // Event Handlers:
-    static void handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data);
+    static void handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpointer user_data);
     static gboolean handleTouchEvents(ClutterActor *actor, ClutterEvent *event, gpointer user_data);
 
     // Timeline object itself:

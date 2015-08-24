@@ -178,7 +178,7 @@ void shaderAnimation(TCLControl *tcl) {
 
 // handleNewFrame is the function that is called ever 120 milliseconds via the timeline!
 // This is where ALL animation updates will happen.
-void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer user_data) {
+void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpointer user_data) {
 
     // Rebuild the struct from the pointer we handed in:
     AnimationData *data;
@@ -271,7 +271,12 @@ void Animation::handleNewFrame(ClutterActor *timeline, gint frame_num, gpointer 
 
 
     // Update the shader uniforms:
-    animationTime += 0.1;
+
+    // Use the timeline delta to determine how much time to add to the clock:
+    int delta = clutter_timeline_get_delta(timeline);
+//    printf("Delta: %f\n", delta/1000.0);
+    animationTime += delta/1000.0;
+
     if (animation->currentShader>0) {
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1,
                                           animationTime);
