@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
     plan = fftw_plan_dft_r2c_1d(samples_count, samples, output, 0);
 
     int count = 0;
-    while(count<100) {
+    while(count<0) {
         // naive input read:
 //        for (i = 0; i< samples_count; i++) {
 //            samples[i] = audio.audio_out[i];

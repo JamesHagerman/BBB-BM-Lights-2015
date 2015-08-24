@@ -403,8 +403,8 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     if (shaderBuffer == NULL) {
         printf("OOPS! malloc error!\n");
     } else {
-        printf("We malloc'd %i bytes for your shaderBuffer. It points at: %p\n", shaderBufferSize, shaderBuffer);
-        printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
+//        printf("We malloc'd %i bytes for your shaderBuffer. It points at: %p\n", shaderBufferSize, shaderBuffer);
+//        printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
     }
 
     // Make sure we don't have a current shader so we don't break the update loop:

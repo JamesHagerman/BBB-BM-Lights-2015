@@ -19,9 +19,10 @@ void* input_alsa(void* data)
     unsigned int sampleRate = 44100;
 
     unsigned int val;
+    unsigned int periods = 2;
     unsigned int periodTime = 0;
-    unsigned long periodSize = 256; // = 64; // in frames
-    unsigned long bufferSize = 0; // = 2048; // total number of frames * channel count * (size of data)
+    unsigned long periodSize = 8192; // in frames
+    unsigned long bufferSize = periodSize * periods; // total number of frames * channel count * (size of data)
 
 
 
@@ -31,7 +32,7 @@ void* input_alsa(void* data)
 //    int radj, ladj;
 
     // alsa: open device to capture audio
-    if ((err = snd_pcm_open(&handle, audio-> source, SND_PCM_STREAM_CAPTURE, 0) < 0)) {
+    if ((err = snd_pcm_open(&handle, audio->source, SND_PCM_STREAM_CAPTURE, 0) < 0)) {
         fprintf(stderr, "error opening stream: %s\n", snd_strerror(err));
         exit(EXIT_FAILURE);
     } else {
@@ -47,8 +48,12 @@ void* input_alsa(void* data)
 
 
     // Periods are some number of frames long.
-    // The buffer needs to be at least 2 times the period length
-    snd_pcm_hw_params_set_period_size_near(handle, params, &periodSize, &dir); //number of frames pr read
+    snd_pcm_hw_params_set_periods(handle, params, periods, 0);
+
+    // Each period has some given size:
+    snd_pcm_hw_params_set_period_size_near(handle, params, &periodSize, &dir);
+
+    // The buffer needs to be at least 2 times the length of a single period:
 //    snd_pcm_hw_params_set_buffer_size_near(handle, params, &bufferSize);
 
     // Set the parameters we just configured onto the hardware itself:
@@ -75,19 +80,17 @@ void* input_alsa(void* data)
     snd_pcm_hw_params_get_buffer_size(params, (snd_pcm_uframes_t *)&bufferSize); // Get buffer size
     snd_pcm_hw_params_get_period_size(params, &periodSize, &dir); // Get period size
     snd_pcm_hw_params_get_period_time(params,  &periodTime, &dir);
-    printf("Buffer size: %lu, Period size: %lu, Period time: %u \n", bufferSize, periodSize, periodTime);
+    printf("Buffer size (should be ): %lu, Period size: %lu, Period time: %u \n", bufferSize, periodSize, periodTime);
 
     printf("Audio format: %i\n", audio->format);
 
-    size = periodSize * (audio->format / 8) * channelCount; // frames * 16 bits / 8 * 2 channels
-    printf("Actual calculated buffer Size: %i\n", size);
-
+    // Calculate buffer size manually:
+    size = periodSize * audio->channelCount * (audio->format / 8);
+    printf("Buffer size: %i\n", size);
     buffer = (char *) malloc(size);
 
-    frames = periodSize;
-    audio->actualBufferSize = frames;
-
-
+    printf("Period size: %i\n", periodSize);
+    audio->actualBufferSize = periodSize;
 
 //    radj = audio->format / 4; //adjustments for interleaved
 //    ladj = audio->format / 8;
@@ -103,15 +106,16 @@ void* input_alsa(void* data)
         // frames = "sample" in mono land...
         // frames = left+right pair in stereo land
 
-        err = snd_pcm_readi(handle, buffer, frames); // frames = how many frames to be read
+//        printf("Reading %i samples from buffer\n", periodSize);
+        err = snd_pcm_readi(handle, buffer, periodSize); // frames = how many frames to be read
         if (err == -EPIPE) {
             /* EPIPE means overrun */
             fprintf(stderr, "overrun occurred\n");
             snd_pcm_prepare(handle);
         } else if (err < 0) {
             fprintf(stderr, "error from read: %s\n", snd_strerror(err));
-        } else if (err != (int)frames) {
-            fprintf(stderr, "short read, read %d %d frames\n", err, (int)frames);
+        } else if (err != (int)periodSize) {
+            fprintf(stderr, "short read, read %d %d frames\n", err, (int)periodSize);
         }
 
         if (err >=0) {
@@ -119,12 +123,13 @@ void* input_alsa(void* data)
         }
 
         // Grab the 16 bit audio data!!
-//        printf("read: %i:", err);
+        printf("Read: %i bytes of audio\n", err);
         offset = 0;
-        for (i = 0; i < err-1; i += 1) {
-            audio->audio_out[i] = buffer[offset];//|buffer[offset+1]<<8; // 16bit little endian. Never can remember....
-            offset+= 4;
+        for (i = 0; i < err; i += 1) {
+//            audio->audio_out[0] = buffer[offset];//|buffer[offset+1]<<8; // 16bit little endian. Never can remember....
+//            offset+= 1;
 //            printf("%i, ", audio->audio_out[i]);
+            printf("Derp\n");
         }
 //        printf("end\n");
 

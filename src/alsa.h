@@ -1,7 +1,7 @@
 #ifndef ALSA_CTL
 #define ALSA_CTL
 struct audio_data {
-    int audio_out[2048]; // int = 16 bit number
+    int audio_out[8192]; // int = 16 bit number
     int format;
     unsigned int rate ;
     char *source; //alsa device or fifo path
