@@ -7,6 +7,9 @@
 #include "configurations.h"
 #include "animation.h"
 
+#include "alsa.h"
+#include "fft.h"
+
 Events::Events() {
     // printf("Building events class\n");
 }
@@ -73,6 +76,7 @@ gboolean Events::handleKeyPresses (ClutterActor *actor,
         system("sync; shutdown -h now");
     } else if (65307 == keyval) {
         printf("esc pressed. Exiting...\n");
+        teardownFFT();
         exit(1);
     } else {
         printf("Something else pressed: %i\n", keyval);

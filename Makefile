@@ -53,7 +53,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o src/alsa.o
+OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o src/alsa.o src/fft.o
 
 all: ${OUTPUT}
 

@@ -17,6 +17,9 @@
 #include "configurations.h"
 #include "AnimationHelpers.h"
 
+#include "alsa.h"
+#include "fft.h"
+
 typedef struct {
     TCLControl *tcl;
     int *animationNumber;
@@ -279,6 +282,9 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
 
 
     // Update the shader uniforms:
+
+    // This is going to take forever to execute... maybe we should do it in a thread?
+    executeFFT();
 
     // Use the timeline delta to determine how much time to add to the clock:
     int delta = clutter_timeline_get_delta(timeline);
