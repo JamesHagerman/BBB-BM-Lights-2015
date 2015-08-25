@@ -141,14 +141,14 @@ int main(int argc, char *argv[]) {
 
 
     // Build UI Buttons:
-    Button button1 = Button(stage, 0, buttonWidth*2, buttonHeight/2, 0, height-buttonHeight+buttonHeight/2, (ClutterColor){ 0, 255, 47, 0xFF }, &animation, 1);
+    Button button1 = Button(stage, 0, buttonWidth*2, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF }, &animation, 1);
 //    Button button2 = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 232, 217, 12, 0xFF }, &animation, 2);
 
     Button button3 = Button(stage, 2, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF }, &animation, 0);
     Button button4 = Button(stage, 3, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF }, &animation, 0);
     Button button5 = Button(stage, 4, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF }, &animation, 0);
 
-    Button button6 = Button(stage, 5, buttonWidth, buttonHeight+buttonHeight/2, 0, height-(buttonHeight*2), (ClutterColor){ 255, 0, 91, 0xFF }, &animation, 2);
+    Button button6 = Button(stage, 5, buttonWidth, buttonHeight, 0, height-(buttonHeight*2), (ClutterColor){ 255, 0, 91, 0xFF }, &animation, 2);
 //    Button button7 = Button(stage, 6, buttonWidth, buttonHeight, buttonWidth, height-(buttonHeight*2), (ClutterColor){ 55, 8, 232, 0xFF }, &animation, 0);
     Button button8 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*2, height-(buttonHeight*2), (ClutterColor){ 0, 228, 255, 0xFF }, &animation, 0);
     Button button9 = Button(stage, 8, buttonWidth, buttonHeight, buttonWidth*3, height-(buttonHeight*2), (ClutterColor){ 30, 232, 12, 0xFF }, &animation, 0);
