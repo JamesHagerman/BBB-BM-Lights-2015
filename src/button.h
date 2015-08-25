@@ -8,7 +8,7 @@
 class Button {
     public:
         Button();
-        Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor button1Color, Animation *mainAnimations);
+        Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor button1Color, Animation *mainAnimations, int type);
         ~Button();
         // void changeAnimation(int id);
         static gboolean handleEvents (ClutterActor *actor, ClutterEvent *event, gpointer user_data);

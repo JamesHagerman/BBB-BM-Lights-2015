@@ -128,23 +128,30 @@ int main(int argc, char *argv[]) {
 
 
     // Try getting alsa loaded!!
-    initAlsa();
+    //initAlsa();
 
     // Start animation loop:
     Animation animation = Animation(stage, &tcl); // pointer TO the main tcl object.
 
-    // Build UI Buttons:
-    Button button1 = Button(stage, 0, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF }, &animation);
-    Button button2 = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth, height-buttonHeight, (ClutterColor){ 232, 217, 12, 0xFF }, &animation);
-    Button button3 = Button(stage, 2, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF }, &animation);
-    Button button4 = Button(stage, 3, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF }, &animation);
-    Button button5 = Button(stage, 4, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF }, &animation);
+    // Load some images for the buttons:
+//    const char *img_path = "./wut.png";
+//    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
 
-    Button button6 = Button(stage, 5, buttonWidth, buttonHeight, 0, height-(buttonHeight*2), (ClutterColor){ 255, 0, 91, 0xFF }, &animation);
-    Button button7 = Button(stage, 6, buttonWidth, buttonHeight, buttonWidth, height-(buttonHeight*2), (ClutterColor){ 55, 8, 232, 0xFF }, &animation);
-    Button button8 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*2, height-(buttonHeight*2), (ClutterColor){ 0, 228, 255, 0xFF }, &animation);
-    Button button9 = Button(stage, 8, buttonWidth, buttonHeight, buttonWidth*3, height-(buttonHeight*2), (ClutterColor){ 30, 232, 12, 0xFF }, &animation);
-    Button button10 = Button(stage, 9, buttonWidth, buttonHeight, buttonWidth*4, height-(buttonHeight*2), (ClutterColor){ 255, 215, 0, 0xFF }, &animation);
+
+
+
+    // Build UI Buttons:
+    Button button1 = Button(stage, 0, buttonWidth, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 0, 255, 47, 0xFF }, &animation, 1);
+    Button button2 = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth, height-buttonHeight, (ClutterColor){ 232, 217, 12, 0xFF }, &animation, 2);
+    Button button3 = Button(stage, 2, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF }, &animation, 0);
+    Button button4 = Button(stage, 3, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF }, &animation, 0);
+    Button button5 = Button(stage, 4, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF }, &animation, 0);
+
+    Button button6 = Button(stage, 5, buttonWidth, buttonHeight, 0, height-(buttonHeight*2), (ClutterColor){ 255, 0, 91, 0xFF }, &animation, 0);
+    Button button7 = Button(stage, 6, buttonWidth, buttonHeight, buttonWidth, height-(buttonHeight*2), (ClutterColor){ 55, 8, 232, 0xFF }, &animation, 0);
+    Button button8 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*2, height-(buttonHeight*2), (ClutterColor){ 0, 228, 255, 0xFF }, &animation, 0);
+    Button button9 = Button(stage, 8, buttonWidth, buttonHeight, buttonWidth*3, height-(buttonHeight*2), (ClutterColor){ 30, 232, 12, 0xFF }, &animation, 0);
+    Button button10 = Button(stage, 9, buttonWidth, buttonHeight, buttonWidth*4, height-(buttonHeight*2), (ClutterColor){ 255, 215, 0, 0xFF }, &animation, 0);
 
     // Actually show the stage and run the app:
     clutter_actor_show(stage);

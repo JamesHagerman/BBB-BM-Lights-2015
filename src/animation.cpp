@@ -292,7 +292,7 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
     // Update the shader uniforms:
 
     // This is going to take forever to execute... maybe we should do it in a thread?
-    executeFFT();
+    //executeFFT();
 
     // Use the timeline delta to determine how much time to add to the clock:
     int delta = clutter_timeline_get_delta(timeline);
@@ -334,8 +334,8 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(data);
 
     // Load image data from a file:
-    // const char *img_path = "./wut.png";
-    // GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
+//    const char *img_path = "./wut.png";
+//    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size (img_path, WIDTH, HEIGHT, &error);
 
     // Build the color buffer we'll store the actual colors in:
     pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);

@@ -4,10 +4,11 @@
 #include <clutter/clutter.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "configurations.h"
 
-Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations) {
+Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations, int type) {
 
     uniqueId = id;
     animation = mainAnimations;
@@ -19,6 +20,34 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
     clutter_actor_set_pivot_point(buttonActor, 0.5, 0.5);
     clutter_actor_add_child(stage, buttonActor);
     clutter_actor_set_reactive (buttonActor, TRUE);
+
+    // Set the buttons overlay image:
+    GError *err = NULL;
+    const char *speedImage = "images/btn_speed_selector.png";
+    const char *colorSelectorImage = "images/btn_color_selector.png";
+    GdkPixbuf *pixbuf;
+    ClutterContent *image = clutter_image_new ();
+
+    if (type == 1) {
+        pixbuf = gdk_pixbuf_new_from_file (speedImage, NULL);
+    } else if (type == 2) {
+        pixbuf = gdk_pixbuf_new_from_file (colorSelectorImage, NULL);
+    }
+
+    if (type != 0) {
+        clutter_image_set_data (CLUTTER_IMAGE (image),
+                                gdk_pixbuf_get_pixels (pixbuf),
+                                gdk_pixbuf_get_has_alpha (pixbuf)
+                                ? COGL_PIXEL_FORMAT_RGBA_8888
+                                : COGL_PIXEL_FORMAT_RGB_888,
+                                gdk_pixbuf_get_width (pixbuf),
+                                gdk_pixbuf_get_height (pixbuf),
+                                gdk_pixbuf_get_rowstride (pixbuf),
+                                &err);
+        g_object_unref (pixbuf);
+        clutter_actor_set_content  (buttonActor, image);
+    }
+
 
     // Build a pointer to a struct that we can pass through the g_signal_connect function:
     ButtonData *data;
