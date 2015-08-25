@@ -189,7 +189,7 @@ gboolean Button::handleEvents (ClutterActor *actor,
             // printf("Some other event %i\n", eventType);
         }
     } else if (type == 1) { // handle speed control "button"
-        if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
+        if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION || eventType == CLUTTER_TOUCH_BEGIN) {
             gfloat stage_x, stage_y;
             gfloat actor_x = 0, actor_y = 0;
 
