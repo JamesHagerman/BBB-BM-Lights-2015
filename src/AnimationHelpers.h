@@ -150,6 +150,11 @@ int getRGB(int hsvColor) {
 }
 
 // Random functions:
+
+float getrandf() { // must init with: srand(time(NULL));
+    return (float)rand();
+}
+
 int getrand(int min, int max) {
     if (max == min) {
         max += 1;

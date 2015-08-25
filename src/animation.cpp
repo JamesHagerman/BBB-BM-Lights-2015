@@ -54,12 +54,20 @@ ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
 gfloat animationTime = 0.0; // A variable to hold the value of iGlobalTime
 
+// GLSL texture2D uniform storage:
+gfloat audioTexture[4096];
+int audioTextureSize = 4096;
+gfloat noiseTexture[1024];
+int noiseTextureSize = 1024;
+
 // These are the pre and postambles for the Shader Toy shader import system.
 // Nothing too complex can run very well on the BBB GPU but it's better than nothing!
 const gchar *fragShaderPreamble = "" //"#version 110\n\n"
         "uniform float iGlobalTime;\n"
         "uniform vec2 iResolution;\n"
         "uniform vec2 iMouse;\n";
+//        "uniform sampler2D iChannel0;\n"
+//        "uniform sampler2D iChannel1;\n";
 
 const gchar *fragShaderPostamble = ""
         "void main(void) {\n"
@@ -292,9 +300,15 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
 //    printf("Delta: %f\n", delta/1000.0);
     animationTime += delta/1000.0;
 
+    for (int i=0; i<noiseTextureSize; i++) {
+        noiseTexture[i] = getrandf();
+    }
+
     if (animation->currentShader>0) {
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, input_x*1.0);
+//        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel0", CLUTTER_TYPE_SHADER_FLOAT, 1, audioTexture);
+//        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel1", CLUTTER_TYPE_SHADER_FLOAT, 1024, noiseTexture);
     }
 
 }
@@ -413,6 +427,14 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
 //        printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
     }
 
+    // Populate a few texture arrays to be available to shaders:
+//    executeFFT();
+    audioTexture[0] = 0.25;
+    srand(time(NULL));
+    for (i=0; i<noiseTextureSize; i++) {
+        noiseTexture[i] = getrandf();
+    }
+
     // Make sure we don't have a current shader so we don't break the update loop:
     currentShader = -1;
 
@@ -507,6 +529,9 @@ void Animation::loadShader(const char *fragment_path) {
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, HEIGHT*osd_scale, WIDTH*osd_scale);
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x*osd_scale, input_y*osd_scale);
+//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel0", CLUTTER_TYPE_SHADER_FLOAT, 1, audioTexture);
+//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel1", CLUTTER_TYPE_SHADER_FLOAT, 1, noiseTexture);
+
 
     // Set the effect live on the on screen display actor...
     clutter_actor_add_effect(shaderOutput, shaderEffect);

@@ -65,7 +65,8 @@ void changeAnimation(int id, Animation *animation) {
             break;
 
         case 5  :
-            animation->switchAnimation(6);
+            // animation->switchAnimation(6);
+            animation->loadShader("./shaders/audio.frag");
             break;
         case 6  :
             animation->switchAnimation(7);
