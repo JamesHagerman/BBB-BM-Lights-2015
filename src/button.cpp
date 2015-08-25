@@ -7,6 +7,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "configurations.h"
+#include "AnimationHelpers.h"
 
 Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations, int type) {
 
@@ -48,6 +49,16 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
         clutter_actor_set_content  (buttonActor, image);
     }
 
+    if (type == 1) {
+        //pixbuf = gdk_pixbuf_new_from_file (speedImage, NULL);
+    } else if (type == 2) {
+        pixbuf = gdk_pixbuf_new_from_file (colorSelectorImage, NULL);
+    }
+
+    if (type != 0) {
+        clutter_actor_set_content  (buttonActor, image);
+    }
+
 
     // Build a pointer to a struct that we can pass through the g_signal_connect function:
     ButtonData *data;
@@ -59,10 +70,12 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
     data->downColor = downColor;
     data->uniqueId = id;
     data->animationObject = animation;
+    data->type = type;
 
     // Wire up the callbacks:
     g_signal_connect(buttonActor, "touch-event", G_CALLBACK (handleEvents), data);
     g_signal_connect(buttonActor, "button-press-event", G_CALLBACK (handleEvents), data);
+    g_signal_connect(buttonActor, "motion-event", G_CALLBACK(handleEvents), data);
     g_signal_connect(buttonActor, "button-release-event", G_CALLBACK (handleEvents), data);
 }
 
@@ -134,42 +147,62 @@ gboolean Button::handleEvents (ClutterActor *actor,
     ClutterColor downColor = data->downColor;
     int id = data->uniqueId;
     Animation *animation = data->animationObject;
+    int type = data->type;
     // clutter_actor_get_background_color(button1, &button1Color);
     // ClutterColor downColor = { 0, 0, 0, 128 };
 
-    // printf("Button event: ");
-    if (eventType == CLUTTER_TOUCH_BEGIN) {
-        // printf("Touch Begin...\n");
-        clutter_actor_set_background_color (button, &downColor);
-        clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
+    if (type == 0) {
+        // printf("Button event: ");
+        if (eventType == CLUTTER_TOUCH_BEGIN) {
+            // printf("Touch Begin...\n");
+            clutter_actor_set_background_color (button, &downColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
-        changeAnimation(id, animation);
+            changeAnimation(id, animation);
 
-        clutter_actor_set_background_color (button, &upColor);
-        clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+            clutter_actor_set_background_color (button, &upColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
 
-    } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL) {
-        // printf("Touch End...\n");
-        clutter_actor_set_background_color (button, &upColor);
-        clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+        } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL) {
+            // printf("Touch End...\n");
+            clutter_actor_set_background_color (button, &upColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
 
-    } else if (eventType == CLUTTER_BUTTON_PRESS) {
-        // printf("Mouse Down...\n");
-        clutter_actor_set_background_color (button, &downColor);
-        clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
+        } else if (eventType == CLUTTER_BUTTON_PRESS) {
+            // printf("Mouse Down...\n");
+            clutter_actor_set_background_color (button, &downColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
-    } else if (eventType == CLUTTER_BUTTON_RELEASE) {
-        // printf("Mouse Up...\n");
-        clutter_actor_set_background_color (button, &upColor);
-        clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
-        // On bluebutton presses...
-        changeAnimation(id, animation);
-
-    } else if (eventType == CLUTTER_LEAVE) {
-        // printf("Leave event......\n");
+        } else if (eventType == CLUTTER_BUTTON_RELEASE) {
+            // printf("Mouse Up...\n");
+            clutter_actor_set_background_color(button, &upColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+            // On bluebutton presses...
+            changeAnimation(id, animation);
+        } else if (eventType == CLUTTER_LEAVE) {
+            // printf("Leave event......\n");
+        } else {
+            // printf("Some other event %i\n", eventType);
+        }
     } else {
-        // printf("Some other event %i\n", eventType);
+        if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
+            gfloat osd_scale = 16;
+            gfloat stage_x, stage_y;
+            gfloat actor_x = 0, actor_y = 0;
+//            int temp_x, temp_y;
+
+            clutter_event_get_coords(event, &stage_x, &stage_y);
+            clutter_actor_transform_stage_point(actor, stage_x, stage_y, &actor_x, &actor_y);
+
+            temp_x = static_cast<int>(actor_x);
+            temp_y = static_cast<int>(actor_y);
+
+            temp_x = map(temp_x, 0, WIDTH*osd_scale, 0, WIDTH*osd_scale+(WIDTH*osd_scale-150));
+            temp_y = map(temp_y, 0, HEIGHT*osd_scale, 0-50, HEIGHT*osd_scale+(HEIGHT*osd_scale-750));
+            printf("Speed touch: %d\n", temp_x);
+        }
     }
+
 
 
     return CLUTTER_EVENT_PROPAGATE;

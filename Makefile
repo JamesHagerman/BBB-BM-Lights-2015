@@ -53,7 +53,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o src/alsa.o src/fft.o
+OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o src/alsa.o src/fft.o src/AnimationHelpers.o
 #src/sensatron-effect.o
 
 all: ${OUTPUT}
@@ -61,8 +61,8 @@ all: ${OUTPUT}
 ${OUTPUT}: $(OBJS)
 	$(CXX) $(OBJS) $(LDFLAGS) -o ${OUTPUT}
 
-%.o: %.c
-	$(CXX) -c $(CFLAGS) $(IFLAGS) -o $@ $<
+#%.o: %.c
+#	$(CXX) -c $(CFLAGS) $(IFLAGS) -o $@ $<
 
 %.o: %.cpp
 	$(CXX) -c $(CFLAGS) $(IFLAGS) -o $@ $<
