@@ -54,6 +54,7 @@ ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
 gfloat animationTime = 0.0; // A variable to hold the value of iGlobalTime
 
+
 // GLSL texture2D uniform storage:
 gfloat audioTexture[4096];
 int audioTextureSize = 4096;
@@ -298,7 +299,7 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
     int delta = clutter_timeline_get_delta(timeline);
 //    printf("Delta: %f\n", delta/1000.0);
 //    printf("Delta: %f\n", delta/1000.0);
-    animationTime += delta/1000.0;
+    animationTime += delta/1000.0 * (animation->currentSpeed/100.0);
 
     for (int i=0; i<noiseTextureSize; i++) {
         noiseTexture[i] = getrandf();
@@ -438,9 +439,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // Make sure we don't have a current shader so we don't break the update loop:
     currentShader = -1;
 
-
-
-
     // Once we have all that set up, we still need to START THE ACTUAL ANIMATION!!
     // To do that, we'll need to use the event chain/callback system we have been using so far.
     // Get ready to hand this display chunk in to the animation event:
@@ -474,7 +472,14 @@ Animation::~Animation() {
 Animation::Animation() {
 }
 
-// Old Animation stuff:
+
+void Animation::setSpeed(int speed) {
+    if (speed == 0) {
+        speed = 1;
+    }
+    currentSpeed = speed;
+}
+
 void Animation::switchAnimation(int animationNumber) {
     printf("Changing to animation: %i\n", animationNumber);
     currentAnimation = animationNumber;
@@ -526,6 +531,7 @@ void Animation::loadShader(const char *fragment_path) {
 
     // Bind uniforms to the shader so we can hand variables into them
     animationTime = 0.0;
+    currentSpeed = 100; // 100 is the default speed. kinda like percents??
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, HEIGHT*osd_scale, WIDTH*osd_scale);
     clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x*osd_scale, input_y*osd_scale);

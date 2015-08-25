@@ -37,6 +37,9 @@ public:
     // Old Animation stuff:
     int i;
     int currentAnimation;
+    int currentSpeed;
+
+    void setSpeed(int newSpeed);
 
     void switchAnimation(int animation_num);
     int getCurrentAnimation();

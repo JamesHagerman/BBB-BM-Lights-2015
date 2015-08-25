@@ -83,6 +83,10 @@ Button::~Button() {
 
 }
 
+void setSpeed(int speed, Animation *animation) {
+    animation->setSpeed(speed);
+}
+
 void changeAnimation(int id, Animation *animation) {
     switch (id) {
         case 0  :
@@ -184,22 +188,22 @@ gboolean Button::handleEvents (ClutterActor *actor,
         } else {
             // printf("Some other event %i\n", eventType);
         }
-    } else {
+    } else if (type == 1) { // handle speed control "button"
         if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION) {
-            gfloat osd_scale = 16;
             gfloat stage_x, stage_y;
             gfloat actor_x = 0, actor_y = 0;
-//            int temp_x, temp_y;
 
             clutter_event_get_coords(event, &stage_x, &stage_y);
             clutter_actor_transform_stage_point(actor, stage_x, stage_y, &actor_x, &actor_y);
 
             temp_x = static_cast<int>(actor_x);
-            temp_y = static_cast<int>(actor_y);
+//            temp_y = static_cast<int>(actor_y);
 
-            temp_x = map(temp_x, 0, WIDTH*osd_scale, 0, WIDTH*osd_scale+(WIDTH*osd_scale-150));
-            temp_y = map(temp_y, 0, HEIGHT*osd_scale, 0-50, HEIGHT*osd_scale+(HEIGHT*osd_scale-750));
-            printf("Speed touch: %d\n", temp_x);
+            int buttonWidth = clutter_actor_get_width(actor);
+            temp_x = map(temp_x, 0, buttonWidth, -500, 500);
+//            temp_y = map(temp_y, 0, HEIGHT*osd_scale, 0-50, HEIGHT*osd_scale+(HEIGHT*osd_scale-750));
+//            printf("Speed touch: %d\n", temp_x);
+            setSpeed(temp_x, animation);
         }
     }
 
