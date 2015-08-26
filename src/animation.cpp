@@ -3,9 +3,15 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <dirent.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
+
+#include <vector>
+#include <string>
+#include <algorithm>
 
 #include <clutter/clutter.h>
 #include <glib.h>
@@ -59,7 +65,7 @@ gfloat animationTime = 0.0; // A variable to hold the value of iGlobalTime
 gfloat audioTexture[4096];
 int audioTextureSize = 4096;
 gfloat noiseTexture[1024];
-int noiseTextureSize = 1024;
+unsigned int noiseTextureSize = 1024;
 
 // These are the pre and postambles for the Shader Toy shader import system.
 // Nothing too complex can run very well on the BBB GPU but it's better than nothing!
@@ -298,14 +304,18 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
     // Use the timeline delta to determine how much time to add to the clock:
     int delta = clutter_timeline_get_delta(timeline);
 //    printf("Delta: %f\n", delta/1000.0);
-//    printf("Delta: %f\n", delta/1000.0);
-    animationTime += delta/1000.0 * (animation->currentSpeed/100.0);
 
-    for (int i=0; i<noiseTextureSize; i++) {
+    if (animation->currentSpeed > 500 || animation->currentSpeed<-500) {
+        animation->currentSpeed = 100;
+    }
+    animationTime += delta/1000.0 * (animation->currentSpeed/100.0);
+//    printf("Current speed: %i, animation time: %f\n", animation->currentSpeed, animationTime);
+
+    for (unsigned int i=0; i<noiseTextureSize; i++) {
         noiseTexture[i] = getrandf();
     }
 
-    if (animation->currentShader>0) {
+    if (animation->shaderLoaded ) { // Only update the shader when a shader is actually SET
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, input_x*1.0);
 //        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel0", CLUTTER_TYPE_SHADER_FLOAT, 1, audioTexture);
@@ -402,6 +412,9 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     g_signal_connect(lightDisplay, "motion-event", G_CALLBACK(handleTouchEvents), touch_data);
     g_signal_connect(lightDisplay, "button-release-event", G_CALLBACK(handleTouchEvents), touch_data);
 
+    // Set sane default values for the initial touch location
+    input_y = 0;
+    input_x = 0;
 
     // End On screen display
     //=============================
@@ -437,7 +450,8 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     }
 
     // Make sure we don't have a current shader so we don't break the update loop:
-    currentShader = -1;
+    shaderLoaded = false;
+    currentSpeed = 100;
 
     // Once we have all that set up, we still need to START THE ACTUAL ANIMATION!!
     // To do that, we'll need to use the event chain/callback system we have been using so far.
@@ -458,8 +472,12 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // This actually starts the timeline animation!
     clutter_timeline_start(timeline);
 
+    // Generate the list of known shaders:
+    buildShaderList();
+
     // Load the first shader so we do not get a black screen:
-    loadShader("./shaders/basic.frag");
+    currentShader = 0; // Set the inital shader to load (usually, first in the directory)
+    updateCurrentShader();
 
 }
 
@@ -492,6 +510,106 @@ int Animation::getCurrentAnimation() {
 
 
 // New Shader Stuff:
+
+void Animation::buildShaderList() {
+    std::string directory, filepath;
+    DIR *dp;
+    struct dirent *dirp;
+    struct stat filestat;
+
+    // Create a directory object:
+    directory = "shaders"; // this should be everything in the shaders directory
+    dp = opendir( directory.c_str() );
+
+    // Check to see if there was an error opening the directory:
+    if (dp == NULL) {
+        printf("Error opening %s\n", directory.c_str() );
+        return;
+    }
+
+    // Step through and list out all of the files in that directory:
+
+
+//    shaderCount = 0;
+    while ((dirp = readdir( dp ))) {
+        filepath = directory + "/" + dirp->d_name;
+
+        // If the file is a directory (or is in some way invalid) we'll skip it
+        if (stat( filepath.c_str(), &filestat )) continue;
+        if (S_ISDIR( filestat.st_mode ))         continue;
+
+        // filepath should now be a valid file!
+//        printf("\t %s\n", filepath.c_str() );
+//        shaderList[shaderCount] = filepath;
+        shaderList.push_back(filepath);
+//        shaderCount++;
+    }
+    // Sort the list of shader files we found:
+    std::sort( shaderList.begin(), shaderList.end() );
+
+    printf("Here are the shaders we found: \n");
+    for (i=0; i<shaderList.size(); i++) {
+        printf("\t %s\n", shaderList[i].c_str());
+    }
+
+    printf("Found %i shaders!\n", shaderList.size());
+
+    closedir( dp );
+
+}
+
+void Animation::decrShaderIndex() {
+    currentShader--;
+    if (currentShader>5000) { // unsigned int overflows when you subtract below zero
+        currentShader = shaderList.size()-1;
+    }
+    updateCurrentShader();
+}
+
+void Animation::incrShaderIndex() {
+    currentShader++;
+    if (currentShader>shaderList.size()-1) {
+        currentShader = 0;
+    }
+    updateCurrentShader();
+}
+
+void Animation::updateCurrentShader() {
+    printf("Changing to shader %i\n", currentShader);
+    loadShader(shaderList[currentShader].c_str());
+}
+
+void Animation::loadShader(const char *fragment_path) {
+
+    std::string fragShaderStr = readFile(fragment_path);
+    const gchar *fragShaderSrc = fragShaderStr.c_str();
+
+    // Pop off the old shader:
+    unloadShader();
+
+    printf("Loading shader: '%s' \n", fragment_path);
+
+    // Setup the GLSL Fragment shaders that we'll use to generate colors
+    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
+    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
+    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShaderSrc);
+
+    // Bind uniforms to the shader so we can hand variables into them
+    animationTime = 0.0;
+    currentSpeed = 100;
+
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, HEIGHT*osd_scale, WIDTH*osd_scale);
+    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x*osd_scale, input_y*osd_scale);
+//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel0", CLUTTER_TYPE_SHADER_FLOAT, 1, audioTexture);
+//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel1", CLUTTER_TYPE_SHADER_FLOAT, 1, noiseTexture);
+
+
+    // Set the effect live on the on screen display actor...
+    clutter_actor_add_effect(shaderOutput, shaderEffect);
+    shaderLoaded = true;
+}
+
 std::string Animation::readFile(const char *filePath) {
     std::string content;
     std::ifstream fileStream(filePath, std::ios::in);
@@ -514,41 +632,11 @@ std::string Animation::readFile(const char *filePath) {
     return content;
 }
 
-void Animation::loadShader(const char *fragment_path) {
-
-    std::string fragShaderStr = readFile(fragment_path);
-    const gchar *fragShaderSrc = fragShaderStr.c_str();
-
-    // Pop off the old shader:
-    unloadShader();
-
-    printf("Loading shader: '%s' \n", fragment_path);
-
-    // Setup the GLSL Fragment shaders that we'll use to generate colors
-    // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
-    shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
-    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShaderSrc);
-
-    // Bind uniforms to the shader so we can hand variables into them
-    animationTime = 0.0;
-    currentSpeed = 100; // 100 is the default speed. kinda like percents??
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iResolution", G_TYPE_FLOAT, 2, HEIGHT*osd_scale, WIDTH*osd_scale);
-    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_x*osd_scale, input_y*osd_scale);
-//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel0", CLUTTER_TYPE_SHADER_FLOAT, 1, audioTexture);
-//    clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel1", CLUTTER_TYPE_SHADER_FLOAT, 1, noiseTexture);
-
-
-    // Set the effect live on the on screen display actor...
-    clutter_actor_add_effect(shaderOutput, shaderEffect);
-    currentShader = 1;
-}
-
 void Animation::unloadShader() {
     printf("Unloading previous shader...\n");
     // Pop off the old shader:
-    if (currentShader > 0) {
-        currentShader = -1;
+    if (shaderLoaded) {
+        shaderLoaded = false;
         clutter_actor_remove_effect(shaderOutput, shaderEffect);
     }
 }
@@ -557,11 +645,5 @@ void Animation::switchShader(int shaderNumber) {
     currentShader = shaderNumber;
     animationTime = 0.0;
 }
-
-int Animation::getCurrentShader() {
-    printf("Current shader is: %i\n", currentShader);
-    return currentShader;
-}
-
 
 

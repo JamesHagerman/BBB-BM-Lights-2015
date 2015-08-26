@@ -9,7 +9,7 @@
 #include "configurations.h"
 #include "AnimationHelpers.h"
 
-Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations, int type) {
+Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y, ClutterColor upColor, Animation *mainAnimations, int buttonType) {
 
     uniqueId = id;
     animation = mainAnimations;
@@ -29,13 +29,14 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
     GdkPixbuf *pixbuf;
     ClutterContent *image = clutter_image_new ();
 
-    if (type == 1) {
+    if (buttonType == 1) {
         pixbuf = gdk_pixbuf_new_from_file (speedImage, NULL);
-    } else if (type == 2) {
+    } else if (buttonType == 2) {
         pixbuf = gdk_pixbuf_new_from_file (colorSelectorImage, NULL);
     }
 
-    if (type != 0) {
+    // Put images only on the buttons that need one
+    if (buttonType != 0 && buttonType != 3 && buttonType != 4) {
         clutter_image_set_data (CLUTTER_IMAGE (image),
                                 gdk_pixbuf_get_pixels (pixbuf),
                                 gdk_pixbuf_get_has_alpha (pixbuf)
@@ -46,16 +47,6 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
                                 gdk_pixbuf_get_rowstride (pixbuf),
                                 &err);
         g_object_unref (pixbuf);
-        clutter_actor_set_content  (buttonActor, image);
-    }
-
-    if (type == 1) {
-        //pixbuf = gdk_pixbuf_new_from_file (speedImage, NULL);
-    } else if (type == 2) {
-        pixbuf = gdk_pixbuf_new_from_file (colorSelectorImage, NULL);
-    }
-
-    if (type != 0) {
         clutter_actor_set_content  (buttonActor, image);
     }
 
@@ -70,7 +61,7 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
     data->downColor = downColor;
     data->uniqueId = id;
     data->animationObject = animation;
-    data->type = type;
+    data->buttonType = buttonType;
 
     // Wire up the callbacks:
     g_signal_connect(buttonActor, "touch-event", G_CALLBACK (handleEvents), data);
@@ -83,15 +74,12 @@ Button::~Button() {
 
 }
 
-void setSpeed(int speed, Animation *animation) {
-    animation->setSpeed(speed);
-}
-
 void changeAnimation(int id, Animation *animation) {
     switch (id) {
         case 0  :
+            // This button is now
 //            animation->switchAnimation(1);
-            animation->loadShader("./shaders/basic.frag");
+//            animation->loadShader("./shaders/basic.frag");
             break;
         case 1  :
 //            animation->switchAnimation(2);
@@ -151,44 +139,29 @@ gboolean Button::handleEvents (ClutterActor *actor,
     ClutterColor downColor = data->downColor;
     int id = data->uniqueId;
     Animation *animation = data->animationObject;
-    int type = data->type;
+    int buttonType = data->buttonType;
     // clutter_actor_get_background_color(button1, &button1Color);
     // ClutterColor downColor = { 0, 0, 0, 128 };
 
-    if (type == 0) {
-        // printf("Button event: ");
-        if (eventType == CLUTTER_TOUCH_BEGIN) {
-            // printf("Touch Begin...\n");
+    if (buttonType == 0) {
+        if (eventType == CLUTTER_TOUCH_BEGIN || eventType == CLUTTER_BUTTON_PRESS) {
+//            printf("Touch Begin...\n");
             clutter_actor_set_background_color (button, &downColor);
             clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
             changeAnimation(id, animation);
 
-            clutter_actor_set_background_color (button, &upColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
-
-        } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL) {
+        } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
             // printf("Touch End...\n");
             clutter_actor_set_background_color (button, &upColor);
             clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
 
-        } else if (eventType == CLUTTER_BUTTON_PRESS) {
-            // printf("Mouse Down...\n");
-            clutter_actor_set_background_color (button, &downColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
-
-        } else if (eventType == CLUTTER_BUTTON_RELEASE) {
-            // printf("Mouse Up...\n");
-            clutter_actor_set_background_color(button, &upColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
-            // On bluebutton presses...
-            changeAnimation(id, animation);
         } else if (eventType == CLUTTER_LEAVE) {
             // printf("Leave event......\n");
         } else {
             // printf("Some other event %i\n", eventType);
         }
-    } else if (type == 1) { // handle speed control "button"
+    } else if (buttonType == 1) { // handle speed control "button"
         if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION || eventType == CLUTTER_TOUCH_BEGIN) {
             gfloat stage_x, stage_y;
             gfloat actor_x = 0, actor_y = 0;
@@ -203,7 +176,32 @@ gboolean Button::handleEvents (ClutterActor *actor,
             temp_x = map(temp_x, 0, buttonWidth, -500, 500);
 //            temp_y = map(temp_y, 0, HEIGHT*osd_scale, 0-50, HEIGHT*osd_scale+(HEIGHT*osd_scale-750));
 //            printf("Speed touch: %d\n", temp_x);
-            setSpeed(temp_x, animation);
+
+            animation->setSpeed(temp_x);
+        }
+    } else if (buttonType == 2) { // Color control
+
+    } else if (buttonType == 3) { // Handle Decrement
+        if (eventType == CLUTTER_TOUCH_BEGIN || eventType == CLUTTER_BUTTON_PRESS) {
+            clutter_actor_set_background_color (button, &downColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
+
+            animation->decrShaderIndex();
+        } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
+            clutter_actor_set_background_color(button, &upColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+
+        }
+    } else if (buttonType == 4) { // Handle Increment
+        if (eventType == CLUTTER_TOUCH_BEGIN || eventType == CLUTTER_BUTTON_PRESS) {
+            clutter_actor_set_background_color (button, &downColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
+
+            animation->incrShaderIndex();
+        } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
+            clutter_actor_set_background_color(button, &upColor);
+            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+
         }
     }
 

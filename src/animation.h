@@ -6,7 +6,9 @@
 #include <math.h>
 #include <time.h>
 
+#include <vector>
 #include <string>
+#include <algorithm>
 
 #include <clutter/clutter.h>
 #include <glib.h>
@@ -35,23 +37,32 @@ public:
     TCLControl *tcl;
 
     // Old Animation stuff:
-    int i;
+    unsigned int i;
     int currentAnimation;
-    int currentSpeed;
-
-    void setSpeed(int newSpeed);
-
     void switchAnimation(int animation_num);
     int getCurrentAnimation();
 
 
     // New Shader stuff:
-    int currentShader;
-    std::string readFile(const char *filePath);
+    int currentSpeed;
+    void setSpeed(int newSpeed);
+
+    std::vector <std::string> shaderList;
+//    int shaderCount;
+    unsigned int currentShader;
+    bool shaderLoaded;
+
+    void buildShaderList();
+    void incrShaderIndex();
+    void decrShaderIndex();
+
+    void updateCurrentShader();
     void loadShader(const char *fragment_path);
+    std::string readFile(const char *filePath);
     void unloadShader();
+
     void switchShader(int shaderNumber);
-    int getCurrentShader();
+
 };
 
 #endif

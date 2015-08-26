@@ -30,7 +30,7 @@ class Button {
             ClutterColor downColor;
             int uniqueId;
             Animation *animationObject;
-            int type;
+            int buttonType;
         } ButtonData;
     private:
 
