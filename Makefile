@@ -17,9 +17,9 @@ endif
 
 
 CXX = $(CROSSCOMPILER)g++
-CFLAGS = -Wall -g -DDEBUG
-LDFLAGS = `pkg-config clutter-1.0 cogl-1.0  --libs` -lm -lp9813 -lftd2xx  -lpthread -lfftw3 -lasound
-IFLAGS = `pkg-config clutter-1.0 cogl-1.0  --cflags`
+CFLAGS = -Wall -g -DDEBUG -DCOGL_ENABLE_EXPERIMENTAL_API -DCLUTTER_ENABLE_EXPERIMENTAL_API
+LDFLAGS = `pkg-config clutter-1.0 cogl-2.0-experimental --libs` -lm -lp9813 -lftd2xx  -lpthread -lfftw3 -lasound
+IFLAGS = `pkg-config clutter-1.0 cogl-2.0-experimental --cflags`
 
 ifeq ($(MACHINE)_$(ARCH),Darwin_x86_64)
 	LDFLAGS = `PKG_CONFIG_PATH=/opt/ImageMagick/lib/pkgconfig:/opt/X11/lib/pkgconfig /usr/local/bin/pkg-config gdk-pixbuf-2.0 clutter-1.0 --libs`
@@ -53,8 +53,7 @@ endif
 
 
 OUTPUT = clutter_window
-OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o src/alsa.o src/fft.o src/AnimationHelpers.o
-#src/sensatron-effect.o
+OBJS = src/main.o src/TCLControl.o src/events.o src/button.o src/animation.o src/alsa.o src/fft.o src/AnimationHelpers.o src/sensatron-effect.o
 
 all: ${OUTPUT}
 

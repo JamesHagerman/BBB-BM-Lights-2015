@@ -18,6 +18,10 @@
 #include <glib/gprintf.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
+#define COGL_ENABLE_EXPERIMENTAL_API 1
+#include <cogl/cogl.h>
+#include <cogl/cogl-gles2.h>
+
 #include "p9813.h"
 #include "TCLControl.h"
 #include "configurations.h"
@@ -552,7 +556,7 @@ void Animation::buildShaderList() {
         printf("\t %s\n", shaderList[i].c_str());
     }
 
-    printf("Found %i shaders!\n", shaderList.size());
+    printf("Found %u shaders!\n", (unsigned int)shaderList.size());
 
     closedir( dp );
 
@@ -608,6 +612,30 @@ void Animation::loadShader(const char *fragment_path) {
     // Build a GLSL Fragment shader to affect the color output (to the screen at least for now)
     shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShaderSrc);
+
+    // Now, let's try attaching a texture to this bitch!!
+
+    // Get the effects private object
+    ClutterShaderEffectPrivate *priv = CLUTTER_SHADER_EFFECT(shaderEffect)->priv;
+
+    // Get a texture. This should PROBABLY actually BE OUR TEXTURE:
+//    CoglTexture *texture = clutter_offscreen_effect_get_texture (CLUTTER_OFFSCREEN_EFFECT(shaderEffect));
+
+    const char *textureFile = "images/text_noise.png";
+    CoglTexture *texture = cogl_texture_new_from_file(textureFile,
+                                                      COGL_TEXTURE_NONE,
+                                                      COGL_PIXEL_FORMAT_ANY,
+                                                      &error);
+
+    // Try attaching the texture to the effect (on the 1th layer?):
+//    cogl_pipeline_set_layer_texture (priv->pipeline, 1, texture);
+
+
+
+//    CoglPipeline *target;
+//    target = COGL_PIPELINE (clutter_offscreen_effect_get_target ((ClutterOffscreenEffect)shaderEffect));
+
+
 
     // Bind uniforms to the shader so we can hand variables into them
     animationTime = 0.0;
