@@ -141,19 +141,26 @@ int main(int argc, char *argv[]) {
 
 
     // Build UI Buttons:
-    Button speedCtrl = Button(stage, 0, buttonWidth*2, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 113, 9, 170, 0xFF }, &animation, 1); // Speed control
-//    Button colorCtrl = Button(stage, 1, buttonWidth, buttonHeight, 0, height-(buttonHeight*2), (ClutterColor){ 255, 0, 91, 0xFF }, &animation, 2); // Color Control
-    Button decrCtrl = Button(stage, 3, buttonWidth/2, buttonHeight, 0, height-(buttonHeight*2), (ClutterColor){ 255, 255, 0, 0xFF }, &animation, 3);
-    Button incrCtrl = Button(stage, 2, buttonWidth/2, buttonHeight, buttonWidth*4+buttonWidth/2, height-(buttonHeight*2), (ClutterColor){ 255, 255, 0, 0xFF }, &animation, 4);
-    Button button2 = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 255, 0, 0xFF }, &animation, 0);
+    // Bottom row
+    Button speedCtrl = Button(stage, 0, buttonWidth*2, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 159,238,0, 0xFF }, &animation, 1); // Speed control
+    Button reloadCtrl = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255,255,0, 0xFF }, &animation, 5);
+    Button colorCtrl = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 255, 0, 91, 0xFF }, &animation, 2); // Color Control
+
+    // Top row:
+    Button decrCtrl = Button(stage, 2, buttonWidth/2, buttonHeight, 0, height-buttonHeight*2, (ClutterColor){ 205,0,116, 0xFF }, &animation, 3);
+    Button incrCtrl = Button(stage, 3, buttonWidth/2, buttonHeight, buttonWidth*4+buttonWidth/2, height-buttonHeight*2, (ClutterColor){ 113,9,170, 0xFF }, &animation, 4);
+
+    Button button7 = Button(stage, 4, buttonWidth, buttonHeight, buttonWidth-buttonWidth/2, height-buttonHeight*2, (ClutterColor){ 55, 8, 232, 0xFF }, &animation, 0);
+    Button button8 = Button(stage, 5, buttonWidth, buttonHeight, buttonWidth*2-buttonWidth/2, height-buttonHeight*2, (ClutterColor){ 0, 228, 255, 0xFF }, &animation, 0);
+    Button button9 = Button(stage, 6, buttonWidth, buttonHeight, buttonWidth*3-buttonWidth/2, height-buttonHeight*2, (ClutterColor){ 30, 232, 12, 0xFF }, &animation, 0);
+    Button button5 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*4-buttonWidth/2, height-buttonHeight*2, (ClutterColor){ 51, 13, 255, 0xFF }, &animation, 0);
+
 
 
 //    Button button3 = Button(stage, 2, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 122, 0, 0xFF }, &animation, 0);
 //    Button button4 = Button(stage, 3, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 232, 12, 111, 0xFF }, &animation, 0);
-//    Button button5 = Button(stage, 4, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 51, 13, 255, 0xFF }, &animation, 0);
-//    Button button7 = Button(stage, 6, buttonWidth, buttonHeight, buttonWidth, height-(buttonHeight*2), (ClutterColor){ 55, 8, 232, 0xFF }, &animation, 0);
-//    Button button8 = Button(stage, 7, buttonWidth, buttonHeight, buttonWidth*2, height-(buttonHeight*2), (ClutterColor){ 0, 228, 255, 0xFF }, &animation, 0);
-//    Button button9 = Button(stage, 8, buttonWidth, buttonHeight, buttonWidth*3, height-(buttonHeight*2), (ClutterColor){ 30, 232, 12, 0xFF }, &animation, 0);
+
+
 
 
     // Actually show the stage and run the app:

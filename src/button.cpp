@@ -36,7 +36,7 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
     }
 
     // Put images only on the buttons that need one
-    if (buttonType != 0 && buttonType != 3 && buttonType != 4) {
+    if (buttonType != 0 && buttonType != 3 && buttonType != 4 && buttonType != 5) {
         clutter_image_set_data (CLUTTER_IMAGE (image),
                                 gdk_pixbuf_get_pixels (pixbuf),
                                 gdk_pixbuf_get_has_alpha (pixbuf)
@@ -146,21 +146,28 @@ gboolean Button::handleEvents (ClutterActor *actor,
     if (buttonType == 0) {
         if (eventType == CLUTTER_TOUCH_BEGIN || eventType == CLUTTER_BUTTON_PRESS) {
 //            printf("Touch Begin...\n");
-            clutter_actor_set_background_color (button, &downColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
+//            clutter_actor_set_background_color (button, &downColor);
+//            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
-            changeAnimation(id, animation);
+//            changeAnimation(id, animation);
+            if (id == 4) {
+                animation->currentOffset = 0;
+            } else if (id == 5) {
+                animation->currentOffset = 1;
+            } else if (id == 6) {
+                animation->currentOffset = 2;
+            } else if (id == 7) {
+                animation->currentOffset = 3;
+            }
+            animation->updateCurrentShader(animation->currentOffset);
 
-        } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
-            // printf("Touch End...\n");
-            clutter_actor_set_background_color (button, &upColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
-
-        } else if (eventType == CLUTTER_LEAVE) {
-            // printf("Leave event......\n");
-        } else {
-            // printf("Some other event %i\n", eventType);
         }
+//        else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
+//            // printf("Touch End...\n");
+//            clutter_actor_set_background_color (button, &upColor);
+//            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+//
+//        }
     } else if (buttonType == 1) { // handle speed control "button"
         if (eventType == CLUTTER_TOUCH_UPDATE || eventType == CLUTTER_MOTION || eventType == CLUTTER_TOUCH_BEGIN) {
             gfloat stage_x, stage_y;
@@ -183,26 +190,40 @@ gboolean Button::handleEvents (ClutterActor *actor,
 
     } else if (buttonType == 3) { // Handle Decrement
         if (eventType == CLUTTER_TOUCH_BEGIN || eventType == CLUTTER_BUTTON_PRESS) {
-            clutter_actor_set_background_color (button, &downColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
+//            clutter_actor_set_background_color (button, &downColor);
+//            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
             animation->decrShaderIndex();
-        } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
-            clutter_actor_set_background_color(button, &upColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
-
         }
+//        else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
+//            clutter_actor_set_background_color(button, &upColor);
+//            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+//
+//        }
     } else if (buttonType == 4) { // Handle Increment
         if (eventType == CLUTTER_TOUCH_BEGIN || eventType == CLUTTER_BUTTON_PRESS) {
-            clutter_actor_set_background_color (button, &downColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
+//            clutter_actor_set_background_color (button, &downColor);
+//            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
 
             animation->incrShaderIndex();
-        } else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
-            clutter_actor_set_background_color(button, &upColor);
-            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
-
         }
+//        else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
+//            clutter_actor_set_background_color(button, &upColor);
+//            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+//
+//        }
+    } else if (buttonType == 5) { // Handle Reload
+        if (eventType == CLUTTER_TOUCH_BEGIN || eventType == CLUTTER_BUTTON_PRESS) {
+//            clutter_actor_set_background_color (button, &downColor);
+//            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, -15.0);
+
+            animation->updateCurrentShader(animation->currentOffset);
+        }
+//        else if (eventType == CLUTTER_TOUCH_END || eventType == CLUTTER_TOUCH_CANCEL || eventType == CLUTTER_BUTTON_RELEASE) {
+//            clutter_actor_set_background_color(button, &upColor);
+//            clutter_actor_set_rotation_angle(button, CLUTTER_Z_AXIS, 0.0);
+//
+//        }
     }
 
 

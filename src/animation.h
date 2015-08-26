@@ -50,6 +50,7 @@ public:
     std::vector <std::string> shaderList;
 //    int shaderCount;
     unsigned int currentShader;
+    unsigned int currentOffset;
     bool shaderLoaded;
 
     void buildShaderList();
@@ -57,6 +58,7 @@ public:
     void decrShaderIndex();
 
     void updateCurrentShader();
+    void updateCurrentShader(int offset);
     void loadShader(const char *fragment_path);
     std::string readFile(const char *filePath);
     void unloadShader();

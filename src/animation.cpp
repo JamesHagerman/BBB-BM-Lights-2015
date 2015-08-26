@@ -559,24 +559,39 @@ void Animation::buildShaderList() {
 }
 
 void Animation::decrShaderIndex() {
-    currentShader--;
+    currentShader-=4;
     if (currentShader>5000) { // unsigned int overflows when you subtract below zero
-        currentShader = shaderList.size()-1;
+//        currentShader = shaderList.size()-1; // wrap
+        currentShader = 0; // no wrap
     }
-    updateCurrentShader();
+    currentOffset = 0;
+    updateCurrentShader(currentOffset);
 }
 
 void Animation::incrShaderIndex() {
-    currentShader++;
+    currentShader+=4;
     if (currentShader>shaderList.size()-1) {
-        currentShader = 0;
+//        currentShader = 0;// wrap
+        currentShader = shaderList.size()-1;// nowrap
     }
-    updateCurrentShader();
+    currentOffset = 0;
+    updateCurrentShader(currentOffset);
 }
 
 void Animation::updateCurrentShader() {
     printf("Changing to shader %i\n", currentShader);
     loadShader(shaderList[currentShader].c_str());
+}
+
+void Animation::updateCurrentShader(int offset) {
+    unsigned int toLoad;
+    if (currentShader+offset>shaderList.size()-1) {
+        toLoad = shaderList.size()-1;
+    } else {
+        toLoad = currentShader+offset;
+    }
+    printf("Changing to offset shader %i\n", toLoad);
+    loadShader(shaderList[toLoad].c_str());
 }
 
 void Animation::loadShader(const char *fragment_path) {
