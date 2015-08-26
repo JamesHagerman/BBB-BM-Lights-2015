@@ -23,19 +23,19 @@
  */
 
 /**
- * SECTION:clutter-blur-effect
- * @short_description: A blur effect
+ * SECTION:sensatron-effect
+ * @short_description: A sensatron effect
  * @see_also: #ClutterEffect, #ClutterOffscreenEffect
  *
- * #ClutterBlurEffect is a sub-class of #ClutterEffect that allows blurring a
+ * #ClutterSensatronEffect is a sub-class of #ClutterEffect that allows sensatronring a
  * actor and its contents.
  *
- * #ClutterBlurEffect is available since Clutter 1.4
+ * #ClutterSensatronEffect is available since Clutter 1.4
  */
 
-#define CLUTTER_BLUR_EFFECT_CLASS(klass)        (G_TYPE_CHECK_CLASS_CAST ((klass), CLUTTER_TYPE_BLUR_EFFECT, ClutterBlurEffectClass))
-#define CLUTTER_IS_BLUR_EFFECT_CLASS(klass)     (G_TYPE_CHECK_CLASS_TYPE ((klass), CLUTTER_TYPE_BLUR_EFFECT))
-#define CLUTTER_BLUR_EFFECT_GET_CLASS(obj)      (G_TYPE_INSTANCE_GET_CLASS ((obj), CLUTTER_TYPE_BLUR_EFFECT, ClutterBlurEffectClass))
+#define CLUTTER_SENSATRON_EFFECT_CLASS(klass)        (G_TYPE_CHECK_CLASS_CAST ((klass), CLUTTER_TYPE_SENSATRON_EFFECT, ClutterSensatronEffectClass))
+#define CLUTTER_IS_SENSATRON_EFFECT_CLASS(klass)     (G_TYPE_CHECK_CLASS_TYPE ((klass), CLUTTER_TYPE_SENSATRON_EFFECT))
+#define CLUTTER_SENSATRON_EFFECT_GET_CLASS(obj)      (G_TYPE_INSTANCE_GET_CLASS ((obj), CLUTTER_TYPE_SENSATRON_EFFECT, ClutterSensatronEffectClass))
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -53,17 +53,17 @@
 
 #include <clutter/clutter.h>
 
-#define BLUR_PADDING    2
+#define SENSATRON_PADDING    2
 
 /* FIXME - lame shader; we should really have a decoupled
- * horizontal/vertical two pass shader for the gaussian blur
+ * horizontal/vertical two pass shader for the gaussian sensatron
  */
-static const gchar *box_blur_glsl_declarations =
+static const gchar *box_sensatron_glsl_declarations =
         "uniform vec2 pixel_step;\n";
 #define SAMPLE(offx, offy) \
   "cogl_texel += texture2D (cogl_sampler, cogl_tex_coord.st + pixel_step * " \
   "vec2 (" G_STRINGIFY (offx) ", " G_STRINGIFY (offy) "));\n"
-static const gchar *box_blur_glsl_shader =
+static const gchar *box_sensatron_glsl_shader =
         "  cogl_texel = texture2D (cogl_sampler, cogl_tex_coord.st);\n"
 SAMPLE (-1.0, -1.0)
 SAMPLE ( 0.0, -1.0)
@@ -76,7 +76,7 @@ SAMPLE (+1.0, +1.0)
 "  cogl_texel /= 9.0;\n";
 #undef SAMPLE
 
-struct _ClutterBlurEffect
+struct _ClutterSensatronEffect
 {
     ClutterOffscreenEffect parent_instance;
 
@@ -91,19 +91,21 @@ struct _ClutterBlurEffect
     CoglPipeline *pipeline;
 };
 
-struct _ClutterBlurEffectClass
+struct _ClutterSensatronEffectClass
 {
     ClutterOffscreenEffectClass parent_class;
+
+    ClutterShaderType shader_type;
 
     CoglPipeline *base_pipeline;
 };
 
-G_DEFINE_TYPE (ClutterBlurEffect, clutter_blur_effect, CLUTTER_TYPE_OFFSCREEN_EFFECT);
+G_DEFINE_TYPE (ClutterSensatronEffect, clutter_sensatron_effect, CLUTTER_TYPE_OFFSCREEN_EFFECT);
 
 static gboolean
-clutter_blur_effect_pre_paint (ClutterEffect *effect)
+clutter_sensatron_effect_pre_paint (ClutterEffect *effect)
 {
-    ClutterBlurEffect *self = CLUTTER_BLUR_EFFECT (effect);
+    ClutterSensatronEffect *self = CLUTTER_SENSATRON_EFFECT (effect);
     ClutterEffectClass *parent_class;
 
     if (!clutter_actor_meta_get_enabled (CLUTTER_ACTOR_META (effect)))
@@ -125,11 +127,10 @@ clutter_blur_effect_pre_paint (ClutterEffect *effect)
         return FALSE;
     }
 
-    parent_class = CLUTTER_EFFECT_CLASS (clutter_blur_effect_parent_class);
+    parent_class = CLUTTER_EFFECT_CLASS (clutter_sensatron_effect_parent_class);
     if (parent_class->pre_paint (effect))
     {
-        ClutterOffscreenEffect *offscreen_effect =
-                CLUTTER_OFFSCREEN_EFFECT (effect);
+        ClutterOffscreenEffect *offscreen_effect = CLUTTER_OFFSCREEN_EFFECT (effect);
         CoglHandle texture;
 
         texture = clutter_offscreen_effect_get_texture (offscreen_effect);
@@ -150,7 +151,7 @@ clutter_blur_effect_pre_paint (ClutterEffect *effect)
                                              pixel_step);
         }
 
-        cogl_pipeline_set_layer_texture (self->pipeline, 0, texture);
+        cogl_pipeline_set_layer_texture (self->pipeline, 0, (CoglTexture*)texture);
 
         return TRUE;
     }
@@ -159,9 +160,9 @@ clutter_blur_effect_pre_paint (ClutterEffect *effect)
 }
 
 static void
-clutter_blur_effect_paint_target (ClutterOffscreenEffect *effect)
+clutter_sensatron_effect_paint_target (ClutterOffscreenEffect *effect)
 {
-    ClutterBlurEffect *self = CLUTTER_BLUR_EFFECT (effect);
+    ClutterSensatronEffect *self = CLUTTER_SENSATRON_EFFECT (effect);
     guint8 paint_opacity;
 
     paint_opacity = clutter_actor_get_paint_opacity (self->actor);
@@ -179,7 +180,7 @@ clutter_blur_effect_paint_target (ClutterOffscreenEffect *effect)
 }
 
 static gboolean
-clutter_blur_effect_get_paint_volume (ClutterEffect      *effect,
+clutter_sensatron_effect_get_paint_volume (ClutterEffect      *effect,
                                       ClutterPaintVolume *volume)
 {
     gfloat cur_width, cur_height;
@@ -189,10 +190,10 @@ clutter_blur_effect_get_paint_volume (ClutterEffect      *effect,
     cur_width = clutter_paint_volume_get_width (volume);
     cur_height = clutter_paint_volume_get_height (volume);
 
-    origin.x -= BLUR_PADDING;
-    origin.y -= BLUR_PADDING;
-    cur_width += 2 * BLUR_PADDING;
-    cur_height += 2 * BLUR_PADDING;
+    origin.x -= SENSATRON_PADDING;
+    origin.y -= SENSATRON_PADDING;
+    cur_width += 2 * SENSATRON_PADDING;
+    cur_height += 2 * SENSATRON_PADDING;
     clutter_paint_volume_set_origin (volume, &origin);
     clutter_paint_volume_set_width (volume, cur_width);
     clutter_paint_volume_set_height (volume, cur_height);
@@ -201,9 +202,9 @@ clutter_blur_effect_get_paint_volume (ClutterEffect      *effect,
 }
 
 static void
-clutter_blur_effect_dispose (GObject *gobject)
+clutter_sensatron_effect_dispose (GObject *gobject)
 {
-    ClutterBlurEffect *self = CLUTTER_BLUR_EFFECT (gobject);
+    ClutterSensatronEffect *self = CLUTTER_SENSATRON_EFFECT (gobject);
 
     if (self->pipeline != NULL)
     {
@@ -211,29 +212,30 @@ clutter_blur_effect_dispose (GObject *gobject)
         self->pipeline = NULL;
     }
 
-    G_OBJECT_CLASS (clutter_blur_effect_parent_class)->dispose (gobject);
+    G_OBJECT_CLASS (clutter_sensatron_effect_parent_class)->dispose (gobject);
 }
 
 static void
-clutter_blur_effect_class_init (ClutterBlurEffectClass *klass)
+clutter_sensatron_effect_class_init (ClutterSensatronEffectClass *klass)
 {
     ClutterEffectClass *effect_class = CLUTTER_EFFECT_CLASS (klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
     ClutterOffscreenEffectClass *offscreen_class;
 
-    gobject_class->dispose = clutter_blur_effect_dispose;
+    // This is fine to leave as is for now? ClutterShaderEffects just call their parent dispose...
+    gobject_class->dispose = clutter_sensatron_effect_dispose;
 
-    effect_class->pre_paint = clutter_blur_effect_pre_paint;
-    effect_class->get_paint_volume = clutter_blur_effect_get_paint_volume;
+    effect_class->pre_paint = clutter_sensatron_effect_pre_paint;
+    effect_class->get_paint_volume = clutter_sensatron_effect_get_paint_volume;
 
     offscreen_class = CLUTTER_OFFSCREEN_EFFECT_CLASS (klass);
-    offscreen_class->paint_target = clutter_blur_effect_paint_target;
+    offscreen_class->paint_target = clutter_sensatron_effect_paint_target;
 }
 
 static void
-clutter_blur_effect_init (ClutterBlurEffect *self)
+clutter_sensatron_effect_init (ClutterSensatronEffect *self)
 {
-    ClutterBlurEffectClass *klass = CLUTTER_BLUR_EFFECT_GET_CLASS (self);
+    ClutterSensatronEffectClass *klass = CLUTTER_SENSATRON_EFFECT_GET_CLASS (self);
 
     if (G_UNLIKELY (klass->base_pipeline == NULL))
     {
@@ -244,9 +246,9 @@ clutter_blur_effect_init (ClutterBlurEffect *self)
         klass->base_pipeline = cogl_pipeline_new (ctx);
 
         snippet = cogl_snippet_new (COGL_SNIPPET_HOOK_TEXTURE_LOOKUP,
-                                    box_blur_glsl_declarations,
+                                    box_sensatron_glsl_declarations,
                                     NULL);
-        cogl_snippet_set_replace (snippet, box_blur_glsl_shader);
+        cogl_snippet_set_replace (snippet, box_sensatron_glsl_shader);
         cogl_pipeline_add_layer_snippet (klass->base_pipeline, 0, snippet);
         cogl_object_unref (snippet);
 
@@ -262,17 +264,95 @@ clutter_blur_effect_init (ClutterBlurEffect *self)
 }
 
 /**
- * clutter_blur_effect_new:
+ * clutter_sensatron_effect_new:
  *
- * Creates a new #ClutterBlurEffect to be used with
+ * Creates a new #ClutterSensatronEffect to be used with
  * clutter_actor_add_effect()
  *
- * Return value: the newly created #ClutterBlurEffect or %NULL
+ * Return value: the newly created #ClutterSensatronEffect or %NULL
  *
  * Since: 1.4
  */
 ClutterEffect *
-clutter_blur_effect_new (void)
+clutter_sensatron_effect_new (void)
 {
-    return g_object_new (CLUTTER_TYPE_BLUR_EFFECT, NULL);
+    return (ClutterEffect*)g_object_new (CLUTTER_TYPE_SENSATRON_EFFECT,
+                                         NULL);
 }
+
+
+
+
+
+
+//==============
+// Trying to get this shit working on my own:
+
+
+//static CoglHandle
+//clutter_shader_effect_create_shader (ClutterShaderEffect *self)
+//{
+//    ClutterShaderEffectPrivate *priv = self->priv;
+//
+//    switch (priv->shader_type)
+//    {
+//        case CLUTTER_FRAGMENT_SHADER:
+//            return cogl_create_shader (COGL_SHADER_TYPE_FRAGMENT);
+//            break;
+//
+//        case CLUTTER_VERTEX_SHADER:
+//            return cogl_create_shader (COGL_SHADER_TYPE_VERTEX);
+//            break;
+//
+//        default:
+//            g_assert_not_reached ();
+//    }
+//}
+//
+//
+//gboolean
+//clutter_shader_effect_set_shader_source (ClutterShaderEffect *effect,
+//                                         const gchar         *source)
+//{
+//    ClutterShaderEffectPrivate *priv;
+//
+//    g_return_val_if_fail (CLUTTER_IS_SHADER_EFFECT (effect), FALSE);
+//    g_return_val_if_fail (source != NULL && *source != '\0', FALSE);
+//
+//    priv = effect->priv;
+//
+//    if (priv->shader != COGL_INVALID_HANDLE)
+//        return TRUE;
+//
+//    priv->shader = clutter_shader_effect_create_shader (effect);
+//
+//    cogl_shader_source (priv->shader, source);
+//
+//    CLUTTER_NOTE (SHADER, "Compiling shader effect");
+//
+//    cogl_shader_compile (priv->shader);
+//
+//    if (cogl_shader_is_compiled (priv->shader))
+//    {
+//        priv->program = cogl_create_program ();
+//
+//        cogl_program_attach_shader (priv->program, priv->shader);
+//
+//        cogl_program_link (priv->program);
+//    }
+//    else
+//    {
+//        gchar *log_buf = cogl_shader_get_info_log (priv->shader);
+//
+//        g_warning (G_STRLOC ": Unable to compile the GLSL shader: %s", log_buf);
+//        g_free (log_buf);
+//    }
+//
+//    return TRUE;
+//}
+
+
+
+
+
+

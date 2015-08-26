@@ -22,39 +22,34 @@
  *   Emmanuele Bassi <ebassi@linux.intel.com>
  */
 
-#ifndef __CLUTTER_BLUR_EFFECT_H__
-#define __CLUTTER_BLUR_EFFECT_H__
+#ifndef __CLUTTER_SENSATRON_EFFECT_H__
+#define __CLUTTER_SENSATRON_EFFECT_H__
 
-//#if !defined(__CLUTTER_H_INSIDE__) && !defined(CLUTTER_COMPILATION)
-//#error "Only <clutter/clutter.h> can be included directly."
-//#endif
-
-//#include <clutter/clutter-effect.h>
 #include <clutter/clutter.h>
 
 G_BEGIN_DECLS
 
-#define CLUTTER_TYPE_BLUR_EFFECT        (clutter_blur_effect_get_type ())
-#define CLUTTER_BLUR_EFFECT(obj)        (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLUTTER_TYPE_BLUR_EFFECT, ClutterBlurEffect))
-#define CLUTTER_IS_BLUR_EFFECT(obj)     (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLUTTER_TYPE_BLUR_EFFECT))
+#define CLUTTER_TYPE_SENSATRON_EFFECT        (clutter_sensatron_effect_get_type ())
+#define CLUTTER_SENSATRON_EFFECT(obj)        (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLUTTER_TYPE_SENSATRON_EFFECT, ClutterSensatronEffect))
+#define CLUTTER_IS_SENSATRON_EFFECT(obj)     (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLUTTER_TYPE_SENSATRON_EFFECT))
 
 /**
- * ClutterBlurEffect:
+ * ClutterSensatronEffect:
  *
- * #ClutterBlurEffect is an opaque structure
+ * #ClutterSensatronEffect is an opaque structure
  * whose members cannot be accessed directly
  *
  * Since: 1.4
  */
-typedef struct _ClutterBlurEffect       ClutterBlurEffect;
-typedef struct _ClutterBlurEffectClass  ClutterBlurEffectClass;
+typedef struct _ClutterSensatronEffect       ClutterSensatronEffect;
+typedef struct _ClutterSensatronEffectClass  ClutterSensatronEffectClass;
 
-CLUTTER_AVAILABLE_IN_1_4
-        GType clutter_blur_effect_get_type (void) G_GNUC_CONST;
+GType clutter_sensatron_effect_get_type (void) G_GNUC_CONST;
+ClutterEffect *clutter_sensatron_effect_new (void);
 
-CLUTTER_AVAILABLE_IN_1_4
-        ClutterEffect *clutter_blur_effect_new (void);
+gboolean        clutter_shader_effect_set_shader_source (ClutterShaderEffect *effect,
+                                                         const gchar         *source);
 
 G_END_DECLS
 
-#endif /* __CLUTTER_BLUR_EFFECT_H__ */
+#endif /* __CLUTTER_SENSATRON_EFFECT_H__ */

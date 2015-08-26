@@ -27,6 +27,8 @@
 #include "configurations.h"
 #include "AnimationHelpers.h"
 
+#include "sensatron-effect.h"
+
 #include "alsa.h"
 #include "fft.h"
 
@@ -613,10 +615,16 @@ void Animation::loadShader(const char *fragment_path) {
     shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShaderSrc);
 
+//    ClutterEffect *effect = clutter_blur_effect_new (); // works
+
+    ClutterEffect *effect = clutter_sensatron_effect_new ();
+    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(effect), fragShaderSrc);
+
+
     // Now, let's try attaching a texture to this bitch!!
 
     // Get the effects private object
-    ClutterShaderEffectPrivate *priv = CLUTTER_SHADER_EFFECT(shaderEffect)->priv;
+//    ClutterShaderEffectPrivate *priv = CLUTTER_SHADER_EFFECT(shaderEffect)->priv;
 
     // Get a texture. This should PROBABLY actually BE OUR TEXTURE:
 //    CoglTexture *texture = clutter_offscreen_effect_get_texture (CLUTTER_OFFSCREEN_EFFECT(shaderEffect));
@@ -650,6 +658,7 @@ void Animation::loadShader(const char *fragment_path) {
 
     // Set the effect live on the on screen display actor...
     clutter_actor_add_effect(shaderOutput, shaderEffect);
+    clutter_actor_add_effect(shaderOutput, effect);
     shaderLoaded = true;
 }
 
