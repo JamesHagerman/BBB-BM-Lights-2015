@@ -51,6 +51,10 @@ int h_angle = 0;
 
 
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
+//    printf("x: %li, in_min: %li, in_max: %li, out_min: %li, out_max: %li\n", x, in_min, in_max, out_min, out_max);
+    if (in_max == in_min) {
+        in_max = 1;
+    }
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 

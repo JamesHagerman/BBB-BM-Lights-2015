@@ -17,6 +17,7 @@
 #include "AnimationHelpers.h"
 
 #define PI 3.141592653589793 // ya know... for our waveform generator :facepalm:
+#define M_PI PI
 
 pthread_t p_thread;
 int thr_id;
@@ -30,11 +31,10 @@ fftw_plan plan;
 
 double realPart, imgaPart;
 
-int *bands;
-int freqBands = 50; // how many frequency bands we want in the end
+int freqBands = 32; // how many frequency bands we want in the end
 int binsPerBand = 1024/freqBands; // how many bins get bucketed
-double max;
-double min;
+long max;
+long min;
 
 int peakIndex = 0;
 
@@ -153,6 +153,8 @@ double steeper(int i, int nn) {
 void executeFFT(unsigned char *audioPixels, int audioRowstride) {
 
     int i;
+    max = 0; // reset for next pass
+    min = 0;
 
     int actualBufferSize =  audio.actualBufferSize; // number of actual 16bit audio values we're reading in
     samples_count = actualBufferSize;//2 * (actualBufferSize / 2 + 1);
@@ -164,24 +166,26 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
 
         // Read in values from the sound card:
         for (i = 0; i < samples_count; i++) {
-//            printf("%i, ", audio.audio_out[i]);
-//            samples[i] = audio.audio_out[i];
-            samples[i] = audio.audio_out[i] * hanning(i, samples_count); // Apply a window function
+//#ifdef BEAGLEBONEBLACK
+            samples[i] = audio.audio_out[i];// * hanning(i, samples_count); // Apply a window function
+//#else
 
             // generate a sine wave:
-//            printf("%f, ", sin((i*10)*PI/180));
 //            samples[i] = (sin((i*10)*PI/180)*7000) * hanning(i, samples_count);;
+//#endif
 
-            if (samples[i] > max) {
-                max = samples[i];
+            if (round(samples[i]) > max) {
+                max = round(samples[i]);
             }
-            if (samples[i] < min) {
-                min = samples[i];
+            if (round(samples[i]) < min) {
+                min = round(samples[i]);
             }
+
+//            printf("%d, ", samples[i]);
         }
-        printf("Audio read END, max = %.1f, min = %.1f\n", max, min);
-        min = 0;
-        max = 0;
+        printf("Audio read END, max = %li, min = %li\n", max, min);
+        min = 0.0;
+        max = 0.0;
 
         // compute fftw
         fftw_execute(plan);
@@ -203,26 +207,46 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
 //                    samples[i] = 1;
 //                }
             }
+
+            // The REAL values of the FFT are not important right now:
+            if (round(samples[i]) > max) {
+                max = round(samples[i]);
+                peakIndex = i;
+            }
+            if (round(samples[i]) < min) {
+                min = round(samples[i]);
+            }
         }
+
+        // output:
+//        for (i = 0; i < samples_count / 2; i++) {
+//        for (i = 0; i < freqBands; i++) {
+//            printf("%.1f, ", samples[i]);
+//        }
+        printf("FFT compute end, max = %li, min = %li, max peak at index: %i\n", max, min, peakIndex);
 
         // This will average the bands together
         int currentBand = 0;
-
+        peakIndex = 0;
+        max = 0;
+        min = 0;
         while (currentBand < freqBands) {
             for (int bin = 0; bin < binsPerBand; bin++) {
                 samples[currentBand] += samples[(currentBand*binsPerBand)+bin];
             }
             samples[currentBand] = samples[currentBand]/binsPerBand;
-            if (samples[currentBand] > max) {
-                max = samples[currentBand];
+            if (round(samples[currentBand]) > max) {
+                max = round(samples[currentBand]);
                 peakIndex = currentBand;
             }
-            if (samples[currentBand] < min) {
-                min = samples[currentBand];
+            if (round(samples[currentBand]) < min) {
+                min = round(samples[currentBand]);
             }
 
             currentBand++;
         }
+
+        printf("FFT averaging end, max = %li, min = %li, max peak at index: %i\n\n", max, min, peakIndex);
 
         int sampleCount = 0;
         long converted = 0;
@@ -237,11 +261,11 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
                 // This AUTOMATICALLY updates the color of the pixbuf!
                 // It's just hitting the memory directly!
 
-                converted = (long)(samples[y]);//*255;
+                converted = round(samples[y]);
                 converted = map(converted, 0, max, 0, 255);
 
-                pixel[0] = converted;   // low bits...
-                pixel[1] = 0; //((int)(samples[y]-min)) & 0xff00; // high bits.
+                pixel[0] = converted;// & 0xff;   // low bits...
+                pixel[1] = 0;//converted & 0xff00; //((int)(samples[y]-min)) & 0xff00; // high bits.
                 pixel[2] = 0;//getrand(0, 255);     // some random value could be used for noise...
                 sampleCount++;
                 if (sampleCount > 600) {
@@ -273,24 +297,12 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
             }
         }
 
-        // output:
-//        for (i = 0; i < samples_count / 2; i++) {
-//        for (i = 0; i < freqBands; i++) {
-//            printf("%.1f, ", samples[i]);
-//        }
-        printf("FFT compute end, max = %.1f, min = %.1f, max peak at index: %i\n", max, min, peakIndex);
 
-
-        max = 0; // reset for next pass
-        min = 0;
 
         peakIndex = 0; // reset peak detector
 
         audio.lockAudio = false;
     }
-//    else {
-//        printf("waiting for audio...\n");
-//    }
 }
 
 void populateTexture() {
