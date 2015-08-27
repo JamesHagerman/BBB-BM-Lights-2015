@@ -166,7 +166,7 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
         // Read in values from the sound card:
         for (i = 0; i < samples_count; i++) {
 //#ifdef BEAGLEBONEBLACK
-            printf("%d, ", audio.audio_out[i]);
+//            printf("%d, ", audio.audio_out[i]);
             samples[i] = audio.audio_out[i] * hanning(i, samples_count); // Apply a window function
 //#else
 
@@ -182,7 +182,7 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
             }
 
         }
-        printf("Audio read END, max = %li, min = %li\n", max, min);
+//        printf("Audio read END, max = %li, min = %li\n", max, min);
         min = 0.0;
         max = 0.0;
 
@@ -222,10 +222,10 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
 //        for (i = 0; i < freqBands; i++) {
 //            printf("%.1f, ", samples[i]);
 //        }
-        printf("FFT compute end, max = %li, min = %li, max peak at index: %i\n", max, min, peakIndex);
+//        printf("FFT compute end, max = %li, min = %li, max peak at index: %i\n", max, min, peakIndex);
 
         // This will average the bands together
-        int currentBand = 0;
+        int currentBand = 1; // start at 1 to drop the DC offset...
         peakIndex = 0;
         max = 0;
         min = 0;
@@ -245,7 +245,7 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
             currentBand++;
         }
 
-        printf("FFT averaging end, max = %li, min = %li, max peak at index: %i\n\n", max, min, peakIndex);
+//        printf("FFT averaging end, max = %li, min = %li, max peak at index: %i\n\n", max, min, peakIndex);
 
         int sampleCount = 0;
         long converted = 0;
