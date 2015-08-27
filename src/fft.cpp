@@ -166,7 +166,8 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
         // Read in values from the sound card:
         for (i = 0; i < samples_count; i++) {
 //#ifdef BEAGLEBONEBLACK
-            samples[i] = audio.audio_out[i];// * hanning(i, samples_count); // Apply a window function
+            printf("%d, ", audio.audio_out[i]);
+            samples[i] = audio.audio_out[i] * hanning(i, samples_count); // Apply a window function
 //#else
 
             // generate a sine wave:
@@ -180,7 +181,6 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
                 min = round(samples[i]);
             }
 
-//            printf("%d, ", samples[i]);
         }
         printf("Audio read END, max = %li, min = %li\n", max, min);
         min = 0.0;
