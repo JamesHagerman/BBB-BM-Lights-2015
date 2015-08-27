@@ -30,7 +30,7 @@ fftw_plan plan;
 
 double realPart, imgaPart;
 
-int freqBands = 32; // how many frequency bands we want in the end
+int freqBands = 50; // how many frequency bands we want in the end
 int binsPerBand = 1024/freqBands; // how many bins get bucketed
 long max;
 long min;
