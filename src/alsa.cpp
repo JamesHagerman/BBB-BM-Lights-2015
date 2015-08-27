@@ -65,6 +65,7 @@ void* input_alsa(void* data)
 
     // Get some debug values and store them in the audio data struct so we can use them elsewhere:
     snd_pcm_hw_params_get_format(params, (snd_pcm_format_t * )&val);// Audio format enum (snd_pcm_format_t):
+    printf("Actual format we were able to chose on the hardware: %u\n", val);
     if (val < 6) {
         audio->format = 16;
     } else if (val > 5 && val < 10) {
