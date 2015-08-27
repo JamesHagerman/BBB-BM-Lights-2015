@@ -118,7 +118,7 @@ void* input_alsa(void* data)
             // Grab the 16 bit audio data!!
             offset = 0;
             for (i = 0; i < err; i += 2) {
-                audio->audio_out[offset] = buffer[i]|buffer[i+1]<<8; // 16bit little endian. Never can remember....
+                audio->audio_out[offset] = buffer[i];//|buffer[i+1]<<8; // 16bit little endian. Never can remember....
                 offset+= 1;
             }
 
