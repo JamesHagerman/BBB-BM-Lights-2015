@@ -17,7 +17,6 @@
 #include "AnimationHelpers.h"
 
 #define PI 3.141592653589793 // ya know... for our waveform generator :facepalm:
-#define M_PI PI
 
 pthread_t p_thread;
 int thr_id;
