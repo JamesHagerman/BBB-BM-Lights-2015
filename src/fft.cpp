@@ -36,6 +36,8 @@ int binsPerBand = 1024/freqBands; // how many bins get bucketed
 double max;
 double min;
 
+int peakIndex = 0;
+
 
 //=======================
 // ALSA setup. This REALLY needs to be moved into a class...
@@ -213,6 +215,7 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
             samples[currentBand] = samples[currentBand]/binsPerBand;
             if (samples[currentBand] > max) {
                 max = samples[currentBand];
+                peakIndex = currentBand;
             }
             if (samples[currentBand] < min) {
                 min = samples[currentBand];
@@ -235,7 +238,7 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
                 // It's just hitting the memory directly!
 
                 converted = (long)(samples[y]);//*255;
-                //converted = map(converted, (long)(min), (long)(max), 0, 255);
+                converted = map(converted, 0, max, 0, 255);
 
                 pixel[0] = converted;   // low bits...
                 pixel[1] = 0; //((int)(samples[y]-min)) & 0xff00; // high bits.
@@ -272,14 +275,16 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
 
         // output:
 //        for (i = 0; i < samples_count / 2; i++) {
-        for (i = 0; i < freqBands; i++) {
-            printf("%.1f, ", samples[i]);
-        }
-        printf("FFT compute end, max = %.1f, min = %.1f\n\n", max, min);
+//        for (i = 0; i < freqBands; i++) {
+//            printf("%.1f, ", samples[i]);
+//        }
+        printf("FFT compute end, max = %.1f, min = %.1f, max peak at index: %i\n", max, min, peakIndex);
 
 
         max = 0; // reset for next pass
         min = 0;
+
+        peakIndex = 0; // reset peak detector
 
         audio.lockAudio = false;
     }
