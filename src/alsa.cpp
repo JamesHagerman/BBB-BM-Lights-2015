@@ -93,7 +93,7 @@ void* input_alsa(void* data)
 
     int offset;
     while (1) {
-        if (!audio->lockAudio && !audioDying) {
+        if (!audioDying) { //!audio->lockAudio &&
             // err is how many "frames" we read.
             // frames = "sample" in mono land...
             // frames = left+right pair in stereo land

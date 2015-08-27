@@ -409,7 +409,7 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     // Init the audioImage that will store the FFT output for attaching to the actor
     error = NULL;
     audioImage = clutter_image_new ();
-    audiopixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
+    audiopixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT );
     audioPixels = gdk_pixbuf_get_pixels(audiopixbuf); // Grab it's pixels...
     audioRowstride = gdk_pixbuf_get_rowstride(audiopixbuf); // figure out the width of the buffer...
 
@@ -424,9 +424,9 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
             // And directly update that memory location with a new color
             // This AUTOMATICALLY updates the color of the pixbuf!
             // It's just hitting the memory directly!
-            pixel[0] = 255;//((int)(samples[x]*max)) & 0xff;   // low bits...
-            pixel[1] = 255;//((int)(samples[x]*max)) & 0xff00; // high bits.
-            pixel[2] = 255;     // some random value could be used for noise...
+            pixel[0] = y;//((int)(samples[x]*max)) & 0xff;   // low bits...
+            pixel[1] = x;//((int)(samples[x]*max)) & 0xff00; // high bits.
+            pixel[2] = 0;     // some random value could be used for noise...
         }
     }
 
