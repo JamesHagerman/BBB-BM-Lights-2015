@@ -2,7 +2,7 @@
 #define FFT
 
 void initAlsa();
-void executeFFT();
+void executeFFT(unsigned char *audioPixels, int audioRowstride);
 void teardownFFT();
 
 #endif //FFT

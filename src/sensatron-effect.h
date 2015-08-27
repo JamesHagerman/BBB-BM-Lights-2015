@@ -47,8 +47,7 @@ typedef struct _ClutterSensatronEffectClass  ClutterSensatronEffectClass;
 GType clutter_sensatron_effect_get_type (void) G_GNUC_CONST;
 ClutterEffect *clutter_sensatron_effect_new (void);
 
-gboolean        clutter_shader_effect_set_shader_source (ClutterShaderEffect *effect,
-                                                         const gchar         *source);
+gboolean        clutter_sensatron_effect_set_shader_source ( ClutterSensatronEffect *effect, const gchar *source);
 
 G_END_DECLS
 

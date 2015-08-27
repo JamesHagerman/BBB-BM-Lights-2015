@@ -27,7 +27,7 @@
 #include "configurations.h"
 #include "AnimationHelpers.h"
 
-#include "sensatron-effect.h"
+//#include "sensatron-effect.h"
 
 #include "alsa.h"
 #include "fft.h"
@@ -66,19 +66,26 @@ ClutterEffect *shaderEffect;
 guint8 *shaderBuffer;
 gfloat animationTime = 0.0; // A variable to hold the value of iGlobalTime
 
-
 // GLSL texture2D uniform storage:
-gfloat audioTexture[4096];
-int audioTextureSize = 4096;
-gfloat noiseTexture[1024];
-unsigned int noiseTextureSize = 1024;
+ClutterContent *audioImage;
+GdkPixbuf *audiopixbuf;
+unsigned char *audioPixels;
+int audioRowstride; // Size of the color buffer
+
+// Bad audio textures:
+//gfloat audioTexture[4096];
+//int audioTextureSize = 4096;
+//gfloat noiseTexture[1024];
+//unsigned int noiseTextureSize = 1024;
 
 // These are the pre and postambles for the Shader Toy shader import system.
 // Nothing too complex can run very well on the BBB GPU but it's better than nothing!
 const gchar *fragShaderPreamble = "" //"#version 110\n\n"
         "uniform float iGlobalTime;\n"
         "uniform vec2 iResolution;\n"
-        "uniform vec2 iMouse;\n";
+        "uniform vec2 iMouse;\n"
+        "uniform sampler2D cogl_sampler;\n";
+//        "varying vec4 cogl_tex_coord;\n";
 //        "uniform sampler2D iChannel0;\n"
 //        "uniform sampler2D iChannel1;\n";
 
@@ -86,6 +93,7 @@ const gchar *fragShaderPostamble = ""
         "void main(void) {\n"
         "   vec4 outFragColor = vec4(1.0,0.5,0,0);\n"
         "   vec2 inFragCoord = vec2(cogl_tex_coord_in[0].x*iResolution.x, cogl_tex_coord_in[0].y*iResolution.y);\n"
+//        "   vec4 texture2D (cogl_sampler, cogl_tex_coord.st;\n"
         "   mainImage(outFragColor, inFragCoord);\n"
         "   cogl_color_out = outFragColor;\n"
         "}";
@@ -205,9 +213,6 @@ void shaderAnimation(TCLControl *tcl) {
 }
 
 
-
-
-
 // handleNewFrame is the function that is called ever 120 milliseconds via the timeline!
 // This is where ALL animation updates will happen.
 void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpointer user_data) {
@@ -221,73 +226,12 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
     // Error object for GDK/Clutter calls that need them
     error = NULL;
 
-    // ToDo: Rework old animation system:
-//    // We hand in the ADDRESS of the current Animation:
-//    int *animation_number = data->animationNumber;
-//    // Run which ever animation we're on:
-//    switch (*animation_number) {
-//        case 1  :
-//            animation1(tcl);
-//            break;
-//        case 2  :
-//            animation2(tcl);
-//            break;
-//        case 3  :
-//            animation3(tcl);
-//            break;
-//        case 4  :
-//            animation4(tcl);
-//            break;
-//        case 5  :
-//            animation5(tcl);
-//            break;
-//        case 6  :
-//            animation6(tcl);
-//            break;
-//        case 7  :
-//            animation7(tcl);
-//            break;
-//        case 8  :
-//            animation8(tcl);
-//            break;
-//        case 9  :
-//            animation9(tcl);
-//            break;
-//        case 10  :
-//            animation10(tcl);
-//            break;
-//
-//        default :
-//            shaderAnimation(tcl);
-//    }
-
     shaderAnimation(tcl);
 
     // Send the updated color buffer to the strands
     if (tcl->enabled) {
         tcl->Update();
     }
-
-    // Old animation loop stuff:
-//    // Update the on screen color display using the colors FROM THE PRE-LIGHT ARRAY ITSELF!
-//    // Draw onscreen color map display:
-//    int index = 0;
-//    for (int x = 0; x < WIDTH; x++) {
-//        for (int y = 0; y < HEIGHT; y++) {
-//
-//            // This next line grabs the address of single pixel out of the pixels char buffer
-//            // and points a char at it so that it's value can be set:
-//            unsigned char *pixel = &pixels[y * rowstride + x * 3];
-//
-//            TCpixel thisPixel = tcl->pixelBuf[index];
-//            // #define TCrgb(R,G,B) (((R) << 16) | ((G) << 8) | (B))
-//            pixel[0] = ((thisPixel) >> 16) & 0xff;//red
-//            pixel[1] = ((thisPixel) >> 8) & 0xff;//green
-//            pixel[2] = (thisPixel) & 0xff;//blue
-//            index += 1;
-//        }
-//    }
-
 
     // Dump the colors from the color buffer into the ClutterContent delegate!
     if (pixbuf != NULL) {
@@ -304,28 +248,38 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
 
     // Update the shader uniforms:
 
-    // This is going to take forever to execute... maybe we should do it in a thread?
-    //executeFFT();
+    // Populate the audioImage with the FFT data:
+    executeFFT(audioPixels, audioRowstride);
+
+    // Actually load our FFT Texture colors onto the actor
+    clutter_image_set_data (CLUTTER_IMAGE (audioImage),
+                            gdk_pixbuf_get_pixels (audiopixbuf),
+                            gdk_pixbuf_get_has_alpha (audiopixbuf)
+                            ? COGL_PIXEL_FORMAT_RGBA_8888
+                            : COGL_PIXEL_FORMAT_RGB_888,
+                            gdk_pixbuf_get_width (audiopixbuf),
+                            gdk_pixbuf_get_height (audiopixbuf),
+                            gdk_pixbuf_get_rowstride (audiopixbuf),
+                            &error);
+    clutter_actor_set_content (shaderOutput, audioImage);
+
 
     // Use the timeline delta to determine how much time to add to the clock:
     int delta = clutter_timeline_get_delta(timeline);
-//    printf("Delta: %f\n", delta/1000.0);
-
     if (animation->currentSpeed > 500 || animation->currentSpeed<-500) {
         animation->currentSpeed = 100;
     }
     animationTime += delta/1000.0 * (animation->currentSpeed/100.0);
 //    printf("Current speed: %i, animation time: %f\n", animation->currentSpeed, animationTime);
 
-    for (unsigned int i=0; i<noiseTextureSize; i++) {
-        noiseTexture[i] = getrandf();
-    }
+    // Update the random noiseImage:
+//    for (unsigned int i=0; i<noiseTextureSize; i++) {
+//        noiseTexture[i] = getrandf();
+//    }
 
     if (animation->shaderLoaded ) { // Only update the shader when a shader is actually SET
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iGlobalTime", G_TYPE_FLOAT, 1, animationTime);
         clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iMouse", G_TYPE_FLOAT, 2, input_y*1.0, input_x*1.0);
-//        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel0", CLUTTER_TYPE_SHADER_FLOAT, 1, audioTexture);
-//        clutter_shader_effect_set_uniform(CLUTTER_SHADER_EFFECT(shaderEffect), "iChannel1", CLUTTER_TYPE_SHADER_FLOAT, 1024, noiseTexture);
     }
 
 }
@@ -375,7 +329,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
             pixel[2] = 0x0;//blue
         }
     }
-
     // Dump the colors from the color buffer into the ClutterContent delegate!
     if (pixbuf != NULL) {
         clutter_image_set_data(CLUTTER_IMAGE(colors),
@@ -397,7 +350,6 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
     clutter_actor_set_size(lightDisplay, WIDTH, HEIGHT);
     clutter_actor_set_scale(lightDisplay, osd_scale, osd_scale+7);
     clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Z_AXIS, -90);
-//    clutter_actor_set_rotation_angle(lightDisplay, CLUTTER_Y_AXIS, 180);
 
     // Actually add that actor to the stage!
     clutter_actor_add_child(stage, lightDisplay);
@@ -447,17 +399,61 @@ Animation::Animation(ClutterActor *stage, TCLControl *tcl) {
 //        printf(" The Rowstride on the shaderBuffer is %i\n", rowstride);
     }
 
-    // Populate a few texture arrays to be available to shaders:
-//    executeFFT();
-    audioTexture[0] = 0.25;
-    srand(time(NULL));
-    for (i=0; i<noiseTextureSize; i++) {
-        noiseTexture[i] = getrandf();
+
+    // init shader TEXTURES!
+    // Populate the noiseImage:
+//    const char *textureFile = "images/text_noise.png";
+//    audiopixbuf = gdk_pixbuf_new_from_file (textureFile, NULL);
+
+
+    // Init the audioImage that will store the FFT output for attaching to the actor
+    error = NULL;
+    audioImage = clutter_image_new ();
+    audiopixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, WIDTH, HEIGHT);
+    audioPixels = gdk_pixbuf_get_pixels(audiopixbuf); // Grab it's pixels...
+    audioRowstride = gdk_pixbuf_get_rowstride(audiopixbuf); // figure out the width of the buffer...
+
+    // Populate the audioImage with no data so we have a fresh start:
+    for (int x = 0; x < WIDTH; x++) {
+        for (int y = 0; y < HEIGHT; y++) {
+
+            // Find the ADDRESS of each pixel in the pixbuf via the raw char buffer we built...
+            // and bind it to a pointer to a char...
+            unsigned char *pixel = &audioPixels[y * audioRowstride + x * 3];
+
+            // And directly update that memory location with a new color
+            // This AUTOMATICALLY updates the color of the pixbuf!
+            // It's just hitting the memory directly!
+            pixel[0] = 255;//((int)(samples[x]*max)) & 0xff;   // low bits...
+            pixel[1] = 255;//((int)(samples[x]*max)) & 0xff00; // high bits.
+            pixel[2] = 255;     // some random value could be used for noise...
+        }
     }
+
+    // Actually load our color onto the actor
+    clutter_image_set_data (CLUTTER_IMAGE (audioImage),
+                            gdk_pixbuf_get_pixels (audiopixbuf),
+                            COGL_PIXEL_FORMAT_RGB_888,
+                            gdk_pixbuf_get_width (audiopixbuf),
+                            gdk_pixbuf_get_height (audiopixbuf),
+                            gdk_pixbuf_get_rowstride (audiopixbuf),
+                            &error);
+//    g_object_unref (audiopixbuf); // we want to reuse this... don't dereference that memory yet...
+    clutter_actor_set_content (shaderOutput, audioImage);
+    //clutter_actor_set_content_gravity (shaderOutput, CLUTTER_CONTENT_GRAVITY_TOP_RIGHT);
+
+//    audioTexture[0] = 0.25;
+//    srand(time(NULL));
+//    for (i=0; i<noiseTextureSize; i++) {
+//        noiseTexture[i] = getrandf();
+//    }
 
     // Make sure we don't have a current shader so we don't break the update loop:
     shaderLoaded = false;
     currentSpeed = 100;
+
+
+
 
     // Once we have all that set up, we still need to START THE ACTUAL ANIMATION!!
     // To do that, we'll need to use the event chain/callback system we have been using so far.
@@ -615,34 +611,20 @@ void Animation::loadShader(const char *fragment_path) {
     shaderEffect = clutter_shader_effect_new(CLUTTER_FRAGMENT_SHADER);
     clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(shaderEffect), fragShaderSrc);
 
+    // Start fuckups:
 //    ClutterEffect *effect = clutter_blur_effect_new (); // works
-
-    ClutterEffect *effect = clutter_sensatron_effect_new ();
-    clutter_shader_effect_set_shader_source(CLUTTER_SHADER_EFFECT(effect), fragShaderSrc);
-
-
+//    ClutterEffect *effect = clutter_sensatron_effect_new ();
+//    clutter_sensatron_effect_set_shader_source(CLUTTER_SENSATRON_EFFECT(effect), fragShaderSrc);
     // Now, let's try attaching a texture to this bitch!!
-
-    // Get the effects private object
-//    ClutterShaderEffectPrivate *priv = CLUTTER_SHADER_EFFECT(shaderEffect)->priv;
-
-    // Get a texture. This should PROBABLY actually BE OUR TEXTURE:
-//    CoglTexture *texture = clutter_offscreen_effect_get_texture (CLUTTER_OFFSCREEN_EFFECT(shaderEffect));
-
-    const char *textureFile = "images/text_noise.png";
-    CoglTexture *texture = cogl_texture_new_from_file(textureFile,
-                                                      COGL_TEXTURE_NONE,
-                                                      COGL_PIXEL_FORMAT_ANY,
-                                                      &error);
-
+//    CoglTexture *texture = cogl_texture_new_from_file(textureFile,
+//                                                      COGL_TEXTURE_NONE,
+//                                                      COGL_PIXEL_FORMAT_ANY,
+//                                                      &error);
     // Try attaching the texture to the effect (on the 1th layer?):
 //    cogl_pipeline_set_layer_texture (priv->pipeline, 1, texture);
-
-
-
 //    CoglPipeline *target;
 //    target = COGL_PIPELINE (clutter_offscreen_effect_get_target ((ClutterOffscreenEffect)shaderEffect));
-
+    // End fuckups
 
 
     // Bind uniforms to the shader so we can hand variables into them
@@ -658,7 +640,8 @@ void Animation::loadShader(const char *fragment_path) {
 
     // Set the effect live on the on screen display actor...
     clutter_actor_add_effect(shaderOutput, shaderEffect);
-    clutter_actor_add_effect(shaderOutput, effect);
+
+//    clutter_actor_add_effect(shaderOutput, effect);
     shaderLoaded = true;
 }
 

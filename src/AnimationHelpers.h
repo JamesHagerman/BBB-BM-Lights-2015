@@ -1,10 +1,20 @@
 #ifndef RUNMAKE_ANIMATIONHELPERS_H
 #define RUNMAKE_ANIMATIONHELPERS_H
 
+#include <glib.h>
+#include <glib/gprintf.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "p9813.h"
+#include "TCLControl.h"
+
 // Define the sizes of the image that shows the lights:
 #define TCrgb(R, G, B) (((R) << 16) | ((G) << 8) | (B))
 #define HEIGHT 50
 #define WIDTH 12
+
+#define FFT_HEIGHT 2
+#define FFT_WIDTH 1024
 
 extern gfloat osd_scale;
 

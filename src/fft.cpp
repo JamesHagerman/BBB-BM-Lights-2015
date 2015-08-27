@@ -14,6 +14,8 @@
 #include "fft.h"
 #include "alsa.h"
 
+#include "AnimationHelpers.h"
+
 #define PI 3.141592653589793 // ya know... for our waveform generator :facepalm:
 
 pthread_t p_thread;
@@ -94,7 +96,7 @@ void initAlsa() {
 
 }
 
-void executeFFT() {
+void executeFFT(unsigned char *audioPixels, int audioRowstride) {
 
     int i;
 
@@ -127,6 +129,30 @@ void executeFFT() {
             samples[i] = 10 * log(creal(output[i])*creal(output[i]) + cimag(output[i])*cimag(output[i]))/log(10); // power_in_db
             if (samples[i] > max) {
                 max = samples[i];
+            }
+        }
+
+//        printf("width: %i height %i\n", WIDTH, HEIGHT);
+
+        int sampleCount = 0;
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+
+                // Find the ADDRESS of each pixel in the pixbuf via the raw char buffer we built...
+                // and bind it to a pointer to a char...
+                unsigned char *pixel = &audioPixels[y * audioRowstride + x * 3];
+
+                // And directly update that memory location with a new color
+                // This AUTOMATICALLY updates the color of the pixbuf!
+                // It's just hitting the memory directly!
+                pixel[0] = ((int)(samples[x]*max)) & 0xff;   // low bits...
+                pixel[1] = ((int)(samples[x]*max)) & 0xff00; // high bits.
+                pixel[2] = getrand(0, 255);     // some random value could be used for noise...
+                sampleCount++;
+                if (sampleCount > 600) {
+                    x= WIDTH+1;
+                    y= HEIGHT+1;
+                }
             }
         }
 

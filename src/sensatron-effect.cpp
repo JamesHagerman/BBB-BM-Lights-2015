@@ -89,6 +89,11 @@ struct _ClutterSensatronEffect
     gint tex_height;
 
     CoglPipeline *pipeline;
+
+    CoglHandle program;
+    CoglHandle shader;
+
+    GHashTable *uniforms;
 };
 
 struct _ClutterSensatronEffectClass
@@ -151,7 +156,7 @@ clutter_sensatron_effect_pre_paint (ClutterEffect *effect)
                                              pixel_step);
         }
 
-        cogl_pipeline_set_layer_texture (self->pipeline, 0, (CoglTexture*)texture);
+//        cogl_pipeline_set_layer_texture (self->pipeline, 0, (CoglTexture*)texture);
 
         return TRUE;
     }
@@ -289,9 +294,9 @@ clutter_sensatron_effect_new (void)
 // Trying to get this shit working on my own:
 
 
-//static CoglHandle
-//clutter_shader_effect_create_shader (ClutterShaderEffect *self)
-//{
+static CoglHandle
+clutter_sensatron_effect_create_shader (ClutterSensatronEffect *self)
+{
 //    ClutterShaderEffectPrivate *priv = self->priv;
 //
 //    switch (priv->shader_type)
@@ -307,49 +312,55 @@ clutter_sensatron_effect_new (void)
 //        default:
 //            g_assert_not_reached ();
 //    }
-//}
-//
-//
-//gboolean
-//clutter_shader_effect_set_shader_source (ClutterShaderEffect *effect,
-//                                         const gchar         *source)
-//{
+    return cogl_create_shader (COGL_SHADER_TYPE_FRAGMENT);
+}
+
+
+gboolean
+clutter_sensatron_effect_set_shader_source ( ClutterSensatronEffect *effect,
+                                             const gchar         *source)
+{
 //    ClutterShaderEffectPrivate *priv;
-//
-//    g_return_val_if_fail (CLUTTER_IS_SHADER_EFFECT (effect), FALSE);
-//    g_return_val_if_fail (source != NULL && *source != '\0', FALSE);
-//
+    //ClutterSensatronEffect *self = CLUTTER_SENSATRON_EFFECT (effect);
+
+    if (!CLUTTER_IS_SENSATRON_EFFECT (effect)) {
+        printf("OOPS!");
+    }
+
+    g_return_val_if_fail (CLUTTER_IS_SENSATRON_EFFECT (effect), FALSE);
+    g_return_val_if_fail (source != NULL && *source != '\0', FALSE);
+
 //    priv = effect->priv;
 //
 //    if (priv->shader != COGL_INVALID_HANDLE)
 //        return TRUE;
-//
-//    priv->shader = clutter_shader_effect_create_shader (effect);
-//
-//    cogl_shader_source (priv->shader, source);
-//
-//    CLUTTER_NOTE (SHADER, "Compiling shader effect");
-//
-//    cogl_shader_compile (priv->shader);
-//
-//    if (cogl_shader_is_compiled (priv->shader))
-//    {
-//        priv->program = cogl_create_program ();
-//
-//        cogl_program_attach_shader (priv->program, priv->shader);
-//
-//        cogl_program_link (priv->program);
-//    }
-//    else
-//    {
-//        gchar *log_buf = cogl_shader_get_info_log (priv->shader);
-//
-//        g_warning (G_STRLOC ": Unable to compile the GLSL shader: %s", log_buf);
-//        g_free (log_buf);
-//    }
-//
-//    return TRUE;
-//}
+
+    effect->shader = clutter_sensatron_effect_create_shader (effect);
+
+    cogl_shader_source (effect->shader, source);
+
+//    printf (SHADER, "Compiling shader effect");
+
+    cogl_shader_compile (effect->shader);
+
+    if (cogl_shader_is_compiled (effect->shader))
+    {
+        effect->program = cogl_create_program ();
+
+        cogl_program_attach_shader (effect->program, effect->shader);
+
+        cogl_program_link (effect->program);
+    }
+    else
+    {
+        gchar *log_buf = cogl_shader_get_info_log (effect->shader);
+
+        g_warning (G_STRLOC ": Unable to compile the GLSL shader: %s", log_buf);
+        g_free (log_buf);
+    }
+
+    return TRUE;
+}
 
 
 
