@@ -142,9 +142,9 @@ int main(int argc, char *argv[]) {
 
     // Build UI Buttons:
     // Bottom row
-    Button speedCtrl = Button(stage, 0, buttonWidth*2, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 159,238,0, 0xFF }, &animation, 1); // Speed control
-    Button reloadCtrl = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth*2, height-buttonHeight, (ClutterColor){ 255, 0, 91, 0xFF }, &animation, 5);
-    Button colorCtrl = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 255,255,0, 0xFF }, &animation, 2); // Color Control
+    Button speedCtrl = Button(stage, 0, buttonWidth*4, buttonHeight, 0, height-buttonHeight, (ClutterColor){ 159,238,0, 0xFF }, &animation, 1); // Speed control
+    Button reloadCtrl = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth*4, height-buttonHeight, (ClutterColor){ 255, 0, 91, 0xFF }, &animation, 5);
+//    Button colorCtrl = Button(stage, 1, buttonWidth, buttonHeight, buttonWidth*3, height-buttonHeight, (ClutterColor){ 255,255,0, 0xFF }, &animation, 2); // Color Control
 
     // Top row:
     Button decrCtrl = Button(stage, 2, buttonWidth/2, buttonHeight, 0, height-buttonHeight*2, (ClutterColor){ 113,9,170, 0xFF }, &animation, 3);
