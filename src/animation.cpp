@@ -520,7 +520,7 @@ void Animation::buildShaderList() {
     struct stat filestat;
 
     // Create a directory object:
-    directory = "shaders"; // this should be everything in the shaders directory
+    directory = "/home/root/dev/BBB-BM-Lights-2015/shaders"; // this should be everything in the shaders directory
     dp = opendir( directory.c_str() );
 
     // Check to see if there was an error opening the directory:
