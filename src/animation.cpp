@@ -29,8 +29,8 @@
 
 //#include "sensatron-effect.h"
 
-#include "alsa.h"
-#include "fft.h"
+//#include "alsa.h"
+//#include "fft.h"
 
 typedef struct {
     TCLControl *tcl;
@@ -249,7 +249,7 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
     // Update the shader uniforms:
 
     // Populate the audioImage with the FFT data:
-    executeFFT(audioPixels, audioRowstride);
+//    executeFFT(audioPixels, audioRowstride);
 
     // Actually load our FFT Texture colors onto the actor
 //    clutter_image_set_data (CLUTTER_IMAGE (audioImage),

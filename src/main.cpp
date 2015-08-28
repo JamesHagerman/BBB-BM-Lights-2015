@@ -94,8 +94,8 @@ green red
 #include "animation.h"
 #include "configurations.h"
 
-#include "alsa.h"
-#include "fft.h"
+//#include "alsa.h"
+//#include "fft.h"
 
 TCLControl tcl;
 Events eventHandlers;
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
 
 
     // Try getting alsa loaded!!
-    initAlsa();
+//    initAlsa();
 
     // Start animation loop:
     Animation animation = Animation(stage, &tcl); // pointer TO the main tcl object.
