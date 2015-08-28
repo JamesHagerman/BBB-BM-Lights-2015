@@ -534,7 +534,7 @@ void Animation::buildShaderList() {
 
 //    shaderCount = 0;
     while ((dirp = readdir( dp ))) {
-        filepath = directory + "/" + dirp->d_name;
+        filepath = "./"+directory + "/" + dirp->d_name;
 
         // If the file is a directory (or is in some way invalid) we'll skip it
         if (stat( filepath.c_str(), &filestat )) continue;

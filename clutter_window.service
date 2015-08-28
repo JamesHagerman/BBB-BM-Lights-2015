@@ -1,10 +1,10 @@
 [Unit]
-Description=The 2014 Sensatron LED user interface
+Description=The 2015 Sensatron LED user interface
 After=pvr.service
 
 [Service]
 Type=simple
-ExecStart=/home/root/dev/clutter_window/clutter_window
+ExecStart=/home/root/dev/BBB-BM-Lights-2015/clutter_window
 
 [Install]
 WantedBy=basic.target
