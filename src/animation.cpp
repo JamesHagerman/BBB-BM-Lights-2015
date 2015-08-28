@@ -252,15 +252,15 @@ void Animation::handleNewFrame(ClutterTimeline *timeline, gint frame_num, gpoint
     executeFFT(audioPixels, audioRowstride);
 
     // Actually load our FFT Texture colors onto the actor
-//    clutter_image_set_data (CLUTTER_IMAGE (audioImage),
-//                            gdk_pixbuf_get_pixels (audiopixbuf),
-//                            gdk_pixbuf_get_has_alpha (audiopixbuf)
-//                            ? COGL_PIXEL_FORMAT_RGBA_8888
-//                            : COGL_PIXEL_FORMAT_RGB_888,
-//                            gdk_pixbuf_get_width (audiopixbuf),
-//                            gdk_pixbuf_get_height (audiopixbuf),
-//                            gdk_pixbuf_get_rowstride (audiopixbuf),
-//                            &error);
+    clutter_image_set_data (CLUTTER_IMAGE (audioImage),
+                            gdk_pixbuf_get_pixels (audiopixbuf),
+                            gdk_pixbuf_get_has_alpha (audiopixbuf)
+                            ? COGL_PIXEL_FORMAT_RGBA_8888
+                            : COGL_PIXEL_FORMAT_RGB_888,
+                            gdk_pixbuf_get_width (audiopixbuf),
+                            gdk_pixbuf_get_height (audiopixbuf),
+                            gdk_pixbuf_get_rowstride (audiopixbuf),
+                            &error);
 //    clutter_actor_set_content (shaderOutput, audioImage);
 
 

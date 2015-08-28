@@ -250,54 +250,54 @@ void executeFFT(unsigned char *audioPixels, int audioRowstride) {
 //        std::string key ("tunnel1.frag");
 //        std::size_t found = shaderName.rfind(key);
 //        if (found!=std::string::npos) {
-//            int sampleCount = 0;
-//            long converted = 0;
-//            for (int x = 0; x < WIDTH; x++) {
-//                for (int y = 0; y < HEIGHT; y++) {
-//
-//                    // Find the ADDRESS of each pixel in the pixbuf via the raw char buffer we built...
-//                    // and bind it to a pointer to a char...
-//                    unsigned char *pixel = &audioPixels[y * audioRowstride + x * 3];
-//
-//                    // And directly update that memory location with a new color
-//                    // This AUTOMATICALLY updates the color of the pixbuf!
-//                    // It's just hitting the memory directly!
-//
-//                    converted = round(samples[y]);
-//                    converted = map(converted, 0, max, 0, 255);
-//
-//                    pixel[0] = converted;// & 0xff;   // low bits...
-//                    pixel[1] = 0;//converted & 0xff00; //((int)(samples[y]-min)) & 0xff00; // high bits.
-//                    pixel[2] = 0;//getrand(0, 255);     // some random value could be used for noise...
-//                    sampleCount++;
-//                    if (sampleCount > 600) {
-//                        x= WIDTH+1;
-//                        y= HEIGHT+1;
+            int sampleCount = 0;
+            long converted = 0;
+            for (int x = 0; x < WIDTH; x++) {
+                for (int y = 0; y < HEIGHT; y++) {
+
+                    // Find the ADDRESS of each pixel in the pixbuf via the raw char buffer we built...
+                    // and bind it to a pointer to a char...
+                    unsigned char *pixel = &audioPixels[y * audioRowstride + x * 3];
+
+                    // And directly update that memory location with a new color
+                    // This AUTOMATICALLY updates the color of the pixbuf!
+                    // It's just hitting the memory directly!
+
+                    converted = round(samples[y]);
+                    converted = map(converted, 0, max, 0, 255);
+
+                    pixel[0] = converted;// & 0xff;   // low bits...
+                    pixel[1] = getrand(0,255);//converted & 0xff00; //((int)(samples[y]-min)) & 0xff00; // high bits.
+                    pixel[2] = 0;//getrand(0, 255);     // some random value could be used for noise...
+                    sampleCount++;
+                    if (sampleCount > 600) {
+                        x= WIDTH+1;
+                        y= HEIGHT+1;
+                    }
+
+//                    // Show x bounds:
+//                    if (x==0 && y==0) {
+//                        pixel[0] = 255;
+//                        pixel[1] = 255;
+//                        pixel[2] = 255;
+//                    } else if (x==11 && y==0) {
+//                        pixel[0] = 255;
+//                        pixel[1] = 255;
+//                        pixel[2] = 255;
 //                    }
 //
-////                    // Show x bounds:
-////                    if (x==0 && y==0) {
-////                        pixel[0] = 255;
-////                        pixel[1] = 255;
-////                        pixel[2] = 255;
-////                    } else if (x==11 && y==0) {
-////                        pixel[0] = 255;
-////                        pixel[1] = 255;
-////                        pixel[2] = 255;
-////                    }
-////
-////                    // Show y bounds:
-////                    if (x==0 && y==49) {
-////                        pixel[0] = 255;
-////                        pixel[1] = 255;
-////                        pixel[2] = 255;
-////                    } else if (x==11 && y==49) {
-////                        pixel[0] = 255;
-////                        pixel[1] = 255;
-////                        pixel[2] = 255;
-////                    }
-//                }
-//            }
+//                    // Show y bounds:
+//                    if (x==0 && y==49) {
+//                        pixel[0] = 255;
+//                        pixel[1] = 255;
+//                        pixel[2] = 255;
+//                    } else if (x==11 && y==49) {
+//                        pixel[0] = 255;
+//                        pixel[1] = 255;
+//                        pixel[2] = 255;
+//                    }
+                }
+            }
 //        }
 
 
