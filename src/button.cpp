@@ -24,8 +24,13 @@ Button::Button(ClutterActor *stage, int id, int width, int height, int x, int y,
 
     // Set the buttons overlay image:
     GError *err = NULL;
+#ifdef BEAGLEBONEBLACK
+    const char *speedImage = "/home/root/dev/BBB-BM-Lights-2015/images/btn_speed_selector.png";
+    const char *colorSelectorImage = "/home/root/dev/BBB-BM-Lights-2015/images/btn_color_selector.png";
+#else
     const char *speedImage = "images/btn_speed_selector.png";
     const char *colorSelectorImage = "images/btn_color_selector.png";
+#endif
     GdkPixbuf *pixbuf;
     ClutterContent *image = clutter_image_new ();
 
