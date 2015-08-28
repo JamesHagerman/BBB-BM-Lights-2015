@@ -87,7 +87,7 @@ void changeAnimation(int id, Animation *animation) {
             break;
         case 2  :
 //            animation->switchAnimation(3);
-            animation->loadShader("./shaders/timer.frag");
+            animation->loadShader("./shaders/zztimer.frag");
             break;
         case 3  :
             // animation->switchAnimation(4);
