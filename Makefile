@@ -5,7 +5,8 @@ ifeq ($(MACHINE)_$(ARCH),Darwin_x86_64)
 	CROSSCOMPILER = 
 endif
 ifeq ($(MACHINE)_$(ARCH),Linux_armv7l)
-	CROSSCOMPILER = arm-angstrom-linux-gnueabi-
+#	CROSSCOMPILER = arm-angstrom-linux-gnueabi-
+	CROSSCOMPILER = 
 endif
 ifeq ($(MACHINE)_$(ARCH),Linux_x86_64)	
 	CROSSCOMPILER = 
